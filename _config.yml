@@ -2,18 +2,18 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://yoursite.com
-title: My Octopress Blog
-subtitle: A blogging framework for hackers.
-author: Your Name
+url: http://xeonxu.github.com
+title: 不停地疯
+subtitle: Work as a hacker, hack as a artist.
+author: Xeon Xu
 simple_search: http://google.com/search
-description:
+description: 猪头小强的生活
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
 # http://www.ruby-doc.org/core-1.9.2/Time.html#method-i-strftime
 # Additionally, %o will give you the ordinal representation of the day
-date_format: "ordinal"
+date_format: "%Y年%m月%d日"	#2012年1月1日
 
 # RSS / Email (optional) subscription links (change if using something like Feedburner)
 subscribe_rss: /atom.xml
@@ -58,13 +58,13 @@ default_asides: [asides/recent_posts.html, asides/github.html, asides/twitter.ht
 # ----------------------- #
 
 # Github repositories
-github_user:
+github_user: xeonxu
 github_repo_count: 0
 github_show_profile_link: true
 github_skip_forks: true
 
 # Twitter
-twitter_user:
+twitter_user: xeonxu
 twitter_tweet_count: 4
 twitter_show_replies: false
 twitter_follow_button: true
@@ -72,7 +72,7 @@ twitter_show_follower_count: false
 twitter_tweet_button: true
 
 # Google +1
-google_plus_one: false
+google_plus_one: true
 google_plus_one_size: medium
 
 # Google Plus Profile
@@ -96,4 +96,4 @@ disqus_show_comment_count: false
 google_analytics_tracking_id:
 
 # Facebook Like
-facebook_like: false
+facebook_like: true
