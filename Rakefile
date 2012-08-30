@@ -21,11 +21,16 @@ blog_index_dir  = 'source'    # directory for your blog's index page (if you put
 deploy_dir      = "_deploy"   # deploy directory (for Github pages deployment)
 stash_dir       = "_stash"    # directory to stash posts for speedy generation
 posts_dir       = "_posts"    # directory for blog files
+org_posts_dir   = "org_posts"
 themes_dir      = ".themes"   # directory for blog files
-new_post_ext    = "markdown"  # default new post file extension when using the new_post task
-new_page_ext    = "markdown"  # default new page file extension when using the new_page task
+new_post_ext    = "org"  # default new post file extension when using the new_post task
+new_page_ext    = "org"  # default new page file extension when using the new_page task
 server_port     = "4000"      # port for preview server eg. localhost:4000
-
+# open ,使用系统默认编辑器
+# open -a Mou，使用Mou打开
+# open -a Byword，使用Byword打开
+# subl, 使用Sublime Text2打开
+editor="~/bin/em"
 
 desc "Initial setup for Octopress: copies the default theme into the path of Jekyll's generator. Rake install defaults to rake install[classic] to install a different theme run rake install[some_theme_name]"
 task :install, :theme do |t, args|
@@ -40,6 +45,7 @@ task :install, :theme do |t, args|
   mkdir_p "sass"
   cp_r "#{themes_dir}/#{theme}/sass/.", "sass"
   mkdir_p "#{source_dir}/#{posts_dir}"
+  mkdir_p "#{source_dir}/#{org_posts_dir}"
   mkdir_p public_dir
 end
 
@@ -85,22 +91,25 @@ task :preview do
     exit 0
   }
 
+  system "sleep 2; open http://localhost:#{server_port}/"
   [jekyllPid, compassPid, rackupPid].each { |pid| Process.wait(pid) }
 end
 
 # usage rake new_post[my-new-post] or rake new_post['my new post'] or rake new_post (defaults to "new-post")
-desc "Begin a new post in #{source_dir}/#{posts_dir}"
+desc "Begin a new post in #{source_dir}/#{org_posts_dir}"
 task :new_post, :title do |t, args|
   raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
   mkdir_p "#{source_dir}/#{posts_dir}"
+  mkdir_p "#{source_dir}/#{org_posts_dir}"
   args.with_defaults(:title => 'new-post')
   title = args.title
-  filename = "#{source_dir}/#{posts_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{title.to_url}.#{new_post_ext}"
+  filename = "#{source_dir}/#{org_posts_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{title.to_url}.#{new_post_ext}"
   if File.exist?(filename)
     abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
   end
   puts "Creating new post: #{filename}"
   open(filename, 'w') do |post|
+    post.puts "#+BEGIN_HTML"
     post.puts "---"
     post.puts "layout: post"
     post.puts "title: \"#{title.gsub(/&/,'&amp;')}\""
@@ -108,6 +117,10 @@ task :new_post, :title do |t, args|
     post.puts "comments: true"
     post.puts "categories: "
     post.puts "---"
+    post.puts "#+END_HTML"
+  end
+  if #{editor}
+    system "sleep 1; #{editor} #{filename}"
   end
 end
 
@@ -148,6 +161,9 @@ task :new_page, :filename do |t, args|
   else
     puts "Syntax error: #{args.filename} contains unsupported characters"
   end
+  if #{editor}
+    system "sleep 1; #{editor} #{filename}"
+  end
 end
 
 # usage rake isolate[my-post]
@@ -155,14 +171,14 @@ desc "Move all other posts than the one currently being worked on to a temporary
 task :isolate, :filename do |t, args|
   stash_dir = "#{source_dir}/#{stash_dir}"
   FileUtils.mkdir(stash_dir) unless File.exist?(stash_dir)
-  Dir.glob("#{source_dir}/#{posts_dir}/*.*") do |post|
+  Dir.glob("#{source_dir}/#{org_posts_dir}/*.*") do |post|
     FileUtils.mv post, stash_dir unless post.include?(args.filename)
   end
 end
 
 desc "Move all stashed posts back into the posts directory, ready for site generation."
 task :integrate do
-  FileUtils.mv Dir.glob("#{source_dir}/#{stash_dir}/*.*"), "#{source_dir}/#{posts_dir}/"
+  FileUtils.mv Dir.glob("#{source_dir}/#{stash_dir}/*.*"), "#{source_dir}/#{org_posts_dir}/"
 end
 
 desc "Clean out caches: .pygments-cache, .gist-cache, .sass-cache"
@@ -299,7 +315,7 @@ task :setup_github_pages, :repo do |t, args|
   if args.repo
     repo_url = args.repo
   else
-    puts "Enter the read/write url for your repository" 
+    puts "Enter the read/write url for your repository"
     puts "(For example, 'git@github.com:your_username/your_username.github.com)"
     repo_url = get_stdin("Repository url: ")
   end
