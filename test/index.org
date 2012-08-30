@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Hello World - 不停地疯</title>
+  <title>test - 不停地疯</title>
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="关于本Blog 自己是一个很懒散的人，从接触电脑开始到现在不下14个年头，但要说自己做过什么，一时间还真难以回答。零星的积累都随我那善变的爱好一去不返了，让人有种虚度光阴的感觉。自己也不是没有做过尝试，开玩网络之初就在MyOpera上建立了自己的Blog，当然内容以个人日记流水账为主， &hellip;">
+  <meta name="description" content="Test 2012年08月30日 2012年08月30日 Tweet Recent Posts 搭建Linux下的分布式编译系统 Hello World GitHub Repos Status updating... @xeonxu on GitHub $.domReady(function &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://xeonxu.github.com/blog/2012/08/26/hello-world/">
+  <link rel="canonical" href="http://xeonxu.github.com/test/index.org">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -63,15 +63,31 @@
   <div id="main">
     <div id="content">
       <div>
-<article class="hentry" role="article">
+<article role="article">
   
   <header>
-    
-      <h1 class="entry-title">Hello World</h1>
-    
-    
+    <h1 class="entry-title">Test</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-30T00:56:00+08:00" pubdate data-updated="true">2012年08月30日</time></p>
+  </header>
+  
+  
+  
+    <footer>
       <p class="meta">
         
+        
 
 
 
@@ -83,56 +99,13 @@
   
 
 
-<time datetime="2012-08-26T20:56:00+08:00" pubdate data-updated="true">2012年08月26日</time>
+<time datetime="2012-08-30T00:56:00+08:00" pubdate data-updated="true">2012年08月30日</time>
         
       </p>
-    
-  </header>
-
-
-<div class="entry-content"><h1>关于本Blog</h1>
-
-<p>自己是一个很懒散的人，从接触电脑开始到现在不下14个年头，但要说自己做过什么，一时间还真难以回答。零星的积累都随我那善变的爱好一去不返了，让人有种虚度光阴的感觉。自己也不是没有做过尝试，开玩网络之初就在MyOpera上建立了自己的Blog，当然内容以个人日记流水账为主，那时真是快乐的单身年代。可是用了一段MyOpera后总觉得界面和功能不禁人意，而此时的Google正如火如荼，于是便赶了潮流在Blogspot上搭建了人生第二个Blog。可惜好景不长，Blogspot在国内越来越难以访问，原因大家懂的。慢慢的，也就淡了。然而随之时间的流逝，也许是老了，总觉得不记录些什么有愧于人生，从而有了再建立一个Blog的想法。当然，建立本Blog还有以下几个原因:</p>
-
-<ol>
-<li>之前两个博客太过生活化，流水账没有重点。虽说这也是记录博客的一种方式，但是自己想做点改变。</li>
-<li>想把自己工作中的一些经验和生活中的感悟，都点点滴滴的记录下来，希望到老了的时候看到时，不会后悔曾经浪费了生命。</li>
-<li>作为程序员，没有不用github和Markdown的理由，加之Emacs对Mardown的完美支持，没理由拒绝。</li>
-</ol>
-
-
-<p>最后以一个程序员最惯用的开场白来向各位打个招呼:Hello World!</p>
-</div>
-
-
-  <footer>
-    <p class="meta">
       
+        <div class="sharing">
   
-
-<span class="byline author vcard">Posted by <span class="fn">Xeon Xu</span></span>
-
-      
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-08-26T20:56:00+08:00" pubdate data-updated="true">2012年08月26日</time>
-      
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://xeonxu.github.com/blog/2012/08/26/hello-world/" data-via="xeonxu" data-counturl="http://xeonxu.github.com/blog/2012/08/26/hello-world/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://xeonxu.github.com/test/index.org" data-via="xeonxu" data-counturl="http://xeonxu.github.com/test/index.org" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -142,14 +115,9 @@
   
 </div>
 
-    
-    <p class="meta">
       
-      
-        <a class="basic-alignment right" href="/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/" title="Next Post: 搭建Linux下的分布式编译系统">搭建Linux下的分布式编译系统 &raquo;</a>
-      
-    </p>
-  </footer>
+    </footer>
+  
 </article>
 
 </div>
