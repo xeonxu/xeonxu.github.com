@@ -89,7 +89,7 @@ mkdir -p ~/temp && tar jxvf ~/Downloads/distcc-3.1.tar.bz2 -C ~/temp
 {% endcodeblock %}
 
 <p>
-将其解压至个人目录中的临时目录：~/temp下。然后执行：
+将其解压至个人目录中的临时目录： <code>~/temp</code> 下。然后执行：
 </p>
 
 
@@ -127,13 +127,17 @@ sudo make install
 </p>
 
 
+
 <pre class="example">#允许172.16网段的所有电脑连接本服务器
 172.16.0.0/16
 </pre>
 
 
 <p>
-修改 <code>/etc/distcc/commands.allow.sh</code> ，在 <code>allowed_compilers</code> 段里加入需要访问到的编译器程序。注意这里编译器程序可以使用通配符，但是路径需要使用绝对路径，否则会拒绝访问相应的编译器。此例中配置允许访问存放在 <code>/usr/local/目录下gcc的arm-eabi-4.4.3</code> 交叉编译器，实际配置中需要根据需要做修改。
+修改 <code>/etc/distcc/commands.allow.sh</code> ，在 <code>allowed_compilers</code> 段里加入需要访问到的编译器程序。注意这里编译器程序可以使用通配符，但是路径需要使用绝对路径，否则会拒绝访问相应的编译器。此例中配置允许访问存放在 <code>/usr/local/</code> 目录下gcc的 <code>arm-eabi-4.4.3</code> 交叉编译器，实际配置中需要根据需要做修改。
+</p>
+
+
 {% codeblock commands.allow.sh lang:sh %}
 allowed_compilers="
   /usr/bin/cc
@@ -152,11 +156,16 @@ allowed_compilers="
 "
 {% endcodeblock %}
 
+<p>
 将 <code>/usr/local/arm-eabi-4.4.3/bin/</code> 加入到访问路径中，修改 <code>~/.bash_profile</code> 文件，添加以下内容：
+</p>
+
+
 {% codeblock lang:sh %}
 export PATH=/usr/local/arm-eabi-4.4.3/bin/:$PATH
 {% endcodeblock %}
 
+<p>
 修改 <code>/etc/init.d/distcc</code> ,在
 </p>
 
@@ -240,7 +249,7 @@ watch distccmon-text
 </pre>
 
 <p>
-如果显示Block之类的信息，请检查对方服务器上的client.allow是否正确，同时需要确保服务器上的3632端口没有被防火墙拦住。
+如果显示Block之类的信息，请检查对方服务器上的 <code>client.allow</code> 是否正确，同时需要确保服务器上的3632端口没有被防火墙拦住。
 </p>
 </div>
 </div>
@@ -361,7 +370,7 @@ sys     1m20.240s
 <p>Android的代码比较特殊，一部分是C程序，而另一部分为JAVA程序。所以分布编译的时候只能对C程序部分生效。同时，Android代码包包含完整的交叉编译工具链，编译时会使用自己代码包中的工具链进行编译，所以我们之前设置的 <code>CROSS_COMPILE</code> 环境变量会失效。好在解决办法也不是没有，做如下修改即可：
 </p>
 <p>
-修改Android代码目录中的build/core/combo/select.mk文件
+修改Android代码目录中的 <code>build/core/combo/select.mk</code> 文件
 {% codeblock build/core/combo/select.mk lang:makefile %}
 # (...省略...)
 # Now include the combo for this specific target.
