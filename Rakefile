@@ -232,6 +232,9 @@ task :deploy do
   end
 
   Rake::Task[:copydot].invoke(source_dir, public_dir)
+  if Dir.exists?("#{public_dir}/org_posts")
+    FileUtils.rm_rf("#{public_dir}/org_posts")
+  end
   Rake::Task["#{deploy_default}"].execute
 end
 
