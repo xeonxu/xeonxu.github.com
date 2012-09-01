@@ -4,7 +4,7 @@
   <title><![CDATA[不停地疯]]></title>
   <link href="http://xeonxu.github.com/atom.xml" rel="self"/>
   <link href="http://xeonxu.github.com/"/>
-  <updated>2012-08-31T00:25:00+08:00</updated>
+  <updated>2012-09-02T00:28:24+08:00</updated>
   <id>http://xeonxu.github.com/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -591,7 +591,7 @@ sys     1m20.240s
 <ol>
 <li>之前两个博客太过生活化，流水账没有重点。虽说这也是记录博客的一种方式，但是自己想做点改变。</li>
 <li>想把自己工作中的一些经验和生活中的感悟，都点点滴滴的记录下来，希望到老了的时候看到时，不会后悔曾经浪费了生命。</li>
-<li>作为程序员，没有不用github和Markdown的理由，加之Emacs对Mardown的完美支持，没理由拒绝。</li>
+<li>作为程序员和Emacs追随者，没有不用github和org-mode的理由。加之Emacs又有可以将org-file很好地转换为Octopress Markdown格式的插件，没理由拒绝。</li>
 </ol>
 
 

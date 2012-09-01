@@ -4,7 +4,7 @@ layout: post
 title: "搭建Linux下的分布式编译系统"
 date: 2012-08-30 23:46
 comments: true
-categories:
+categories: Linux Android
 ---
 #+END_HTML
 #+TITLE:搭建Linux下的分布式编译系统
