@@ -1,0 +1,3 @@
+[submodule "source/org_posts"]
+	path = source/org_posts
+	url = git@githost.com:xeonxu/org_files.git
