@@ -21,6 +21,7 @@
   <link rel="canonical" href="http://xeonxu.github.com/test/index.org">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="/javascripts/ender.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
@@ -55,8 +56,8 @@
 </form>
   
 <ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/">博客主页</a></li>
+  <li><a href="/blog/archives">存档列表</a></li>
 </ul>
 
 </nav>

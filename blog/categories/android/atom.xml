@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 不停地疯]]></title>
   <link href="http://xeonxu.github.com/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://xeonxu.github.com/"/>
-  <updated>2012-09-02T00:47:10+08:00</updated>
+  <updated>2012-09-02T02:06:49+08:00</updated>
   <id>http://xeonxu.github.com/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -48,9 +48,6 @@
 </div>
 </div>
 
-
-
-
 <div id="outline-container-1" class="outline-2">
 <h2 id="sec-1">概述</h2>
 <div class="outline-text-2" id="text-1">
@@ -66,9 +63,6 @@ Windows下的Incredibuild就是一款成熟的常用分布式编译软件，它�
 </div>
 
 </div>
-
-
-
 
 <div id="outline-container-2" class="outline-2">
 <h2 id="sec-2">分布式编译系统的搭建</h2>
@@ -102,11 +96,11 @@ Windows下的Incredibuild就是一款成熟的常用分布式编译软件，它�
 
 
 <div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>mkdir -p ~/temp <span class="o">&amp;&amp;</span> tar jxvf ~/Downloads/distcc-3.1.tar.bz2 -C ~/temp
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>mkdir -p ~/temp &amp;amp;&amp;amp; tar jxvf ~/Downloads/distcc-3.1.tar.bz2 -C ~/temp
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>
-将其解压至个人目录中的临时目录：~/temp下。然后执行：
+将其解压至个人目录中的临时目录： <code>~/temp</code> 下。然后执行：
 </p>
 
 
@@ -147,13 +141,17 @@ Windows下的Incredibuild就是一款成熟的常用分布式编译软件，它�
 </p>
 
 
+
 <pre class="example">#允许172.16网段的所有电脑连接本服务器
 172.16.0.0/16
 </pre>
 
 
 <p>
-修改 <code>/etc/distcc/commands.allow.sh</code> ，在 <code>allowed_compilers</code> 段里加入需要访问到的编译器程序。注意这里编译器程序可以使用通配符，但是路径需要使用绝对路径，否则会拒绝访问相应的编译器。此例中配置允许访问存放在 <code>/usr/local/目录下gcc的arm-eabi-4.4.3</code> 交叉编译器，实际配置中需要根据需要做修改。
+修改 <code>/etc/distcc/commands.allow.sh</code> ，在 <code>allowed_compilers</code> 段里加入需要访问到的编译器程序。注意这里编译器程序可以使用通配符，但是路径需要使用绝对路径，否则会拒绝访问相应的编译器。此例中配置允许访问存放在 <code>/usr/local/</code> 目录下gcc的 <code>arm-eabi-4.4.3</code> 交叉编译器，实际配置中需要根据需要做修改。
+</p>
+
+
 <div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>commands.allow.sh  </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -187,11 +185,16 @@ Windows下的Incredibuild就是一款成熟的常用分布式编译软件，它�
 </span><span class='line'><span class="s2">&quot;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>
 将 <code>/usr/local/arm-eabi-4.4.3/bin/</code> 加入到访问路径中，修改 <code>~/.bash_profile</code> 文件，添加以下内容：
+</p>
+
+
 <div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/arm-eabi-4.4.3/bin/:<span class="nv">$PATH</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>
 修改 <code>/etc/init.d/distcc</code> ,在
 </p>
 
@@ -275,15 +278,12 @@ localhost
 </pre>
 
 <p>
-如果显示Block之类的信息，请检查对方服务器上的client.allow是否正确，同时需要确保服务器上的3632端口没有被防火墙拦住。
+如果显示Block之类的信息，请检查对方服务器上的 <code>client.allow</code> 是否正确，同时需要确保服务器上的3632端口没有被防火墙拦住。
 </p>
 </div>
 </div>
 
 </div>
-
-
-
 
 <div id="outline-container-3" class="outline-2">
 <h2 id="sec-3">使用distcc进行效率对比</h2>
@@ -404,9 +404,6 @@ sys     1m20.240s
 
 </div>
 
-
-
-
 <div id="outline-container-4" class="outline-2">
 <h2 id="sec-4">Android代码的分布式编译</h2>
 <div class="outline-text-2" id="text-4">
@@ -414,7 +411,7 @@ sys     1m20.240s
 <p>Android的代码比较特殊，一部分是C程序，而另一部分为JAVA程序。所以分布编译的时候只能对C程序部分生效。同时，Android代码包包含完整的交叉编译工具链，编译时会使用自己代码包中的工具链进行编译，所以我们之前设置的 <code>CROSS_COMPILE</code> 环境变量会失效。好在解决办法也不是没有，做如下修改即可：
 </p>
 <p>
-修改Android代码目录中的build/core/combo/select.mk文件
+修改Android代码目录中的 <code>build/core/combo/select.mk</code> 文件
 <div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>build/core/combo/select.mk  </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -521,9 +518,6 @@ sys     1m20.240s
 
 </div>
 
-
-
-
 <div id="outline-container-5" class="outline-2">
 <h2 id="sec-5">总结</h2>
 <div class="outline-text-2" id="text-5">
@@ -543,7 +537,6 @@ sys     1m20.240s
 
 </div>
 </div>
-
 ]]></content>
   </entry>
   

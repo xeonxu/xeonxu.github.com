@@ -26,6 +26,7 @@
   <link rel="canonical" href="http://xeonxu.github.com/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="/javascripts/ender.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
@@ -60,8 +61,8 @@
 </form>
   
 <ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/">博客主页</a></li>
+  <li><a href="/blog/archives">存档列表</a></li>
 </ul>
 
 </nav>
@@ -127,9 +128,6 @@
 </div>
 </div>
 
-
-
-
 <div id="outline-container-1" class="outline-2">
 <h2 id="sec-1">概述</h2>
 <div class="outline-text-2" id="text-1">
@@ -145,9 +143,6 @@ Windows下的Incredibuild就是一款成熟的常用分布式编译软件，它�
 </div>
 
 </div>
-
-
-
 
 <div id="outline-container-2" class="outline-2">
 <h2 id="sec-2">分布式编译系统的搭建</h2>
@@ -181,26 +176,26 @@ Windows下的Incredibuild就是一款成熟的常用分布式编译软件，它�
 
 
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>mkdir -p ~/temp <span class="o">&amp;&amp;</span> tar jxvf ~/Downloads/distcc-3.1.tar.bz2 -C ~/temp
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line">mkdir -p ~/temp <span class="o">&amp;&amp;</span> tar jxvf ~/Downloads/distcc-3.1.tar.bz2 -C ~/temp
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 
 <p>
-将其解压至个人目录中的临时目录：~/temp下。然后执行：
+将其解压至个人目录中的临时目录： <code>~/temp</code> 下。然后执行：
 </p>
 
 
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">cd</span> ~/temp
-</span><span class='line'>./configure
-</span><span class='line'>make
-</span><span class='line'>sudo make install
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nb">cd</span> ~/temp
+</span><span class="line">./configure
+</span><span class="line">make
+</span><span class="line">sudo make install
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 
 <p>
@@ -230,63 +225,72 @@ Windows下的Incredibuild就是一款成熟的常用分布式编译软件，它�
 </p>
 
 
+
 <pre class="example">#允许172.16网段的所有电脑连接本服务器
 172.16.0.0/16
 </pre>
 
 
 <p>
-修改 <code>/etc/distcc/commands.allow.sh</code> ，在 <code>allowed_compilers</code> 段里加入需要访问到的编译器程序。注意这里编译器程序可以使用通配符，但是路径需要使用绝对路径，否则会拒绝访问相应的编译器。此例中配置允许访问存放在 <code>/usr/local/目录下gcc的arm-eabi-4.4.3</code> 交叉编译器，实际配置中需要根据需要做修改。
-
-<figure class='code'><figcaption><span>commands.allow.sh  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">allowed_compilers</span><span class="o">=</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">  /usr/bin/cc</span>
-</span><span class='line'><span class="s2">  /usr/bin/c++</span>
-</span><span class='line'><span class="s2">  /usr/bin/c89</span>
-</span><span class='line'><span class="s2">  /usr/bin/c99</span>
-</span><span class='line'><span class="s2">  /usr/bin/gcc</span>
-</span><span class='line'><span class="s2">  /usr/bin/g++</span>
-</span><span class='line'><span class="s2">  /usr/bin/*gcc-*</span>
-</span><span class='line'><span class="s2">  /usr/bin/*g++-*</span>
-</span><span class='line'><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*gcc*</span>
-</span><span class='line'><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*g++*</span>
-</span><span class='line'><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*ld*</span>
-</span><span class='line'><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*ar*</span>
-</span><span class='line'><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*as*</span>
-</span><span class='line'><span class="s2">&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
+修改 <code>/etc/distcc/commands.allow.sh</code> ，在 <code>allowed_compilers</code> 段里加入需要访问到的编译器程序。注意这里编译器程序可以使用通配符，但是路径需要使用绝对路径，否则会拒绝访问相应的编译器。此例中配置允许访问存放在 <code>/usr/local/</code> 目录下gcc的 <code>arm-eabi-4.4.3</code> 交叉编译器，实际配置中需要根据需要做修改。
+</p>
 
 
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>commands.allow.sh  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nv">allowed_compilers</span><span class="o">=</span><span class="s2">&quot;</span>
+</span><span class="line"><span class="s2">  /usr/bin/cc</span>
+</span><span class="line"><span class="s2">  /usr/bin/c++</span>
+</span><span class="line"><span class="s2">  /usr/bin/c89</span>
+</span><span class="line"><span class="s2">  /usr/bin/c99</span>
+</span><span class="line"><span class="s2">  /usr/bin/gcc</span>
+</span><span class="line"><span class="s2">  /usr/bin/g++</span>
+</span><span class="line"><span class="s2">  /usr/bin/*gcc-*</span>
+</span><span class="line"><span class="s2">  /usr/bin/*g++-*</span>
+</span><span class="line"><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*gcc*</span>
+</span><span class="line"><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*g++*</span>
+</span><span class="line"><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*ld*</span>
+</span><span class="line"><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*ar*</span>
+</span><span class="line"><span class="s2">  /usr/local/arm-eabi-4.4.3/bin/*as*</span>
+</span><span class="line"><span class="s2">&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>
 将 <code>/usr/local/arm-eabi-4.4.3/bin/</code> 加入到访问路径中，修改 <code>~/.bash_profile</code> 文件，添加以下内容：
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/arm-eabi-4.4.3/bin/:<span class="nv">$PATH</span>
-</span></code></pre></td></tr></table></div></figure>
+</p>
 
 
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/arm-eabi-4.4.3/bin/:<span class="nv">$PATH</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>
 修改 <code>/etc/init.d/distcc</code> ,在
 </p>
 
 
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">EXEC</span><span class="o">=</span><span class="s2">&quot;/usr/bin/distccd&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nv">EXEC</span><span class="o">=</span><span class="s2">&quot;/usr/bin/distccd&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 
 <p>
@@ -295,17 +299,17 @@ Windows下的Incredibuild就是一款成熟的常用分布式编译软件，它�
 
 
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/arm-eabi-4.4.0/bin/:<span class="nv">$PATH</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/arm-eabi-4.4.0/bin/:<span class="nv">$PATH</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 
 <p>
 上述文件都改好保存后，退出到命令行界面，重启distcc服务程序：
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo /etc/init.d/distcc restart
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line">sudo /etc/init.d/distcc restart
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 好了，这样一台服务器就算配置完成了。将网络上可以提供编译服务的电脑，全部参照如此配置进行设置。这样就拥有一群可以提供分布编译服务的计算机群了。
 </p>
@@ -334,9 +338,9 @@ localhost
 <p>
 然后定义 <code>CROSS_COMPILE</code> 环境变量，以之前配置的 <code>arm-eabi-gcc</code> 交叉编译器为例，如下定义：
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">export </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;distcc arm-eabi-&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nb">export </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;distcc arm-eabi-&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 至此，distcc的配置全部完成，可以使用了。
 </p>
@@ -351,15 +355,15 @@ localhost
 
 <p>在客户端电脑上进入开源代码目录中执行，上执行
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>make clean;make -j4 <span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;distcc gcc&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line">make clean;make -j4 <span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;distcc gcc&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 然后在同一台客户机的另一终端上执行：
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>watch distccmon-text
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line">watch distccmon-text
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 如果看到类似如下信息，则表明distcc安装配置正常。
 </p>
@@ -374,15 +378,12 @@ localhost
 </pre>
 
 <p>
-如果显示Block之类的信息，请检查对方服务器上的client.allow是否正确，同时需要确保服务器上的3632端口没有被防火墙拦住。
+如果显示Block之类的信息，请检查对方服务器上的 <code>client.allow</code> 是否正确，同时需要确保服务器上的3632端口没有被防火墙拦住。
 </p>
 </div>
 </div>
 
 </div>
-
-
-
 
 <div id="outline-container-3" class="outline-2">
 <h2 id="sec-3">使用distcc进行效率对比</h2>
@@ -402,15 +403,15 @@ localhost
 <p>
 首先非分布式编译，使用8个线程。执行
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">cd</span> ~/Downloads/emacs-23.3
-</span><span class='line'>./configure
-</span><span class='line'>make clean
-</span><span class='line'><span class="nb">time </span>make -j8
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nb">cd</span> ~/Downloads/emacs-23.3
+</span><span class="line">./configure
+</span><span class="line">make clean
+</span><span class="line"><span class="nb">time </span>make -j8
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 编译完成后结果为：
 </p>
@@ -424,15 +425,15 @@ sys     0m48.610s
 <p>
 然后使用分布式编译，同样使用8个线程。执行
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">cd</span> ~/Downloads/emacs-23.3
-</span><span class='line'>./configure
-</span><span class='line'>make clean
-</span><span class='line'><span class="nb">time </span>make -j8 <span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;distcc gcc&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nb">cd</span> ~/Downloads/emacs-23.3
+</span><span class="line">./configure
+</span><span class="line">make clean
+</span><span class="line"><span class="nb">time </span>make -j8 <span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;distcc gcc&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 编译完成后结果为：
 </p>
@@ -459,15 +460,15 @@ sys     0m37.600s
 <p>
 同样首先非分布式编译，使用8个线程。由于之前设置过 <code>CROSS_COMPILE</code> 变量，现在单机编译需要重新设置该变量。
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">export </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;arm-eabi-&quot;</span>
-</span><span class='line'><span class="nb">cd</span> ~/Downloads/Android2.3_kernel_v1.01
-</span><span class='line'>make clean
-</span><span class='line'><span class="nb">time </span>make -j8
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nb">export </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;arm-eabi-&quot;</span>
+</span><span class="line"><span class="nb">cd</span> ~/Downloads/Android2.3_kernel_v1.01
+</span><span class="line">make clean
+</span><span class="line"><span class="nb">time </span>make -j8
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 编译完成后结果为：
 </p>
@@ -481,15 +482,15 @@ sys     2m9.160s
 <p>
 然后分布式编译，使用8个线程。执行
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">export </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;distcc arm-eabi-&quot;</span>
-</span><span class='line'><span class="nb">cd</span> ~/Downloads/Android2.3_kernel_v1.01
-</span><span class='line'>make clean
-</span><span class='line'><span class="nb">time </span>make -j8
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line"><span class="nb">export </span><span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;distcc arm-eabi-&quot;</span>
+</span><span class="line"><span class="nb">cd</span> ~/Downloads/Android2.3_kernel_v1.01
+</span><span class="line">make clean
+</span><span class="line"><span class="nb">time </span>make -j8
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 编译完成后结果为：
 </p>
@@ -511,9 +512,6 @@ sys     1m20.240s
 
 </div>
 
-
-
-
 <div id="outline-container-4" class="outline-2">
 <h2 id="sec-4">Android代码的分布式编译</h2>
 <div class="outline-text-2" id="text-4">
@@ -521,85 +519,85 @@ sys     1m20.240s
 <p>Android的代码比较特殊，一部分是C程序，而另一部分为JAVA程序。所以分布编译的时候只能对C程序部分生效。同时，Android代码包包含完整的交叉编译工具链，编译时会使用自己代码包中的工具链进行编译，所以我们之前设置的 <code>CROSS_COMPILE</code> 环境变量会失效。好在解决办法也不是没有，做如下修改即可：
 </p>
 <p>
-修改Android代码目录中的build/core/combo/select.mk文件
+修改Android代码目录中的 <code>build/core/combo/select.mk</code> 文件
 
-<figure class='code'><figcaption><span>build/core/combo/select.mk  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># (...省略...)</span>
-</span><span class='line'><span class="c"># Now include the combo for this specific target.</span>
-</span><span class='line'><span class="cp">include $(BUILD_COMBOS)/$(combo_target)$(combo_os_arch).mk</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">#使用distcc修改 BEGIN</span>
-</span><span class='line'><span class="cp">ifneq ($(USE_DISTCC),)</span>
-</span><span class='line'>  distcc :<span class="o">=</span> distcc
-</span><span class='line'><span class="cp">  ifneq ($(distcc),$(firstword $($(combo_target)CC)))</span>
-</span><span class='line'><span class="cp">    ifeq ($(dir $($(combo_target)CC)),./)</span>
-</span><span class='line'>      <span class="k">$(</span>combo_target<span class="k">)</span>CC :<span class="o">=</span> <span class="k">$(</span>distcc<span class="k">)</span> <span class="k">$($(</span>combo_target<span class="k">)</span>CC<span class="k">)</span>
-</span><span class='line'><span class="cp">    else</span>
-</span><span class='line'>      <span class="k">$(</span>combo_target<span class="k">)</span>CC :<span class="o">=</span> <span class="k">$(</span>distcc<span class="k">)</span> <span class="k">$(</span>abspath <span class="k">$($(</span>combo_target<span class="k">)</span>CC<span class="k">))</span>
-</span><span class='line'><span class="cp">    endif</span>
-</span><span class='line'><span class="cp">  endif</span>
-</span><span class='line'><span class="cp">  ifneq ($(distcc),$(firstword $($(combo_target)CXX)))</span>
-</span><span class='line'><span class="cp">    ifeq ($(dir $($(combo_target)CXX)),./)</span>
-</span><span class='line'>      <span class="k">$(</span>combo_target<span class="k">)</span>CXX :<span class="o">=</span> <span class="k">$(</span>distcc<span class="k">)</span> <span class="k">$($(</span>combo_target<span class="k">)</span>CXX<span class="k">)</span>
-</span><span class='line'><span class="cp">    else</span>
-</span><span class='line'>      <span class="k">$(</span>combo_target<span class="k">)</span>CXX :<span class="o">=</span> <span class="k">$(</span>distcc<span class="k">)</span> <span class="k">$(</span>abspath <span class="k">$($(</span>combo_target<span class="k">)</span>CXX<span class="k">))</span>
-</span><span class='line'><span class="cp">    endif</span>
-</span><span class='line'><span class="cp">  endif</span>
-</span><span class='line'>  <span class="nv">distcc</span> <span class="o">=</span>
-</span><span class='line'><span class="cp">endif</span>
-</span><span class='line'><span class="c">#使用distcc修改 END</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">ifneq ($(USE_CCACHE),)</span>
-</span><span class='line'>  CCACHE_HOST_TAG :<span class="o">=</span> <span class="k">$(</span>HOST_PREBUILT_TAG<span class="k">)</span>
-</span><span class='line'><span class="c">  # If we are cross-compiling Windows binaries on Linux</span>
-</span><span class='line'><span class="c"># (...省略...)</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>build/core/combo/select.mk  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="c"># (...省略...)</span>
+</span><span class="line"><span class="c"># Now include the combo for this specific target.</span>
+</span><span class="line"><span class="cp">include $(BUILD_COMBOS)/$(combo_target)$(combo_os_arch).mk</span>
+</span><span class="line">
+</span><span class="line"><span class="c">#使用distcc修改 BEGIN</span>
+</span><span class="line"><span class="cp">ifneq ($(USE_DISTCC),)</span>
+</span><span class="line">  distcc :<span class="o">=</span> distcc
+</span><span class="line"><span class="cp">  ifneq ($(distcc),$(firstword $($(combo_target)CC)))</span>
+</span><span class="line"><span class="cp">    ifeq ($(dir $($(combo_target)CC)),./)</span>
+</span><span class="line">      <span class="k">$(</span>combo_target<span class="k">)</span>CC :<span class="o">=</span> <span class="k">$(</span>distcc<span class="k">)</span> <span class="k">$($(</span>combo_target<span class="k">)</span>CC<span class="k">)</span>
+</span><span class="line"><span class="cp">    else</span>
+</span><span class="line">      <span class="k">$(</span>combo_target<span class="k">)</span>CC :<span class="o">=</span> <span class="k">$(</span>distcc<span class="k">)</span> <span class="k">$(</span>abspath <span class="k">$($(</span>combo_target<span class="k">)</span>CC<span class="k">))</span>
+</span><span class="line"><span class="cp">    endif</span>
+</span><span class="line"><span class="cp">  endif</span>
+</span><span class="line"><span class="cp">  ifneq ($(distcc),$(firstword $($(combo_target)CXX)))</span>
+</span><span class="line"><span class="cp">    ifeq ($(dir $($(combo_target)CXX)),./)</span>
+</span><span class="line">      <span class="k">$(</span>combo_target<span class="k">)</span>CXX :<span class="o">=</span> <span class="k">$(</span>distcc<span class="k">)</span> <span class="k">$($(</span>combo_target<span class="k">)</span>CXX<span class="k">)</span>
+</span><span class="line"><span class="cp">    else</span>
+</span><span class="line">      <span class="k">$(</span>combo_target<span class="k">)</span>CXX :<span class="o">=</span> <span class="k">$(</span>distcc<span class="k">)</span> <span class="k">$(</span>abspath <span class="k">$($(</span>combo_target<span class="k">)</span>CXX<span class="k">))</span>
+</span><span class="line"><span class="cp">    endif</span>
+</span><span class="line"><span class="cp">  endif</span>
+</span><span class="line">  <span class="nv">distcc</span> <span class="o">=</span>
+</span><span class="line"><span class="cp">endif</span>
+</span><span class="line"><span class="c">#使用distcc修改 END</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">ifneq ($(USE_CCACHE),)</span>
+</span><span class="line">  CCACHE_HOST_TAG :<span class="o">=</span> <span class="k">$(</span>HOST_PREBUILT_TAG<span class="k">)</span>
+</span><span class="line"><span class="c">  # If we are cross-compiling Windows binaries on Linux</span>
+</span><span class="line"><span class="c"># (...省略...)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 
 之后，执行
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>. ./build/envsetup.sh
-</span><span class='line'>
-</span><span class='line'><span class="nb">export </span><span class="nv">USE_CCACHE</span><span class="o">=</span>1
-</span><span class='line'><span class="nb">export </span><span class="nv">USE_DISTCC</span><span class="o">=</span>1
-</span><span class='line'>
-</span><span class='line'>make -j16
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="sh"><span class="line">. ./build/envsetup.sh
+</span><span class="line">
+</span><span class="line"><span class="nb">export </span><span class="nv">USE_CCACHE</span><span class="o">=</span>1
+</span><span class="line"><span class="nb">export </span><span class="nv">USE_DISTCC</span><span class="o">=</span>1
+</span><span class="line">
+</span><span class="line">make -j16
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 
 我这里使用6台XEON四核单机组成的集群做出来的结果是：
@@ -632,9 +630,6 @@ sys     1m20.240s
 
 </div>
 
-
-
-
 <div id="outline-container-5" class="outline-2">
 <h2 id="sec-5">总结</h2>
 <div class="outline-text-2" id="text-5">
@@ -654,7 +649,6 @@ sys     1m20.240s
 
 </div>
 </div>
-
 </div>
 
 
@@ -720,6 +714,10 @@ sys     1m20.240s
 <aside class="sidebar">
   
     <section>
+  <h1>About Me</h1>
+  <p>徐至强，码奴一枚，抱怨多，脾气差。做过车载，数字电视，手机三方，MTK，MStar，Android。现就职于上海斐讯数据通信技术有限公司(Phicomm)，在移动终端产品研发中当一名手机驱动工程师。</p>
+</section>
+<section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
     
@@ -733,36 +731,6 @@ sys     1m20.240s
     
   </ul>
 </section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/xeonxu">@xeonxu</a> on GitHub
-  
-  <script type="text/javascript">
-    $.domReady(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'xeonxu',
-            count: 4,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
 
 <section>
   <h1>Latest Tweets</h1>
@@ -779,8 +747,6 @@ sys     1m20.240s
     <a href="http://twitter.com/xeonxu" class="twitter-follow-button" data-show-count="false">Follow @xeonxu</a>
   
 </section>
-
-
 
 
 
