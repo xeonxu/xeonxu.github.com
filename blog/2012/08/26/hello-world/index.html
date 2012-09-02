@@ -30,6 +30,37 @@
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<!-- Add support of LaTeX -->
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 
   
 
@@ -169,10 +200,6 @@
 <aside class="sidebar">
   
     <section>
-  <h1>About Me</h1>
-  <p>徐至强，码奴一枚，抱怨多，脾气差。做过车载，数字电视，手机三方，MTK，MStar，Android。现就职于上海斐讯数据通信技术有限公司(Phicomm)，在移动终端产品研发中当一名手机驱动工程师。</p>
-</section>
-<section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
     
@@ -186,6 +213,47 @@
     
   </ul>
 </section>
+<section>
+ <h1>Categories</h1>
+ <ul id="categories">
+ <li class='category'><a href='/blog/categories/Android/'>Android (1)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (1)</a></li>
+<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (1)</a></li>
+<li class='category'><a href='/blog/categories/生活/'>生活 (1)</a></li>
+<li class='category'><a href='/blog/categories/随笔/'>随笔 (1)</a></li>
+
+ </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/xeonxu">@xeonxu</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xeonxu',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 <section>
   <h1>Latest Tweets</h1>
@@ -202,6 +270,8 @@
     <a href="http://twitter.com/xeonxu" class="twitter-follow-button" data-show-count="false">Follow @xeonxu</a>
   
 </section>
+
+
 
 
 

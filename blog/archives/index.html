@@ -31,6 +31,37 @@ Aug 26 2012 posted in 杂谈, 生活, 随笔 Recent Posts 搭建Linux下的分�
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<!-- Add support of LaTeX -->
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 
   
 
@@ -128,6 +159,17 @@ Aug 26 2012 posted in 杂谈, 生活, 随笔 Recent Posts 搭建Linux下的分�
       </li>
     
   </ul>
+</section>
+<section>
+ <h1>Categories</h1>
+ <ul id="categories">
+ <li class='category'><a href='/blog/categories/Android/'>Android (1)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (1)</a></li>
+<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (1)</a></li>
+<li class='category'><a href='/blog/categories/生活/'>生活 (1)</a></li>
+<li class='category'><a href='/blog/categories/随笔/'>随笔 (1)</a></li>
+
+ </ul>
 </section>
 
 <section>
