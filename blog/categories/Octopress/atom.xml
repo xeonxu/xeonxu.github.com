@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Octopress | 不停地疯]]></title>
   <link href="http://xeonxu.github.com/blog/categories/Octopress/atom.xml" rel="self"/>
   <link href="http://xeonxu.github.com/"/>
-  <updated>2012-09-03T22:09:17+08:00</updated>
+  <updated>2012-09-03T22:11:02+08:00</updated>
   <id>http://xeonxu.github.com/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -152,7 +152,7 @@
 </span><span class='line'>      post.puts &quot;#+END_HTML&quot;
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
-现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> 来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 ＝~/git/＝ 目录下，所以我的Emacs配置是这样的：
+现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> 来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 <code>~/git/</code> 目录下，所以我的Emacs配置是这样的：
 <div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.emacs  </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
