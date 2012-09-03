@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Octopress | 不停地疯]]></title>
+  <link href="http://xeonxu.github.com/blog/categories/Octopress/atom.xml" rel="self"/>
+  <link href="http://xeonxu.github.com/"/>
+  <updated>2012-09-03T22:09:17+08:00</updated>
+  <id>http://xeonxu.github.com/</id>
+  <author>
+    <name><![CDATA[Xeon Xu]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[使用Org-Mode来发布博客]]></title>
+    <link href="http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/"/>
+    <updated>2012-09-03T20:58:00+08:00</updated>
+    <id>http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke</id>
+    <content type="html"><![CDATA[<p>
+原文地址： <a href="http://blog.paphus.com/blog/2012/08/01/introducing-octopress-blogging-for-org-mode/">http://blog.paphus.com/blog/2012/08/01/introducing-octopress-blogging-for-org-mode/</a>
+</p>
+<p>
+在之前的一篇<a href="http://blog.paphus.com/blog/2012/07/21/octopress-and-org-mode/"> 文章 </a>中曾介绍过一种从 <a href="http://www.gnu.org/software/emacs/">Emacs</a> 的 <a href="http://orgmode.org/">Org-Mode</a> 中导出文章到Octopress的方法，但这种方法使用简单的HTML导出，会失去语法高亮的特性。为此我将方法重新进行了设计，并且得到了一种更好的方法来取代之前不靠谱的方法。
+</p>
+<p>
+首先，你需要根据  <a href="http://octopress.org/">Octopress</a> 的官方说明进行设置。我在Clone好Octopress的代码库后，进入克隆产生的目录并执行以下命令：
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>  <span class="c">#!/bin/sh</span>
+</span><span class='line'>  <span class="c">#</span>
+</span><span class='line'>  curl -L https://get.rvm.io | bash -s stable --ruby
+</span><span class='line'>  <span class="nb">source</span> ~/.rvm/scripts/rvm
+</span><span class='line'>  rvm install 1.9.2
+</span><span class='line'>  rvm rubygems latest
+</span><span class='line'>  gem install bundler
+</span><span class='line'>  bundle install
+</span><span class='line'>  rake install
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+像之前介绍的那样，我们需要在 <code>.emacs</code> 中新增一个叫 <code>save-then-publish</code> 的命令。
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Save Then Publish  </span><a href='http://doc.norang.ca/org-mode.html'>source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scheme'><span class='line'>  <span class="p">(</span><span class="nf">defun</span> <span class="nv">save-then-publish</span> <span class="p">()</span>
+</span><span class='line'>    <span class="p">(</span><span class="nf">interactive</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">(</span><span class="nf">save-buffer</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">(</span><span class="nf">org-save-all-org-buffers</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">(</span><span class="nf">org-publish-current-project</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+接下来，我们需要设置Org-mode的工程。以我的配置举例来说，我将Octopress的文章放置在 <code>~/git/blog/</code> 目录下。如果你需要将你的文章放在其它什么地方，记得修改下面配置中相应的路径。
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Publish Projects  </span><a href='http://jaderholm.com/blog/blogging-with-org-mode-and-octopress'>source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='scheme'><span class='line'>  <span class="p">(</span><span class="nf">setq</span> <span class="nv">org-publish-project-alist</span>
+</span><span class='line'>        <span class="o">&#39;</span><span class="p">((</span><span class="s">&quot;blog-org&quot;</span> <span class="o">.</span>  <span class="p">(</span><span class="nf">:base-directory</span> <span class="s">&quot;~/git/blog/source/org_posts/&quot;</span>
+</span><span class='line'>                                          <span class="nv">:base-extension</span> <span class="s">&quot;org&quot;</span>
+</span><span class='line'>                                          <span class="nv">:publishing-directory</span> <span class="s">&quot;~/git/blog/source/_posts/&quot;</span>
+</span><span class='line'>                                          <span class="nv">:sub-superscript</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>                                          <span class="nv">:recursive</span> <span class="nv">t</span>
+</span><span class='line'>                                          <span class="nv">:publishing-function</span> <span class="nv">org-publish-org-to-octopress</span>
+</span><span class='line'>                                          <span class="nv">:headline-levels</span> <span class="mi">4</span>
+</span><span class='line'>                                          <span class="nv">:html-extension</span> <span class="s">&quot;markdown&quot;</span>
+</span><span class='line'>                                          <span class="nv">:octopress-extension</span> <span class="s">&quot;markdown&quot;</span>
+</span><span class='line'>                                          <span class="nv">:body-only</span> <span class="nv">t</span><span class="p">))</span>
+</span><span class='line'>          <span class="p">(</span><span class="s">&quot;blog-extra&quot;</span> <span class="o">.</span> <span class="p">(</span><span class="nf">:base-directory</span> <span class="s">&quot;~/git/blog/source/org_posts/&quot;</span>
+</span><span class='line'>                                           <span class="nv">:publishing-directory</span> <span class="s">&quot;~/git/blog/source/&quot;</span>
+</span><span class='line'>                                           <span class="nv">:base-extension</span> <span class="s">&quot;css\\|pdf\\|png\\|jpg\\|gif\\|svg&quot;</span>
+</span><span class='line'>                                           <span class="nv">:publishing-function</span> <span class="nv">org-publish-attachment</span>
+</span><span class='line'>                                           <span class="nv">:recursive</span> <span class="nv">t</span>
+</span><span class='line'>                                           <span class="nv">:author</span> <span class="nv">nil</span>
+</span><span class='line'>                                           <span class="p">))</span>
+</span><span class='line'>          <span class="p">(</span><span class="s">&quot;blog&quot;</span> <span class="o">.</span> <span class="p">(</span><span class="nf">:components</span> <span class="p">(</span><span class="s">&quot;blog-org&quot;</span> <span class="s">&quot;blog-extra&quot;</span><span class="p">)))</span>
+</span><span class='line'>          <span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+现在，我们开始修改代码目录中的 <code>Rakefile</code> 文件。打开它找到 <b>Misc Configs</b> 设置部分，参照下面例子分别修改 <code>new_post_ext</code> 和 <code>new_page_ext</code> 的内容并添加 <code>org_posts_dir</code> 项:
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Rakefile  </span><a href='https://gist.github.com/1244494'>source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>  ## -- Misc Configs -- ##
+</span><span class='line'>
+</span><span class='line'>  public_dir      = &quot;public&quot;    # compiled site directory
+</span><span class='line'>  source_dir      = &quot;source&quot;    # source file directory
+</span><span class='line'>  blog_index_dir  = &#39;source&#39;    # directory for your blog&#39;s index page (if you put your index in source/blog/index.html, set this to &#39;source/blog&#39;)
+</span><span class='line'>  deploy_dir      = &quot;_deploy&quot;   # deploy directory (for Github pages deployment)
+</span><span class='line'>  stash_dir       = &quot;_stash&quot;    # directory to stash posts for speedy generation
+</span><span class='line'>  posts_dir       = &quot;_posts&quot;    # directory for blog files
+</span><span class='line'>  org_posts_dir   = &quot;org_posts&quot;
+</span><span class='line'>  themes_dir      = &quot;.themes&quot;   # directory for blog files
+</span><span class='line'>  new_post_ext    = &quot;org&quot;  # default new post file extension when using the new_post task
+</span><span class='line'>  new_page_ext    = &quot;org&quot;  # default new page file extension when using the new_page task
+</span><span class='line'>  server_port     = &quot;4000&quot;      # port for preview server eg. localhost:4000
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+接着修改 <code>Rakefile</code> ，找到下面代码所示的部分并添加 <code>BEGIN_HTML</code> 和 <code>END_HTML</code> 。这样，我们新建文章的时候就能自动生成相应的HTML标签了。
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Rakefile  </span><a href='https://gist.github.com/1244494'>source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>      post.puts &quot;#+BEGIN_HTML&quot;
+</span><span class='line'>      post.puts &quot;---&quot;
+</span><span class='line'>      post.puts &quot;layout: post&quot;
+</span><span class='line'>      post.puts &quot;title: \&quot;#{title.gsub(/&amp;amp;/,&#39;&amp;amp;&#39;)}\&quot;&quot;
+</span><span class='line'>      post.puts &quot;date: #{Time.now.strftime(&#39;%Y-%m-%d %H:%M&#39;)}&quot;
+</span><span class='line'>      post.puts &quot;comments: true&quot;
+</span><span class='line'>      post.puts &quot;categories: &quot;
+</span><span class='line'>      post.puts &quot;---&quot;
+</span><span class='line'>      post.puts &quot;#+END_HTML&quot;
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> 来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 ＝~/git/＝ 目录下，所以我的Emacs配置是这样的：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.emacs  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scheme'><span class='line'>  <span class="p">(</span><span class="nf">add-to-list</span> <span class="ss">&#39;load-path</span> <span class="s">&quot;~/git/orgmode-octopress&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="nf">require</span> <span class="ss">&#39;org-octopress</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+终于可以写作了！但是写作之前，你必须像下面示例那样先新增一个org文件并将它移动到org_posts目录下：
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>  <span class="nb">cd </span>blog
+</span><span class='line'>  rake <span class="s2">&quot;new_post[title]&quot;</span>
+</span><span class='line'>  mv <span class="nb">source</span>/_posts/2012-08-01-title.org <span class="nb">source</span>/org_posts/
+</span><span class='line'>  <span class="c"># I keep my posts in GIT so then I add it to the repo</span>
+</span><span class='line'>  git add <span class="nb">source</span>/org_posts/2012-08-01-title.org
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+写完文章后，在Emacs中执行 <code>M-x save-then-publish</code> ，然后你可以到shell中执行 <code>rake gen_deploy</code>. 这样，你的文章就成功的发布到网上了。
+</p>
+<p>
+我这次改进主要新增了代码模块的语法高亮特性，不过目前它只能支持小写的 <code>begin_src</code> <code>end_src</code> 代码块。 另外，它也支持 <code>:title</code> <code>:url</code> 和 <code>:urltext</code> 选项。如果你想了解他们的用法，可以看看这篇博文的源代码:<a href="http://blog.paphus.com/org\_posts/2012-08-01-introducing-octopress-blogging-for-org-mode.org">http://blog.paphus.com/org_posts/2012-08-01-introducing-octopress-blogging-for-org-mode.org</a> 。如果有谁希望帮助改进这个HTML导出插件的话，欢迎在github加入。
+</p>
+<p>
+最后，你也许需要修改你的 <code>.htaccess</code> 文件来重定向图像请求。我重定向了所有SVG文件的请求到根目录上，这样静态链接就不会在访问图像的时候报错了。你需要将 <code>.htaccess</code> 文件放置在 <code>source</code> 目录下。
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.htaccess  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>  Options +FollowSymlinks
+</span><span class='line'>  RewriteEngine on
+</span><span class='line'>  RewriteBase /
+</span><span class='line'>  RewriteRule /([^/]+)\.(svg)$ /$1.$2 [R,L]
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</p>
+]]></content>
+  </entry>
+  
+</feed>
