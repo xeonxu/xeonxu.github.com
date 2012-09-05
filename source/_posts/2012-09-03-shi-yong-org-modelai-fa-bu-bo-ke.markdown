@@ -89,7 +89,7 @@ categories: Octopress Org-Mode Emacs 翻译
       post.puts "#+END_HTML"
 {% endcodeblock %}
 
-现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> 来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 ＝~/git/＝ 目录下，所以我的Emacs配置是这样的：
+现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> <sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 <code>~/git/</code> 目录下，所以我的Emacs配置是这样的：
 {% codeblock .emacs lang:scheme %}
   (add-to-list 'load-path "~/git/orgmode-octopress")
   (require 'org-octopress)
@@ -117,4 +117,14 @@ categories: Octopress Org-Mode Emacs 翻译
   RewriteBase /
   RewriteRule /([^/]+)\.(svg)$ /$1.$2 [R,L]
 {% endcodeblock %}
+
+</p><div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 译者注：注意，该插件只支持Emacs 24.x。之前就因为Emacs版本原因，一直无法使用。
 </p>
+
+
+
+</div>
+</div>
