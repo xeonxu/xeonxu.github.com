@@ -268,7 +268,7 @@
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
 
-现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> 来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 <code>~/git/</code> 目录下，所以我的Emacs配置是这样的：
+现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> <sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 <code>~/git/</code> 目录下，所以我的Emacs配置是这样的：
 
 <div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>.emacs  </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
@@ -312,7 +312,18 @@
 </span><span class="line">  RewriteRule /([^/]+)\.(svg)$ /$1.$2 [R,L]
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
+
 </p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 译者注：注意，该插件只支持Emacs 24.x。之前就因为Emacs版本原因，一直无法使用。
+</p>
+
+
+
+</div>
+</div>
 </div>
 
 
@@ -340,7 +351,7 @@
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/emacs/'>Emacs</a>, <a class='category' href='/blog/categories/octopress/'>Octopress</a>, <a class='category' href='/blog/categories/org-mode/'>Org-Mode</a>, <a class='category' href='/blog/categories/翻译/'>翻译</a>
+    <a class='category' href='/blog/categories/Emacs/'>Emacs</a>, <a class='category' href='/blog/categories/Octopress/'>Octopress</a>, <a class='category' href='/blog/categories/Org-Mode/'>Org-Mode</a>, <a class='category' href='/blog/categories/翻译/'>翻译</a>
   
 </span>
 
@@ -362,6 +373,8 @@
       
         <a class="basic-alignment left" href="/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/" title="Previous Post: 搭建Linux下的分布式编译系统">&laquo; 搭建Linux下的分布式编译系统</a>
       
+      
+        <a class="basic-alignment right" href="/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/" title="Next Post: 优化使用Orgmode发布Octopress的方法">优化使用Orgmode发布Octopress的方法 &raquo;</a>
       
     </p>
   </footer>
@@ -385,10 +398,10 @@
  <h1>Categories</h1>
  <ul id="categories">
  <li class='category'><a href='/blog/categories/Android/'>Android (1)</a></li>
-<li class='category'><a href='/blog/categories/Emacs/'>Emacs (1)</a></li>
+<li class='category'><a href='/blog/categories/Emacs/'>Emacs (2)</a></li>
 <li class='category'><a href='/blog/categories/Linux/'>Linux (1)</a></li>
-<li class='category'><a href='/blog/categories/Octopress/'>Octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (1)</a></li>
+<li class='category'><a href='/blog/categories/Octopress/'>Octopress (2)</a></li>
+<li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (2)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (1)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (1)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
@@ -399,6 +412,10 @@
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/">优化使用Orgmode发布Octopress的方法</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/">使用Org-Mode来发布博客</a>

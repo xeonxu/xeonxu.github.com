@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Emacs | 不停地疯]]></title>
   <link href="http://xeonxu.github.com/blog/categories/Emacs/atom.xml" rel="self"/>
   <link href="http://xeonxu.github.com/"/>
-  <updated>2012-09-03T22:11:02+08:00</updated>
+  <updated>2012-09-06T00:26:13+08:00</updated>
   <id>http://xeonxu.github.com/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,198 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[优化使用Orgmode发布Octopress的方法]]></title>
+    <link href="http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/"/>
+    <updated>2012-09-05T07:59:00+08:00</updated>
+    <id>http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa</id>
+    <content type="html"><![CDATA[<p>
+前几天翻译了一篇来自Tom Alexander的<a href="http://blog.xeonxu.info/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/">文章</a> ，文中介绍了如何通过修改Rakefile文件以及添加相应的Emacs设置，来使通过Org-mode发布Octopress博客成为可能。该方法很好用，特别是使用作者自己修改的el脚本可以非常方便的将Org文件输出为octopress的文章。但是，原文作者的方法也有一点缺憾，那就是必须手动移动新建的Org文件到相应的目录下；而且在使用 <code>rake new_post[""]</code> 命令新建文档后必须手动编辑新建的文件，少了那么一点点便捷。为此，我又通过网络查找了一些资料，最后找到了<a href="http://imwuyu.me/blog/configuring-octopress.html/">这里</a> 。 受到这篇文章的启发，我尝试修改了工程中的 <code>Rakefile</code> 文件，最后成功地让一切都自动化起来。具体方法如下：
+</p>
+<ul>
+<li>修改Rakefile中关于org文档目录以及新建post文件的扩展名。同时新增一个编辑器的变量
+</li>
+</ul>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Rakefile  </span><a href='https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad'>Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='makefile'><span class='line'> <span class="nv">deploy_dir</span>      <span class="o">=</span> “_deploy”   <span class="c"># deploy directory (for Github pages deployment)</span>
+</span><span class='line'> <span class="nv">stash_dir</span>       <span class="o">=</span> “_stash”    <span class="c"># directory to stash posts for speedy generation</span>
+</span><span class='line'> <span class="nv">posts_dir</span>       <span class="o">=</span> “_posts”    <span class="c"># directory for blog files</span>
+</span><span class='line'> <span class="nv">org_posts_dir</span>   <span class="o">=</span> “org_posts”
+</span><span class='line'> <span class="nv">themes_dir</span>      <span class="o">=</span> “.themes”   <span class="c"># directory for blog files</span>
+</span><span class='line'> <span class="nv">new_post_ext</span>    <span class="o">=</span> “org”  <span class="c"># default new post file extension when using the new_post task</span>
+</span><span class='line'> <span class="nv">new_page_ext</span>    <span class="o">=</span> “org”  <span class="c"># default new page file extension when using the new_page task</span>
+</span><span class='line'> <span class="nv">server_port</span>     <span class="o">=</span> “4000”      <span class="c"># port for preview server eg. localhost:4000&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">&lt;h1</span> <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;open-&quot;</span>&gt;open ,使用系统默认编辑器&lt;/h1&gt;
+</span><span class='line'>&lt;p&gt;# open -a Mou，使用Mou打开
+</span><span class='line'><span class="c"># open -a Byword，使用Byword打开</span>
+</span><span class='line'><span class="c"># subl, 使用Sublime Text2打开</span>
+</span><span class='line'><span class="nv">editor</span> <span class="o">=</span>”~/bin/em” <span class="c"># Emacs wrapper</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>
+我使用我自己编写的emacs wrapper来调用Emacs，为的是让Emacs的启动更快一点（通过server方式）。em的内容如下：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>em  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/bash</span>
+</span><span class='line'>/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n -a <span class="s2">&quot;/Applications/Emacs.app/Contents/MacOS/Emacs&quot;</span> <span class="nv">$1</span> &amp;gt; /dev/null 2&amp;gt;&amp;amp;1 &amp;amp;
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+如果你也想通过emacsclient来加速Emacs的启动速度，你可能需要在你的 <code>.emacs</code> 文件中添加以下语句：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.emacs  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">(</span>require <span class="err">&#39;</span>edit-server<span class="o">)</span>
+</span><span class='line'><span class="o">(</span>edit-server-start<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+当然，你也可以指定 <code>editor</code> 变量为任何你喜欢的编辑器，不过既然都用Org文件发博客了，有什么理由不用Emacs呢？
+</p>
+<ul>
+<li>添加新建 <code>org_posts_dir</code> 目录及相应org文件的语句
+</li>
+</ul>
+
+<p>在 <code>task :install, :theme do |t, args|</code> 语句之下，添加新建 <code>org_posts_dir</code> 的语句：
+</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Rakefile  </span><a href='https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad'>Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">theme</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">theme</span> <span class="o">||</span> <span class="err">‘</span><span class="n">classic</span><span class="err">’</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="err">“</span><span class="c1">## Copying “+theme+” theme into ./#{source_dir} and ./sass”</span>
+</span><span class='line'>  <span class="n">mkdir_p</span> <span class="n">source_dir</span>
+</span><span class='line'>  <span class="n">cp_r</span> <span class="err">“</span><span class="c1">#{themes_dir}/#{theme}/source/.”, source_dir</span>
+</span><span class='line'>  <span class="n">mkdir_p</span> <span class="err">“</span><span class="n">sass</span><span class="err">”</span>
+</span><span class='line'>  <span class="n">cp_r</span> <span class="err">“</span><span class="c1">#{themes_dir}/#{theme}/sass/.”, “sass”</span>
+</span><span class='line'>  <span class="n">mkdir_p</span> <span class="err">“</span><span class="c1">#{source_dir}/#{posts_dir}”</span>
+</span><span class='line'>  <span class="n">mkdir_p</span> <span class="err">“</span><span class="c1">#{source_dir}/#{org_posts_dir}”</span>
+</span><span class='line'>  <span class="n">mkdir_p</span> <span class="n">public_dir</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+在 <code>task :new_post, :title do |t, args|</code> 语句之下，添加新建文档目录和新建文章的语句：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Rakefile  </span><a href='https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad'>Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="n">task</span> <span class="ss">:new_post</span><span class="p">,</span> <span class="ss">:title</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
+</span><span class='line'>   <span class="k">raise</span> <span class="s2">&quot;### You haven&#39;t set anything up yet. First run `rake install` to set up an Octopress theme.&quot;</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>   <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">org_posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>   <span class="n">args</span><span class="o">.</span><span class="n">with_defaults</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="s1">&#39;new-post&#39;</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">title</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">title</span>
+</span><span class='line'>   <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">org_posts_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">to_url</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">new_post_ext</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>   <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span><span class='line'>     <span class="nb">abort</span><span class="p">(</span><span class="s2">&quot;rake aborted!&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">ask</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> already exists. Do you want to overwrite?&quot;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span>
+</span><span class='line'>   <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+</p>
+<ul>
+<li>为了在新建文件之后能够立即编辑，我还在 <code>new_post</code> 命令中加入了相应的编辑语句：
+</li>
+</ul>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Rakefile  </span><a href='https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad'>Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">desc</span> <span class="err">“</span><span class="no">Begin</span> <span class="n">a</span> <span class="kp">new</span> <span class="n">post</span> <span class="k">in</span> <span class="c1">#{source_dir}/#{org_posts_dir}”</span>
+</span><span class='line'><span class="n">task</span> <span class="ss">:new_post</span><span class="p">,</span> <span class="ss">:title</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="err">“</span><span class="c1">### You haven’t set anything up yet. First run &lt;code&gt;rake install&lt;/code&gt; to set up an Octopress theme.” unless File.directory?(source_dir)</span>
+</span><span class='line'>  <span class="n">mkdir_p</span> <span class="err">“</span><span class="c1">#{source_dir}/#{posts_dir}”</span>
+</span><span class='line'>  <span class="n">mkdir_p</span> <span class="err">“</span><span class="c1">#{source_dir}/#{org_posts_dir}”</span>
+</span><span class='line'>  <span class="n">args</span><span class="o">.</span><span class="n">with_defaults</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="err">‘</span><span class="kp">new</span><span class="o">-</span><span class="n">post</span><span class="err">’</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">title</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">title</span>
+</span><span class='line'>  <span class="n">filename</span> <span class="o">=</span> <span class="err">“</span><span class="c1">#{source_dir}/#{org_posts_dir}/#{Time.now.strftime(‘%Y-%m-%d’)}-#{title.to_url}.#{new_post_ext}”</span>
+</span><span class='line'>  <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">abort</span><span class="p">(</span><span class="err">“</span><span class="n">rake</span> <span class="n">aborted!</span><span class="err">”</span><span class="p">)</span> <span class="k">if</span> <span class="n">ask</span><span class="p">(</span><span class="err">“</span><span class="c1">#{filename} already exists. Do you want to overwrite?”, [‘y’, ‘n’]) == ‘n’</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="err">“</span><span class="no">Creating</span> <span class="kp">new</span> <span class="n">post</span><span class="p">:</span> <span class="c1">#{filename}”</span>
+</span><span class='line'>  <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="err">‘</span><span class="n">w</span><span class="err">’</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="err">“</span><span class="c1">#+BEGIN_HTML”</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="err">“—”</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="err">“</span><span class="n">layout</span><span class="p">:</span> <span class="n">post</span><span class="err">”</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="err">“</span><span class="n">title</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/&amp;amp;/</span><span class="p">,</span><span class="err">’</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="err">’</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="err">”</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="err">“</span><span class="n">date</span><span class="p">:</span> <span class="c1">#{Time.now.strftime(‘%Y-%m-%d %H:%M’)}”</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="err">“</span><span class="n">comments</span><span class="p">:</span> <span class="kp">true</span><span class="err">”</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="err">“</span><span class="n">categories</span><span class="p">:</span> <span class="err">“</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="err">“—”</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="err">“</span><span class="c1">#+END_HTML”</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">if</span> <span class="c1">#{editor}</span>
+</span><span class='line'>    <span class="nb">system</span> <span class="err">“</span><span class="nb">sleep</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">#{editor} #{filename}”</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>
+在 <code>new_page</code> 中也添加相同的语句。
+</p>
+<ul>
+<li>最后，为了预览更加方便，在 <code>preview</code> 命令最后添加下面的语句：
+</li>
+</ul>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Rakefile  </span><a href='https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad'>Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>   <span class="nb">system</span> <span class="err">“</span><span class="nb">sleep</span> <span class="mi">2</span><span class="p">;</span> <span class="nb">open</span> <span class="n">http</span><span class="ss">:/</span><span class="o">/</span><span class="n">localhost</span><span class="p">:</span><span class="c1">#{server_port}/”</span>
+</span><span class='line'>   <span class="o">[</span><span class="n">jekyllPid</span><span class="p">,</span> <span class="n">compassPid</span><span class="p">,</span> <span class="n">rackupPid</span><span class="o">].</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">pid</span><span class="o">|</span> <span class="no">Process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+好了，现在我们只需要在控制台上执行 <code>rake new_post["something"]</code> 就会自动在我们设定的 <code>org_posts_dir</code> 目录下新建一份org文档，并且使用我们指定的编辑器打开它。然后随便编辑一点什么，保存并执行 <code>C-c C-e F</code> 或者直接调用Tom Alexander文章中所说的 <code>M-x save-then-publish</code> 命令。最后再在控制台上执行 <code>rake generate&amp;&amp;rake preview</code> 。 Booooom，自动弹出的浏览器上是不是显示出了你刚才编写的文章？非常方便吧？赶快试试！
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用Org-Mode来发布博客]]></title>
@@ -152,7 +344,7 @@
 </span><span class='line'>      post.puts &quot;#+END_HTML&quot;
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
-现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> 来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 <code>~/git/</code> 目录下，所以我的Emacs配置是这样的：
+现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> <sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 <code>~/git/</code> 目录下，所以我的Emacs配置是这样的：
 <div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.emacs  </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -190,7 +382,18 @@
 </span><span class='line'>  RewriteBase /
 </span><span class='line'>  RewriteRule /([^/]+)\.(svg)$ /$1.$2 [R,L]
 </span></code></pre></td></tr></table></div></figure></notextile></div>
+
 </p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 译者注：注意，该插件只支持Emacs 24.x。之前就因为Emacs版本原因，一直无法使用。
+</p>
+
+
+
+</div>
+</div>
 ]]></content>
   </entry>
   
