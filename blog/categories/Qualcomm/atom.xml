@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Qualcomm | 不停地疯]]></title>
+  <link href="http://xeonxu.github.com/blog/categories/Qualcomm/atom.xml" rel="self"/>
+  <link href="http://xeonxu.github.com/"/>
+  <updated>2012-09-09T16:35:24+08:00</updated>
+  <id>http://xeonxu.github.com/</id>
+  <author>
+    <name><![CDATA[Xeon Xu]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[高通编译环境一键安装包]]></title>
+    <link href="http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/"/>
+    <updated>2012-09-09T14:22:00+08:00</updated>
+    <id>http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao</id>
+    <content type="html"><![CDATA[<p>
+之前一直都在Marvell平台上开发Android，Marvell平台的CP只Release二进制文件，所以开发过程中一般只需要修改并编译AP端的代码就可以了。最近一个月，由于项目需要，开始转到开发高通平台的Android。初步接触下来，高通平台和Marvell平台有很大不同。最显著一点就是，Marvell平台中是AP启动起来后再挂CP跑；而高通平台则是先启动CP<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，然后CP初始化AP并加载程序运行。另一方面，高通的CP相比AP有更大的控制权限，像对GPIO，PMIC的控制等都是CP进行控制，AP端如果需要对这些资源进行操作，则必须先由CP程序分配相应权限给AP才可以。AP和CP的交互则使用共享内存的方式进行同步。
+</p>
+<p>
+高通这种架构特点注定了OEM商需要同时修改AP和CP的代码，所以高通的软件包在Release的时候是分为AP包和MP<sup><a class="footref" name="fnr.1.2" href="#fn.1">1</a></sup>包的。AP包中包括Android，Kernel，AP端的bootloader lk等；而MP包中则包括AMSS，qcsbl，oemsbl等。AP包的编译环境一般都架设在Linux下，使用Android的官方搭建方法就可以搞定。而MP包属于高通的特有产物，需要按照高通的搭建文档来进行，使用RVCT编译器，python以及perl环境。实际搭建下来，MP包的编译环境极为繁琐，从头摸索搭建，没有3、4天是不可能完成的。即便有人之前搭建过，文档工具都准备好的情况下，搭建一个可用的环境也至少需要4个小时。为了方便以后开发人员更加方便快捷的搭建开发环境，我花了2个周末的时间，搭建调试并打包制作了高通编译环境的一键安装包。
+</p>
+<p>
+该一键安装包分为Windows版和Linux版。是的，你没有看错，还有Linux版本的编译环境！用过的人都懂的，Linux版的编译环境比Windows编译环境的效率高的不是一点两点<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>。不过有一点需要强调： <b>我制作的编译包中，RVCT的版本不是高通官方建议的版本</b> 。高通官方文档中说，编译环境需要RVCT 2.2 593版本。而我制作的编译包中RVCT版本分别是Windows 2.2 616，Linux 2.2 686版本。修正版本号比高通官方建议的高，但是高通官方对于高版本的编译环境是否可用没有明确的答复，只是说没有测试过<sup><a class="footref" name="fnr.3" href="#fn.3">3</a></sup>。我个人简单测试过，分别使用593版本的RVCT，616版本RVCT和686版本RVCT编译同一套代码，对编译出来的bin文件进行比较，发现除了日期和签名部分有不同外，其余部分都是相同的。另外，这三种编译器编译出来的文件分别刷到手机上，也都可以正常运行。但是， <b>即便如此我也还是不能保证编译环境是完全没有问题的</b> 。所以，对于要求比较高的朋友，可以在研发中使用我的环境，正式发布版本的时候使用高通官方建议的593版本进行编译。
+</p>
+<p>
+最后放出下载地址（由于CSDN只有60M的上传权限，所以只有Linux环境了，并且需要5个资源分。国外下载地址没有任何限制）：
+</p>
+<p>
+国内下载：
+</p>
+<p>
+<a href="http://download.csdn.net/detail/noexu/4558455">Linux编译环境</a>
+</p>
+<p>
+国外下载：
+</p>
+<p>
+<a href="https://docs.google.com/open?id=0B5GJiOxO7LkWT0F3cDhyTG5ZR2s">Linux编译环境</a>
+<a href="https://docs.google.com/open?id=0B5GJiOxO7LkWUkp6N0RCbHF2SWc">Windows编译环境</a>
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 高通平台中将CP称为MP，本质是一样的。
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 相同配置的机器至少有5:1的效率，windows上编译需要50分钟的代码，Linux上只需要10分钟。
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.3" href="#fnr.3">3</a></sup> 根据高通文档的编写时间点以及国企一贯保守的工作习惯上来推断，我猜测高版本应该是没有问题的，因为文档写作之初RVCT 616版本的补丁还没有发布，只是高通方面没人更新。所以，流传到现在就是只能使用593版本的RVCT了。当然这只是我本人的推断。
+</p>
+
+
+
+
+</div>
+</div>
+]]></content>
+  </entry>
+  
+</feed>
