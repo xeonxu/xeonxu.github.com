@@ -3,7 +3,7 @@ layout: post
 title: "搭建Linux下的分布式编译系统"
 date: 2012-08-30 23:46
 comments: true
-categories: Linux Android
+categories: Linux Android 开发
 ---
 
 
