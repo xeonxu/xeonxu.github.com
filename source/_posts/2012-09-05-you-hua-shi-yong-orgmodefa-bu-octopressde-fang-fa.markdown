@@ -22,7 +22,7 @@ categories: Org-Mode Octopress Emacs
  org_posts_dir   = "org_posts"
  themes_dir      = ".themes"   # directory for blog files
  new_post_ext    = "org"  # default new post file extension when using the new_post task
- new_page_ext    = "org"  # default new page file extension when using the new_page task
+ new_page_ext    = "markdown"  # default new page file extension when using the new_page task
  server_port     = "4000"      # port for preview server eg. localhost:4000
 
 # open ,使用系统默认编辑器
@@ -116,9 +116,14 @@ task :new_post, :title do |t, args|
 end
 {% endcodeblock %}
 <p>
-在 <code>new_page</code> 中也添加相同的语句。
-</p>
-<ul>
+在 <code>new_page</code> 中也添加相同的语句，不过注意，最后 <code>editor</code> 那一段中文件名称变量需要使用 <code>#{file}</code> ，如下：
+{% codeblock Rakefile lang:ruby %}
+  if #{editor}
+    system "sleep 1; #{editor} #{file}"
+  end
+{% endcodeblock %}
+
+</p><ul>
 <li>最后，为了预览更加方便，在 <code>preview</code> 命令最后添加下面的语句：
 </li>
 </ul>
