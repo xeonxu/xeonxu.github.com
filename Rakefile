@@ -24,7 +24,7 @@ posts_dir       = "_posts"    # directory for blog files
 org_posts_dir   = "org_posts"
 themes_dir      = ".themes"   # directory for blog files
 new_post_ext    = "org"  # default new post file extension when using the new_post task
-new_page_ext    = "org"  # default new page file extension when using the new_page task
+new_page_ext    = "markdown"  # default new page file extension when using the new_page task
 server_port     = "4000"      # port for preview server eg. localhost:4000
 # open ,使用系统默认编辑器
 # open -a Mou，使用Mou打开
@@ -162,7 +162,7 @@ task :new_page, :filename do |t, args|
     puts "Syntax error: #{args.filename} contains unsupported characters"
   end
   if #{editor}
-    system "sleep 1; #{editor} #{filename}"
+    system "sleep 1; #{editor} #{file}"
   end
 end
 
