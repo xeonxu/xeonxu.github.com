@@ -1,8 +1,0 @@
----
-layout: page
-title: "test"
-date: 2012-08-30 00:56
-comments: true
-sharing: true
-footer: true
----
