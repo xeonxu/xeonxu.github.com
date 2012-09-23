@@ -4,7 +4,7 @@
   <title><![CDATA[不停地疯]]></title>
   <link href="http://xeonxu.github.com/atom.xml" rel="self"/>
   <link href="http://xeonxu.github.com/"/>
-  <updated>2012-09-18T00:01:50+08:00</updated>
+  <updated>2012-09-23T21:37:42+08:00</updated>
   <id>http://xeonxu.github.com/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,197 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Vim的简单配置]]></title>
+    <link href="http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi/"/>
+    <updated>2012-09-22T21:49:00+08:00</updated>
+    <id>http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi</id>
+    <content type="html"><![CDATA[<p>
+自己平时喜欢使用<a href="http://www.gnu.org/software/emacs/">GNU Emacs</a>，但是单位工作环境的限制，使我不得不在<a href="http://www.gnu.org/software/screen/">GNU Screen</a>下运行GNU Emacs。但是貌似Screen和Emacs有点小的兼容性问题，至少我没能调整到完全正常。使用中，Emacs经常会上移一行从而造成画面错乱，让人用的很不爽。为此，我决定在工作环境中暂时使用别的编辑器来替代Emacs。之后，我尝试过使用<a href="http://www.emacswiki.org/emacs/MicroEmacs">Micro Emacs</a>，包括Linus最喜欢用的<a href="http://git.kernel.org/?p=editors/uemacs/uemacs.git;a=tree">uEmacs PK</a>，可惜这玩意儿和GNU Emacs差异有点大，加之所有MicroEmacs对多字节语系支持地都不是很好，而自己又是个懒人也不是特别Geek，就没继续用下去。于是我重新将目光放到了<a href="http://www.vim.org">VIM</a> 上。
+好在工作中对编辑器的要求不是特别高，VIM也不是特别难使，自己又磕磕碰碰地在网上找了些配置添加到自己的Vim上。用起来还不错，可以交叉索引跳转，可以Outline，对我来说，这就够了。
+下面简单列举一下Vim的配置方法，算个存档记录。
+</p>
+<ul>
+<li>Cscope安装配置
+<ol>
+<li>安装Cscope
+     去<a href="http://cscope.sourceforge.net">http://cscope.sourceforge.net</a> 下载cscope源码，然后编译安装。
+</li>
+<li>在个人目录下的 <code>.vimrc</code> 文件中添加如下配置
+</li>
+</ol>
+
+</li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>cscope配置  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="s2">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span>
+</span><span class="line"><span class="s2">&quot;</span> cscope setting
+</span><span class="line"><span class="s2">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span>
+</span><span class="line"><span class="s2">&quot;</span> <span class="k">if </span>has<span class="o">(</span><span class="s2">&quot;cscope&quot;</span><span class="o">)</span>
+</span><span class="line"><span class="s2">&quot;   set csprg=/usr/local/bin/cscope</span>
+</span><span class="line"><span class="s2">&quot;</span>   <span class="nb">set </span><span class="nv">csto</span><span class="o">=</span>1
+</span><span class="line"><span class="s2">&quot;   set cst</span>
+</span><span class="line"><span class="s2">&quot;</span>   <span class="nb">set </span>nocsverb
+</span><span class="line"><span class="s2">&quot;   &quot;</span> add any database in current directory
+</span><span class="line"><span class="s2">&quot;   if filereadable(&quot;</span>cscope.out<span class="s2">&quot;)</span>
+</span><span class="line"><span class="s2">&quot;</span>       cs add cscope.out
+</span><span class="line"><span class="s2">&quot;   endif</span>
+</span><span class="line"><span class="s2">&quot;</span>   <span class="nb">set </span>csverb
+</span><span class="line"><span class="s2">&quot; endif</span>
+</span><span class="line"><span class="s2">&quot;</span>
+</span><span class="line"><span class="s2">&quot; nmap &lt;C-@&gt;s :cs find s &lt;C-R&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;CR&gt;&lt;CR&gt;</span>
+</span><span class="line"><span class="s2">&quot;</span> nmap &lt;C-@&gt;g :cs find g &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line"><span class="s2">&quot; nmap &lt;C-@&gt;c :cs find c &lt;C-R&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;CR&gt;&lt;CR&gt;</span>
+</span><span class="line"><span class="s2">&quot;</span> nmap &lt;C-@&gt;t :cs find t &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line"><span class="s2">&quot; nmap &lt;C-@&gt;e :cs find e &lt;C-R&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;CR&gt;&lt;CR&gt;</span>
+</span><span class="line"><span class="s2">&quot;</span> nmap &lt;C-@&gt;f :cs find f &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cfile&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line"><span class="s2">&quot; nmap &lt;C-@&gt;i :cs find i ^&lt;C-R&gt;=expand(&quot;</span>&lt;cfile&gt;<span class="s2">&quot;)&lt;CR&gt;$&lt;CR&gt;</span>
+</span><span class="line"><span class="s2">&quot;</span> nmap &lt;C-@&gt;d :cs find d &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line"><span class="k">function</span>! LoadCscope<span class="o">()</span>
+</span><span class="line"><span class="nb">let </span><span class="nv">db</span> <span class="o">=</span> findfile<span class="o">(</span><span class="s2">&quot;cscope.out&quot;</span>, <span class="s2">&quot;.;&quot;</span><span class="o">)</span>
+</span><span class="line"><span class="k">if</span> <span class="o">(</span>!empty<span class="o">(</span>db<span class="o">))</span>
+</span><span class="line">  <span class="nb">let </span><span class="nv">path</span> <span class="o">=</span> strpart<span class="o">(</span>db, 0, match<span class="o">(</span>db, <span class="s2">&quot;/cscope.out$&quot;</span><span class="o">))</span>
+</span><span class="line">  <span class="nb">set </span>nocsverb <span class="s2">&quot; suppress &#39;duplicate connection&#39; error</span>
+</span><span class="line"><span class="s2">  set csto=0</span>
+</span><span class="line"><span class="s2">  set cst</span>
+</span><span class="line"><span class="s2">  &quot;</span> add any database in current directory
+</span><span class="line">  <span class="k">if </span>filereadable<span class="o">(</span>db<span class="o">)</span>
+</span><span class="line">     exe <span class="s2">&quot;cs add &quot;</span> . db . <span class="s2">&quot; &quot;</span> . path
+</span><span class="line">     nmap &lt;C-c&gt;s :cs find s &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line">     nmap &lt;C-c&gt;g :cs find g &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line">     nmap &lt;C-c&gt;c :cs find c &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line">     nmap &lt;C-c&gt;t :cs find t &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line">     nmap &lt;C-c&gt;e :cs find e &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line">     nmap &lt;C-c&gt;f :cs find f &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cfile&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line">     nmap &lt;C-c&gt;i :cs find i ^&lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cfile&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;<span class="nv">$&lt;</span>CR&gt;
+</span><span class="line">     nmap &lt;C-c&gt;d :cs find d &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
+</span><span class="line">  <span class="s2">&quot; else add database pointed to by environment</span>
+</span><span class="line"><span class="s2">  elseif $CSCOPE_DB != &quot;</span><span class="err">&quot;</span>
+</span><span class="line">     cs add <span class="nv">$CSCOPE_DB</span>
+</span><span class="line">  endif
+</span><span class="line">  <span class="nb">set </span>csverb
+</span><span class="line">endif
+</span><span class="line">endfunction
+</span><span class="line">au BufEnter /* call LoadCscope<span class="o">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<ol>
+<li>使用时先去要查看的代码目录，然后执行cscope -bqR。完成之后，直接 <code>vi filename</code> 。在需要查找的符号上使用 <code>C-c s/g/c/t/e/f/i/d</code> 即可调用相应的功能。原来cscope插件使用 <code>C-@</code> 做命令引导键，我为了和Emacs同步，将其改为了 <code>C-c</code> 。
+</li>
+<li>添加Outline显示
+</li>
+</ol>
+
+<p>  Outline显示由Taglist来实现：
+</p>
+<ol>
+<li>去<a href="http://www.vim.org/scripts/script.php?script_id=273">http://www.vim.org/scripts/script.php?script_id=273</a> 下载Taglist。
+</li>
+<li>解压后将 <code>taglist.vim</code> 文件放在个人目录下的 <code>.vim/plugin/</code> 目录中。同时，将解压后的 <code>taglist.txt</code> 文件放在个人目录下的 <code>.vim/doc/</code> 目录中。
+</li>
+<li>最后，添加以下配置到个人目录下的 <code>.vimrc</code> 文件中：
+</li>
+</ol>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>taglist配置  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="err">&quot;</span> use F8 to toggle taglist
+</span><span class="line">nnoremap &lt;silent&gt; &lt;F8&gt; :TlistToggle&lt;CR&gt;
+</span><span class="line"><span class="nb">let </span><span class="nv">Tlist_GainFocus_On_ToggleOpen</span><span class="o">=</span>1
+</span><span class="line"><span class="nb">let </span><span class="nv">Tlist_Close_On_Select</span><span class="o">=</span>1
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>
+  如此便可方便的通过F8按键打开当前文件的Outline，并将光标置于Outline中，选择条目后自动关闭。
+</p>
+<ul>
+<li>设置高亮搜索，自动缩进以及语法高亮
+  将以下配置添加到个人目录下的 <code>.vimrc</code> 文件中：
+</li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>高亮缩进配置  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">set </span>nu
+</span><span class="line"><span class="nb">set </span>hlsearch
+</span><span class="line">syntax <span class="nb">enable</span>
+</span><span class="line"><span class="nb">set </span>showmatch
+</span><span class="line"><span class="nb">set </span><span class="nv">ts</span><span class="o">=</span>4
+</span><span class="line"><span class="nb">set </span><span class="nv">softtabstop</span><span class="o">=</span>4
+</span><span class="line"><span class="nb">set </span><span class="nv">shiftwidth</span><span class="o">=</span>4
+</span><span class="line"><span class="nb">set </span>expandtab
+</span><span class="line"><span class="nb">set </span>autoindent
+</span><span class="line"><span class="nb">set </span>cindent
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>
+OK，如此配置后，查看代码编辑代码舒服多了。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[高通编译环境一键安装包]]></title>
@@ -98,7 +289,7 @@
 </span><span class="line"> <span class="nv">org_posts_dir</span>   <span class="o">=</span> <span class="s2">&quot;org_posts&quot;</span>
 </span><span class="line"> <span class="nv">themes_dir</span>      <span class="o">=</span> <span class="s2">&quot;.themes&quot;</span>   <span class="c"># directory for blog files</span>
 </span><span class="line"> <span class="nv">new_post_ext</span>    <span class="o">=</span> <span class="s2">&quot;org&quot;</span>  <span class="c"># default new post file extension when using the new_post task</span>
-</span><span class="line"> <span class="nv">new_page_ext</span>    <span class="o">=</span> <span class="s2">&quot;org&quot;</span>  <span class="c"># default new page file extension when using the new_page task</span>
+</span><span class="line"> <span class="nv">new_page_ext</span>    <span class="o">=</span> <span class="s2">&quot;markdown&quot;</span>  <span class="c"># default new page file extension when using the new_page task</span>
 </span><span class="line"> <span class="nv">server_port</span>     <span class="o">=</span> <span class="s2">&quot;4000&quot;</span>      <span class="c"># port for preview server eg. localhost:4000</span>
 </span><span class="line">
 </span><span class="line"><span class="c"># open ,使用系统默认编辑器</span>
@@ -246,7 +437,18 @@
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>
-在 <code>new_page</code> 中也添加相同的语句。
+在 <code>new_page</code> 中也添加相同的语句，不过注意，最后 <code>editor</code> 那一段中文件名称变量需要使用 <code>#{file}</code> ，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Rakefile  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line">  <span class="k">if</span> <span class="c1">#{editor}</span>
+</span><span class="line">    <span class="nb">system</span> <span class="s2">&quot;sleep 1; </span><span class="si">#{</span><span class="n">editor</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class="line">  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
 </p>
 <ul>
 <li>最后，为了预览更加方便，在 <code>preview</code> 命令最后添加下面的语句：

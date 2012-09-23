@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Org-Mode | 不停地疯]]></title>
   <link href="http://xeonxu.github.com/blog/categories/Org-Mode/atom.xml" rel="self"/>
   <link href="http://xeonxu.github.com/"/>
-  <updated>2012-09-18T00:01:50+08:00</updated>
+  <updated>2012-09-23T21:37:42+08:00</updated>
   <id>http://xeonxu.github.com/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -46,7 +46,7 @@
 </span><span class='line'> <span class="nv">org_posts_dir</span>   <span class="o">=</span> “org_posts”
 </span><span class='line'> <span class="nv">themes_dir</span>      <span class="o">=</span> “.themes”   <span class="c"># directory for blog files</span>
 </span><span class='line'> <span class="nv">new_post_ext</span>    <span class="o">=</span> “org”  <span class="c"># default new post file extension when using the new_post task</span>
-</span><span class='line'> <span class="nv">new_page_ext</span>    <span class="o">=</span> “org”  <span class="c"># default new page file extension when using the new_page task</span>
+</span><span class='line'> <span class="nv">new_page_ext</span>    <span class="o">=</span> “markdown”  <span class="c"># default new page file extension when using the new_page task</span>
 </span><span class='line'> <span class="nv">server_port</span>     <span class="o">=</span> “4000”      <span class="c"># port for preview server eg. localhost:4000&lt;/p&gt;</span>
 </span><span class='line'>
 </span><span class='line'><span class="err">&lt;h1</span> <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;open-&quot;</span>&gt;open ,使用系统默认编辑器&lt;/h1&gt;
@@ -186,7 +186,16 @@
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 <p>
-在 <code>new_page</code> 中也添加相同的语句。
+在 <code>new_page</code> 中也添加相同的语句，不过注意，最后 <code>editor</code> 那一段中文件名称变量需要使用 <code>#{file}</code> ，如下：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Rakefile  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="k">if</span> <span class="c1">#{editor}</span>
+</span><span class='line'>    <span class="nb">system</span> <span class="s2">&quot;sleep 1; </span><span class="si">#{</span><span class="n">editor</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
 </p>
 <ul>
 <li>最后，为了预览更加方便，在 <code>preview</code> 命令最后添加下面的语句：
