@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="本来使用 Org-Mode 来写博客就很舒服了， 插入图片也很容易，使用 [[图片地址]] 的方法就可以。但是对于编写需要插入截图的文档来说，就得先截图，然后保存图片到相应位置，之后才能使用上面的方法来插入图片。 有幸，前面搜索资料时发现了一篇文章1，其中介绍了一种更加自动化的方式在 Org- &hellip;">
+  <meta name="description" content="最近在做高通Android项目时遇到一个问题，测试报告说拨号键盘中按键震感偏弱，问题首先提到了我这里。于是，我首先去内核驱动里检查了一下振子的配置，发现给振子的供电已经调到最高值了，看来只能从别的方向下手解决这个问题。震感强烈与否取决于两个因素，一个是驱动电流/驱动电压，而另一个是驱动时长。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -73,6 +73,286 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/">调节Android拨号键盘的震动效果</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-24T21:48:00+08:00" pubdate data-updated="true">2012年09月24日</time>
+        
+         | <a href="/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+最近在做高通Android项目时遇到一个问题，测试报告说拨号键盘中按键震感偏弱，问题首先提到了我这里。于是，我首先去内核驱动里检查了一下振子的配置，发现给振子的供电已经调到最高值了，看来只能从别的方向下手解决这个问题。震感强烈与否取决于两个因素，一个是驱动电流/驱动电压，而另一个是驱动时长。由于这个项目中给振子的供电是个LDO，只能调节驱动电压，而同时驱动电压已经最大，所以需要想办法加长驱动时间。
+</p>
+<p>
+在和应用一块分析了Android拨号键盘应用的代码后，按键震动的实现在 <code>packages/apps/Contacts/src/com/android/contacts/dialpad/DialpadFragment.java</code> 文件中。该文件中实现了拨号键盘按钮 <code>onClick</code> 事件的监听，其中：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>DialpadFragment.java  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="nd">@Override</span>
+</span><span class="line"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">    <span class="k">switch</span> <span class="o">(</span><span class="n">view</span><span class="o">.</span><span class="na">getId</span><span class="o">())</span> <span class="o">{</span>
+</span><span class="line">        <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">one</span><span class="o">:</span> <span class="o">{</span>
+</span><span class="line">            <span class="n">playTone</span><span class="o">(</span><span class="n">ToneGenerator</span><span class="o">.</span><span class="na">TONE_DTMF_1</span><span class="o">);</span>
+</span><span class="line">            <span class="n">keyPressed</span><span class="o">(</span><span class="n">KeyEvent</span><span class="o">.</span><span class="na">KEYCODE_1</span><span class="o">);</span>
+</span><span class="line">            <span class="k">return</span><span class="o">;</span>
+</span><span class="line">        <span class="o">}</span>
+</span><span class="line">        <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">two</span><span class="o">:</span> <span class="o">{</span>
+</span><span class="line">            <span class="n">playTone</span><span class="o">(</span><span class="n">ToneGenerator</span><span class="o">.</span><span class="na">TONE_DTMF_2</span><span class="o">);</span>
+</span><span class="line">            <span class="n">keyPressed</span><span class="o">(</span><span class="n">KeyEvent</span><span class="o">.</span><span class="na">KEYCODE_2</span><span class="o">);</span>
+</span><span class="line">            <span class="k">return</span><span class="o">;</span>
+</span><span class="line">        <span class="o">}</span>
+</span><span class="line">        <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">three</span><span class="o">:</span> <span class="o">{</span>
+</span><span class="line">            <span class="n">playTone</span><span class="o">(</span><span class="n">ToneGenerator</span><span class="o">.</span><span class="na">TONE_DTMF_3</span><span class="o">);</span>
+</span><span class="line">            <span class="n">keyPressed</span><span class="o">(</span><span class="n">KeyEvent</span><span class="o">.</span><span class="na">KEYCODE_3</span><span class="o">);</span>
+</span><span class="line">            <span class="k">return</span><span class="o">;</span>
+</span><span class="line">        <span class="o">}</span>
+</span><span class="line"><span class="c1">//以下省略</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+可以看到该监听事件中播放了按键音，同时调用了 <code>keyPressed</code> 这个方法。再来看 <code>keyPressed</code> 方法的实现：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>DialpadFragment.java  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">private</span> <span class="kt">void</span> <span class="nf">keyPressed</span><span class="p">(</span><span class="kt">int</span> <span class="n">keyCode</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="n">mHaptic</span><span class="p">.</span><span class="n">vibrate</span><span class="p">();</span>
+</span><span class="line">    <span class="n">KeyEvent</span> <span class="n">event</span> <span class="o">=</span> <span class="n">new</span> <span class="n">KeyEvent</span><span class="p">(</span><span class="n">KeyEvent</span><span class="p">.</span><span class="n">ACTION_DOWN</span><span class="p">,</span> <span class="n">keyCode</span><span class="p">);</span>
+</span><span class="line">    <span class="n">mDigits</span><span class="p">.</span><span class="n">onKeyDown</span><span class="p">(</span><span class="n">keyCode</span><span class="p">,</span> <span class="n">event</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// If the cursor is at the end of the text we hide it.</span>
+</span><span class="line">    <span class="n">final</span> <span class="kt">int</span> <span class="n">length</span> <span class="o">=</span> <span class="n">mDigits</span><span class="p">.</span><span class="n">length</span><span class="p">();</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="n">length</span> <span class="o">==</span> <span class="n">mDigits</span><span class="p">.</span><span class="n">getSelectionStart</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">length</span> <span class="o">==</span> <span class="n">mDigits</span><span class="p">.</span><span class="n">getSelectionEnd</span><span class="p">())</span> <span class="p">{</span>
+</span><span class="line">        <span class="n">mDigits</span><span class="p">.</span><span class="n">setCursorVisible</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+注意 <code>mHaptic.vibrate()</code> ，从方法名称上可以看出这个方法和震动相关，所以现在只要搞清楚该方法的具体实现即可。继续往下追，从该类变量的声明 <code>private HapticFeedback mHaptic = new HapticFeedback();</code> 可以看到，这个方法属于一个名叫 <code>HapticFeedback</code> 的类。而 <code>HapticFeedback</code> 类存在于 <code>packages/apps/Phone/src/com/android/phone/HapticFeedback.java</code> 文件中。顺利找到 <code>vibrate()</code> 的定义：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>HapticFeedback.java  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">vibrate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class="line">    <span class="k">if</span> <span class="o">(!</span><span class="n">mEnabled</span> <span class="o">||</span> <span class="o">!</span><span class="n">mSettingEnabled</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">        <span class="k">return</span><span class="o">;</span>
+</span><span class="line">    <span class="o">}</span>
+</span><span class="line">    <span class="n">mVibrator</span><span class="o">.</span><span class="na">vibrate</span><span class="o">(</span><span class="n">mHapticPattern</span><span class="o">,</span> <span class="n">NO_REPEAT</span><span class="o">);</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+其中的判断无需关心，通过名称可以看出应该是和震动设定有关。之后调用了另一个类 <code>Vibrator</code> 的 <code>vibrate</code> 方法。该方法接受两个参数，同样通过名称看得出第一个参数有关模式，第二个参数有关是否重复。去 <code>Vibrator</code> 类里看看，该类存在于 <code>frameworks/base/core/java/android/os/Vibrator.java</code> 文件中，找到 <code>vibrate</code> 的实现<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Vibrator.java  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="cm">/**</span>
+</span><span class="line"><span class="cm"> * Vibrate with a given pattern.</span>
+</span><span class="line"><span class="cm"> *</span>
+</span><span class="line"><span class="cm"> * &lt;p&gt;</span>
+</span><span class="line"><span class="cm"> * Pass in an array of ints that are the durations for which to turn on or off</span>
+</span><span class="line"><span class="cm"> * the vibrator in milliseconds.  The first value indicates the number of milliseconds</span>
+</span><span class="line"><span class="cm"> * to wait before turning the vibrator on.  The next value indicates the number of milliseconds</span>
+</span><span class="line"><span class="cm"> * for which to keep the vibrator on before turning it off.  Subsequent values alternate</span>
+</span><span class="line"><span class="cm"> * between durations in milliseconds to turn the vibrator off or to turn the vibrator on.</span>
+</span><span class="line"><span class="cm"> * &lt;/p&gt;&lt;p&gt;</span>
+</span><span class="line"><span class="cm"> * To cause the pattern to repeat, pass the index into the pattern array at which</span>
+</span><span class="line"><span class="cm"> * to start the repeat, or -1 to disable repeating.</span>
+</span><span class="line"><span class="cm"> * &lt;/p&gt;</span>
+</span><span class="line"><span class="cm"> *</span>
+</span><span class="line"><span class="cm"> * @param pattern an array of longs of times for which to turn the vibrator on or off.</span>
+</span><span class="line"><span class="cm"> * @param repeat the index into pattern at which to repeat, or -1 if</span>
+</span><span class="line"><span class="cm"> *        you don&#39;t want to repeat.</span>
+</span><span class="line"><span class="cm"> */</span>
+</span><span class="line"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">vibrate</span><span class="o">(</span><span class="kt">long</span><span class="o">[]</span> <span class="n">pattern</span><span class="o">,</span> <span class="kt">int</span> <span class="n">repeat</span><span class="o">)</span>
+</span><span class="line"><span class="o">{</span>
+</span><span class="line">    <span class="k">if</span> <span class="o">(</span><span class="n">mService</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">        <span class="n">Log</span><span class="o">.</span><span class="na">w</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;Failed to vibrate; no vibrator service.&quot;</span><span class="o">);</span>
+</span><span class="line">        <span class="k">return</span><span class="o">;</span>
+</span><span class="line">    <span class="o">}</span>
+</span><span class="line">    <span class="c1">// catch this here because the server will do nothing.  pattern may</span>
+</span><span class="line">    <span class="c1">// not be null, let that be checked, because the server will drop it</span>
+</span><span class="line">    <span class="c1">// anyway</span>
+</span><span class="line">    <span class="k">if</span> <span class="o">(</span><span class="n">repeat</span> <span class="o">&lt;</span> <span class="n">pattern</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">        <span class="k">try</span> <span class="o">{</span>
+</span><span class="line">            <span class="n">mService</span><span class="o">.</span><span class="na">vibratePattern</span><span class="o">(</span><span class="n">pattern</span><span class="o">,</span> <span class="n">repeat</span><span class="o">,</span> <span class="n">mToken</span><span class="o">);</span>
+</span><span class="line">        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">            <span class="n">Log</span><span class="o">.</span><span class="na">w</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;Failed to vibrate.&quot;</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+</span><span class="line">        <span class="o">}</span>
+</span><span class="line">    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class="line">        <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArrayIndexOutOfBoundsException</span><span class="o">();</span>
+</span><span class="line">    <span class="o">}</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+从注释可以了解到该震动模式的意义，第一个值为等待开启震动的时间，第二个为开启震动后持续的时间，之后交替数字为关闭震动的时间以及开启震动的时间。有兴趣可以追到 <code>frameworks/base/services/java/com/android/server/VibratorService.java</code> 看看 <code>vibratePattern</code> 的实现。不过我们已经找到需要的一切了。OK，再次回到 <code>packages/apps/Phone/src/com/android/phone/HapticFeedback.java</code> 文件中查看传入的震动模式设置，很简单搜到以下处理：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>HapticFeedback.java  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">enabled</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">     <span class="n">mEnabled</span> <span class="o">=</span> <span class="n">enabled</span><span class="o">;</span>
+</span><span class="line">     <span class="k">if</span> <span class="o">(</span><span class="n">enabled</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">         <span class="n">mVibrator</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Vibrator</span><span class="o">();</span>
+</span><span class="line">         <span class="k">if</span> <span class="o">(!</span><span class="n">loadHapticSystemPattern</span><span class="o">(</span><span class="n">context</span><span class="o">.</span><span class="na">getResources</span><span class="o">()))</span> <span class="o">{</span>
+</span><span class="line">             <span class="n">mHapticPattern</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">long</span><span class="o">[]</span> <span class="o">{</span><span class="mi">0</span><span class="o">,</span> <span class="n">DURATION</span><span class="o">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">DURATION</span><span class="o">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">DURATION</span><span class="o">};</span>
+</span><span class="line">         <span class="o">}</span>
+</span><span class="line">         <span class="n">mSystemSettings</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Settings</span><span class="o">.</span><span class="na">System</span><span class="o">();</span>
+</span><span class="line">         <span class="n">mContentResolver</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getContentResolver</span><span class="o">();</span>
+</span><span class="line">     <span class="o">}</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+首先尝试从系统设置里载入震动模式，否则使用默认的 <code>new long[] {0, DURATION, 2 * DURATION, 3 * DURATION};</code> 模式。其中 <code>DURATION</code> 等于10，所以默认的模式为等待0秒，震10毫秒，停20毫秒，之后震动30毫秒。注释掉 <code>if (!loadHapticSystemPattern(context.getResources()))</code> 判断，然后将默认震动模式改为 <code>{0, 6*DURATION, 1 * DURATION, 6 * DURATION};</code> 试试效果。执行：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>编译  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">mmm packages/apps/Contacts/&amp;&amp;mmm packages/apps/Phone/
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+然后将编译好的apk文件推到手机上，震感明显，说明修改正确<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>。现在只需要去xml文件中找到震动模式的设置部分，相应修改就可以了。最后找到 <code>frameworks/base/core/res/res/values/config.xml</code> 文件，其中有一部分为：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>设置  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="xml"><span class="line"><span class="c">&lt;!-- Vibrator pattern for feedback about touching a virtual key --&gt;</span>
+</span><span class="line"><span class="nt">&lt;integer-array</span> <span class="na">name=</span><span class="s">&quot;config_virtualKeyVibePattern&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">    <span class="nt">&lt;item&gt;</span>0<span class="nt">&lt;/item&gt;</span>
+</span><span class="line">    <span class="nt">&lt;item&gt;</span>10<span class="nt">&lt;/item&gt;</span>
+</span><span class="line">    <span class="nt">&lt;item&gt;</span>20<span class="nt">&lt;/item&gt;</span>
+</span><span class="line">    <span class="nt">&lt;item&gt;</span>30<span class="nt">&lt;/item&gt;</span>
+</span><span class="line"><span class="nt">&lt;/integer-array&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+是不是和之前看到的默认震动模式很像呢？最后，根据具体情况调了一个比较适中的值，任务完成。
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 还有另外一个 <code>vibrate</code> 的实现，但是该实现只接受一个参数，所以不是我们要找的目标。
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 修改震动设置后，必须同时编译Contact和Phone，并同时更新到手机上才能生效，具体原因不明白，感觉很怪异。
+</p>
+
+
+
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1695,14 +1975,14 @@ sys     1m20.240s
 <section>
  <h1>Categories</h1>
  <ul id="categories">
- <li class='category'><a href='/blog/categories/Android/'>Android (2)</a></li>
+ <li class='category'><a href='/blog/categories/Android/'>Android (3)</a></li>
 <li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
-<li class='category'><a href='/blog/categories/Linux/'>Linux (3)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (4)</a></li>
 <li class='category'><a href='/blog/categories/Octopress/'>Octopress (3)</a></li>
 <li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
 <li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
-<li class='category'><a href='/blog/categories/开发/'>开发 (3)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (4)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (1)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (1)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
@@ -1713,6 +1993,10 @@ sys     1m20.240s
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/">调节Android拨号键盘的震动效果</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/">关于在Org-Mode下方便插入截图的方法</a>
@@ -1728,10 +2012,6 @@ sys     1m20.240s
     
       <li class="post">
         <a href="/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/">优化使用Orgmode发布Octopress的方法</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/">使用Org-Mode来发布博客</a>
       </li>
     
   </ul>
