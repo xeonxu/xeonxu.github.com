@@ -1,24 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+	<channel>
+		<description><![CDATA[不停地疯]]></description>
+		<title><![CDATA[不停地疯]]></title>
+		<link>http://xeonxu.github.com/</link>
+		<pubDate>2012-09-26T22:25:40+08:00</pubDate>
 
-  <title><![CDATA[不停地疯]]></title>
-  <link href="http://xeonxu.github.com/atom.xml" rel="self"/>
-  <link href="http://xeonxu.github.com/"/>
-  <updated>2012-09-26T22:25:40+08:00</updated>
-  <id>http://xeonxu.github.com/</id>
-  <author>
-    <name><![CDATA[Xeon Xu]]></name>
-    
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
-
-  
-  <entry>
-    <title type="html"><![CDATA[关于在Org-Mode下方便插入截图的方法]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/"/>
-    <updated>2012-09-23T23:58:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa</id>
-    <content type="html"><![CDATA[<p>
+		
+		<item>
+			<description>
+				<![CDATA[
+				<p>
 本来使用 <code>Org-Mode</code> 来写博客就很舒服了， 插入图片也很容易，使用
 </p>
 
@@ -155,15 +147,22 @@
 </p>
 </div>
 </div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Vim的简单配置]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi/"/>
-    <updated>2012-09-22T21:49:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi</id>
-    <content type="html"><![CDATA[<p>
+
+				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				]]>
+			</description>
+			<title><![CDATA[关于在Org-Mode下方便插入截图的方法]]></title>
+			<link>http://xeonxu.github.com/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/</link>
+			<pubDate>2012-09-23T23:58:00+08:00</pubDate>
+			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa</guid>
+
+			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+		</item>
+		
+		<item>
+			<description>
+				<![CDATA[
+				<p>
 自己平时喜欢使用<a href="http://www.gnu.org/software/emacs/">GNU Emacs</a>，但是单位工作环境的限制，使我不得不在<a href="http://www.gnu.org/software/screen/">GNU Screen</a>下运行GNU Emacs。但是貌似Screen和Emacs有点小的兼容性问题，至少我没能调整到完全正常。使用中，Emacs经常会上移一行从而造成画面错乱，让人用的很不爽。为此，我决定在工作环境中暂时使用别的编辑器来替代Emacs。之后，我尝试过使用<a href="http://www.emacswiki.org/emacs/MicroEmacs">Micro Emacs</a>，包括Linus最喜欢用的<a href="http://git.kernel.org/?p=editors/uemacs/uemacs.git;a=tree">uEmacs PK</a>，可惜这玩意儿和GNU Emacs差异有点大，加之所有MicroEmacs对多字节语系支持地都不是很好，而自己又是个懒人也不是特别Geek，就没继续用下去。于是我重新将目光放到了<a href="http://www.vim.org">VIM</a> 上。
 好在工作中对编辑器的要求不是特别高，VIM也不是特别难使，自己又磕磕碰碰地在网上找了些配置添加到自己的Vim上。用起来还不错，可以交叉索引跳转，可以Outline，对我来说，这就够了。
 下面简单列举一下Vim的配置方法，算个存档记录。
@@ -346,15 +345,22 @@
 <p>
 OK，如此配置后，查看代码编辑代码舒服多了。
 </p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[高通编译环境一键安装包]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/"/>
-    <updated>2012-09-09T14:22:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao</id>
-    <content type="html"><![CDATA[<p>
+
+				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				]]>
+			</description>
+			<title><![CDATA[Vim的简单配置]]></title>
+			<link>http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi/</link>
+			<pubDate>2012-09-22T21:49:00+08:00</pubDate>
+			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi</guid>
+
+			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+		</item>
+		
+		<item>
+			<description>
+				<![CDATA[
+				<p>
 之前一直都在Marvell平台上开发Android，Marvell平台的CP只Release二进制文件，所以开发过程中一般只需要修改并编译AP端的代码就可以了。最近一个月，由于项目需要，开始转到开发高通平台的Android。初步接触下来，高通平台和Marvell平台有很大不同。最显著一点就是，Marvell平台中是AP启动起来后再挂CP跑；而高通平台则是先启动CP<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，然后CP初始化AP并加载程序运行。另一方面，高通的CP相比AP有更大的控制权限，像对GPIO，PMIC的控制等都是CP进行控制，AP端如果需要对这些资源进行操作，则必须先由CP程序分配相应权限给AP才可以。AP和CP的交互则使用共享内存的方式进行同步。
 </p>
 <p>
@@ -398,15 +404,22 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 
 </div>
 </div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[优化使用Orgmode发布Octopress的方法]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/"/>
-    <updated>2012-09-05T07:59:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa</id>
-    <content type="html"><![CDATA[<p>
+
+				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				]]>
+			</description>
+			<title><![CDATA[高通编译环境一键安装包]]></title>
+			<link>http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/</link>
+			<pubDate>2012-09-09T14:22:00+08:00</pubDate>
+			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao</guid>
+
+			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+		</item>
+		
+		<item>
+			<description>
+				<![CDATA[
+				<p>
 前几天翻译了一篇来自Tom Alexander的<a href="http://blog.xeonxu.info/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/">文章</a> ，文中介绍了如何通过修改Rakefile文件以及添加相应的Emacs设置，来使通过Org-mode发布Octopress博客成为可能。该方法很好用，特别是使用作者自己修改的el脚本可以非常方便的将Org文件输出为octopress的文章。但是，原文作者的方法也有一点缺憾，那就是必须手动移动新建的Org文件到相应的目录下；而且在使用 <code>rake new_post[""]</code> 命令新建文档后必须手动编辑新建的文件，少了那么一点点便捷。为此，我又通过网络查找了一些资料，最后找到了<a href="http://imwuyu.me/blog/configuring-octopress.html/">这里</a> 。 受到这篇文章的启发，我尝试修改了工程中的 <code>Rakefile</code> 文件，最后成功地让一切都自动化起来。具体方法如下：
 </p>
 <ul>
@@ -609,15 +622,22 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 <p>
 好了，现在我们只需要在控制台上执行 <code>rake new_post["something"]</code> 就会自动在我们设定的 <code>org_posts_dir</code> 目录下新建一份org文档，并且使用我们指定的编辑器打开它。然后随便编辑一点什么，保存并执行 <code>C-c C-e F</code> 或者直接调用Tom Alexander文章中所说的 <code>M-x save-then-publish</code> 命令。最后再在控制台上执行 <code>rake generate&amp;&amp;rake preview</code> 。 Booooom，自动弹出的浏览器上是不是显示出了你刚才编写的文章？非常方便吧？赶快试试！
 </p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用Org-Mode来发布博客]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/"/>
-    <updated>2012-09-03T20:58:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke</id>
-    <content type="html"><![CDATA[<p>
+
+				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				]]>
+			</description>
+			<title><![CDATA[优化使用Orgmode发布Octopress的方法]]></title>
+			<link>http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/</link>
+			<pubDate>2012-09-05T07:59:00+08:00</pubDate>
+			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa</guid>
+
+			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+		</item>
+		
+		<item>
+			<description>
+				<![CDATA[
+				<p>
 原文地址： <a href="http://blog.paphus.com/blog/2012/08/01/introducing-octopress-blogging-for-org-mode/">http://blog.paphus.com/blog/2012/08/01/introducing-octopress-blogging-for-org-mode/</a>
 </p>
 <p>
@@ -817,15 +837,22 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 
 </div>
 </div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[搭建Linux下的分布式编译系统]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/"/>
-    <updated>2012-08-30T23:46:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong</id>
-    <content type="html"><![CDATA[<div id="table-of-contents">
+
+				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				]]>
+			</description>
+			<title><![CDATA[使用Org-Mode来发布博客]]></title>
+			<link>http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/</link>
+			<pubDate>2012-09-03T20:58:00+08:00</pubDate>
+			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke</guid>
+
+			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+		</item>
+		
+		<item>
+			<description>
+				<![CDATA[
+				<div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
@@ -1376,15 +1403,22 @@ sys     1m20.240s
 
 </div>
 </div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hello World]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/08/26/hello-world/"/>
-    <updated>2012-08-26T20:56:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/08/26/hello-world</id>
-    <content type="html"><![CDATA[<h1 id="blog">关于本Blog</h1>
+
+				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				]]>
+			</description>
+			<title><![CDATA[搭建Linux下的分布式编译系统]]></title>
+			<link>http://xeonxu.github.com/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/</link>
+			<pubDate>2012-08-30T23:46:00+08:00</pubDate>
+			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong</guid>
+
+			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+		</item>
+		
+		<item>
+			<description>
+				<![CDATA[
+				<h1 id="blog">关于本Blog</h1>
 <p>自己是一个很懒散的人，从接触电脑开始到现在不下14个年头，但要说自己做过什么，一时间还真难以回答。零星的积累都随我那善变的爱好一去不返了，让人有种虚度光阴的感觉。自己也不是没有做过尝试，开玩网络之初就在MyOpera上建立了自己的Blog，当然内容以个人日记流水账为主，那时真是快乐的单身年代。可是用了一段MyOpera后总觉得界面和功能不禁人意，而此时的Google正如火如荼，于是便赶了潮流在Blogspot上搭建了人生第二个Blog。可惜好景不长，Blogspot在国内越来越难以访问，原因大家懂的。慢慢的，也就淡了。然而随之时间的流逝，也许是老了，总觉得不记录些什么有愧于人生，从而有了再建立一个Blog的想法。当然，建立本Blog还有以下几个原因:</p>
 
 <ol>
@@ -1394,7 +1428,17 @@ sys     1m20.240s
 </ol>
 
 <p>最后以一个程序员最惯用的开场白来向各位打个招呼:Hello World!</p>
-]]></content>
-  </entry>
-  
-</feed>
+
+				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				]]>
+			</description>
+			<title><![CDATA[Hello World]]></title>
+			<link>http://xeonxu.github.com/blog/2012/08/26/hello-world/</link>
+			<pubDate>2012-08-26T20:56:00+08:00</pubDate>
+			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/08/26/hello-world</guid>
+
+			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+		</item>
+		
+	</channel>
+</rss>
