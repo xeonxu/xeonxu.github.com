@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Linux | 不停地疯]]></title>
-  <link href="http://xeonxu.github.com/blog/categories/Linux/atom.xml" rel="self"/>
-  <link href="http://xeonxu.github.com/"/>
-  <updated>2012-09-27T00:38:15+08:00</updated>
-  <id>http://xeonxu.github.com/</id>
+  <link href="http://blog.xeonxu.info/blog/categories/Linux/atom.xml" rel="self"/>
+  <link href="http://blog.xeonxu.info/"/>
+  <updated>2012-09-27T00:58:12+08:00</updated>
+  <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[调节Android拨号键盘的震动效果]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/"/>
+    <link href="http://blog.xeonxu.info/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/"/>
     <updated>2012-09-24T21:48:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo</id>
+    <id>http://blog.xeonxu.info/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo</id>
     <content type="html"><![CDATA[<p>
 最近在做高通Android项目时遇到一个问题，测试报告说拨号键盘中按键震感偏弱，问题首先提到了我这里。于是，我首先去内核驱动里检查了一下振子的配置，发现给振子的供电已经调到最高值了，看来只能从别的方向下手解决这个问题。震感强烈与否取决于两个因素，一个是驱动电流/驱动电压，而另一个是驱动时长。由于这个项目中给振子的供电是个LDO，只能调节驱动电压，而同时驱动电压已经最大，所以需要想办法加长驱动时间。
 </p>
@@ -250,9 +250,9 @@
   
   <entry>
     <title type="html"><![CDATA[Vim的简单配置]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi/"/>
+    <link href="http://blog.xeonxu.info/blog/2012/09/22/vim-de-jian-dan-pei-zhi/"/>
     <updated>2012-09-22T21:49:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi</id>
+    <id>http://blog.xeonxu.info/blog/2012/09/22/vim-de-jian-dan-pei-zhi</id>
     <content type="html"><![CDATA[<p>
 自己平时喜欢使用<a href="http://www.gnu.org/software/emacs/">GNU Emacs</a>，但是单位工作环境的限制，使我不得不在<a href="http://www.gnu.org/software/screen/">GNU Screen</a>下运行GNU Emacs。但是貌似Screen和Emacs有点小的兼容性问题，至少我没能调整到完全正常。使用中，Emacs经常会上移一行从而造成画面错乱，让人用的很不爽。为此，我决定在工作环境中暂时使用别的编辑器来替代Emacs。之后，我尝试过使用<a href="http://www.emacswiki.org/emacs/MicroEmacs">Micro Emacs</a>，包括Linus最喜欢用的<a href="http://git.kernel.org/?p=editors/uemacs/uemacs.git;a=tree">uEmacs PK</a>，可惜这玩意儿和GNU Emacs差异有点大，加之所有MicroEmacs对多字节语系支持地都不是很好，而自己又是个懒人也不是特别Geek，就没继续用下去。于是我重新将目光放到了<a href="http://www.vim.org">VIM</a> 上。
 好在工作中对编辑器的要求不是特别高，VIM也不是特别难使，自己又磕磕碰碰地在网上找了些配置添加到自己的Vim上。用起来还不错，可以交叉索引跳转，可以Outline，对我来说，这就够了。
@@ -439,9 +439,9 @@ OK，如此配置后，查看代码编辑代码舒服多了。
   
   <entry>
     <title type="html"><![CDATA[高通编译环境一键安装包]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/"/>
+    <link href="http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/"/>
     <updated>2012-09-09T14:22:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao</id>
+    <id>http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao</id>
     <content type="html"><![CDATA[<p>
 之前一直都在Marvell平台上开发Android，Marvell平台的CP只Release二进制文件，所以开发过程中一般只需要修改并编译AP端的代码就可以了。最近一个月，由于项目需要，开始转到开发高通平台的Android。初步接触下来，高通平台和Marvell平台有很大不同。最显著一点就是，Marvell平台中是AP启动起来后再挂CP跑；而高通平台则是先启动CP<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，然后CP初始化AP并加载程序运行。另一方面，高通的CP相比AP有更大的控制权限，像对GPIO，PMIC的控制等都是CP进行控制，AP端如果需要对这些资源进行操作，则必须先由CP程序分配相应权限给AP才可以。AP和CP的交互则使用共享内存的方式进行同步。
 </p>
@@ -491,9 +491,9 @@ OK，如此配置后，查看代码编辑代码舒服多了。
   
   <entry>
     <title type="html"><![CDATA[搭建Linux下的分布式编译系统]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/"/>
+    <link href="http://blog.xeonxu.info/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/"/>
     <updated>2012-08-30T23:46:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong</id>
+    <id>http://blog.xeonxu.info/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong</id>
     <content type="html"><![CDATA[<div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">

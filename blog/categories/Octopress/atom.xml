@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Octopress | 不停地疯]]></title>
-  <link href="http://xeonxu.github.com/blog/categories/Octopress/atom.xml" rel="self"/>
-  <link href="http://xeonxu.github.com/"/>
-  <updated>2012-09-27T00:38:15+08:00</updated>
-  <id>http://xeonxu.github.com/</id>
+  <link href="http://blog.xeonxu.info/blog/categories/Octopress/atom.xml" rel="self"/>
+  <link href="http://blog.xeonxu.info/"/>
+  <updated>2012-09-27T00:58:12+08:00</updated>
+  <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[关于在Org-Mode下方便插入截图的方法]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/"/>
+    <link href="http://blog.xeonxu.info/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/"/>
     <updated>2012-09-23T23:58:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa</id>
+    <id>http://blog.xeonxu.info/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa</id>
     <content type="html"><![CDATA[<p>
 本来使用 <code>Org-Mode</code> 来写博客就很舒服了， 插入图片也很容易，使用
 </p>
@@ -140,7 +140,7 @@
 </p>
 
 <div id="fig-Vim" class="figure">
-<p><img src="http://xeonxu.github.com/./images/blog/./90530rcx.png" alt="./images/blog/./90530rcx.png" /></p>
+<p><img src="http://blog.xeonxu.info/./images/blog/./90530rcx.png" alt="./images/blog/./90530rcx.png" /></p>
 <p>Vim with taglist</p>
 </div>
 
@@ -156,9 +156,9 @@
   
   <entry>
     <title type="html"><![CDATA[优化使用Orgmode发布Octopress的方法]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/"/>
+    <link href="http://blog.xeonxu.info/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/"/>
     <updated>2012-09-05T07:59:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa</id>
+    <id>http://blog.xeonxu.info/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa</id>
     <content type="html"><![CDATA[<p>
 前几天翻译了一篇来自Tom Alexander的<a href="http://blog.xeonxu.info/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/">文章</a> ，文中介绍了如何通过修改Rakefile文件以及添加相应的Emacs设置，来使通过Org-mode发布Octopress博客成为可能。该方法很好用，特别是使用作者自己修改的el脚本可以非常方便的将Org文件输出为octopress的文章。但是，原文作者的方法也有一点缺憾，那就是必须手动移动新建的Org文件到相应的目录下；而且在使用 <code>rake new_post[""]</code> 命令新建文档后必须手动编辑新建的文件，少了那么一点点便捷。为此，我又通过网络查找了一些资料，最后找到了<a href="http://imwuyu.me/blog/configuring-octopress.html/">这里</a> 。 受到这篇文章的启发，我尝试修改了工程中的 <code>Rakefile</code> 文件，最后成功地让一切都自动化起来。具体方法如下：
 </p>
@@ -357,9 +357,9 @@
   
   <entry>
     <title type="html"><![CDATA[使用Org-Mode来发布博客]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/"/>
+    <link href="http://blog.xeonxu.info/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/"/>
     <updated>2012-09-03T20:58:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke</id>
+    <id>http://blog.xeonxu.info/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke</id>
     <content type="html"><![CDATA[<p>
 原文地址： <a href="http://blog.paphus.com/blog/2012/08/01/introducing-octopress-blogging-for-org-mode/">http://blog.paphus.com/blog/2012/08/01/introducing-octopress-blogging-for-org-mode/</a>
 </p>

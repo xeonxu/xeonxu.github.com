@@ -3,8 +3,8 @@
 	<channel>
 		<description><![CDATA[不停地疯]]></description>
 		<title><![CDATA[不停地疯]]></title>
-		<link>http://xeonxu.github.com/</link>
-		<pubDate>2012-09-27T00:38:15+08:00</pubDate>
+		<link>http://blog.xeonxu.info/</link>
+		<pubDate>2012-09-27T00:58:12+08:00</pubDate>
 
 		
 		<item>
@@ -252,15 +252,17 @@
 </div>
 </div>
 
-				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+
 				]]>
 			</description>
 			<title><![CDATA[调节Android拨号键盘的震动效果]]></title>
-			<link>http://xeonxu.github.com/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/</link>
+			<link>http://blog.xeonxu.info/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/</link>
 			<pubDate>2012-09-24T21:48:00+08:00</pubDate>
-			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo</guid>
+			<guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo</guid>
 
-			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+			<source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
 		</item>
 		
 		<item>
@@ -392,7 +394,7 @@
 </p>
 
 <div id="fig-Vim" class="figure">
-<p><img src="http://xeonxu.github.com/./images/blog/./90530rcx.png" alt="./images/blog/./90530rcx.png" /></p>
+<p><img src="http://blog.xeonxu.info/./images/blog/./90530rcx.png" alt="./images/blog/./90530rcx.png" /></p>
 <p>Vim with taglist</p>
 </div>
 
@@ -404,15 +406,17 @@
 </div>
 </div>
 
-				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+
 				]]>
 			</description>
 			<title><![CDATA[关于在Org-Mode下方便插入截图的方法]]></title>
-			<link>http://xeonxu.github.com/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/</link>
+			<link>http://blog.xeonxu.info/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/</link>
 			<pubDate>2012-09-23T23:58:00+08:00</pubDate>
-			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa</guid>
+			<guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa</guid>
 
-			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+			<source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
 		</item>
 		
 		<item>
@@ -602,15 +606,17 @@
 OK，如此配置后，查看代码编辑代码舒服多了。
 </p>
 
-				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+
 				]]>
 			</description>
 			<title><![CDATA[Vim的简单配置]]></title>
-			<link>http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi/</link>
+			<link>http://blog.xeonxu.info/blog/2012/09/22/vim-de-jian-dan-pei-zhi/</link>
 			<pubDate>2012-09-22T21:49:00+08:00</pubDate>
-			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi</guid>
+			<guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/09/22/vim-de-jian-dan-pei-zhi</guid>
 
-			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+			<source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
 		</item>
 		
 		<item>
@@ -661,15 +667,17 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 </div>
 </div>
 
-				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+
 				]]>
 			</description>
 			<title><![CDATA[高通编译环境一键安装包]]></title>
-			<link>http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/</link>
+			<link>http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/</link>
 			<pubDate>2012-09-09T14:22:00+08:00</pubDate>
-			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao</guid>
+			<guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao</guid>
 
-			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+			<source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
 		</item>
 		
 		<item>
@@ -879,15 +887,17 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 好了，现在我们只需要在控制台上执行 <code>rake new_post["something"]</code> 就会自动在我们设定的 <code>org_posts_dir</code> 目录下新建一份org文档，并且使用我们指定的编辑器打开它。然后随便编辑一点什么，保存并执行 <code>C-c C-e F</code> 或者直接调用Tom Alexander文章中所说的 <code>M-x save-then-publish</code> 命令。最后再在控制台上执行 <code>rake generate&amp;&amp;rake preview</code> 。 Booooom，自动弹出的浏览器上是不是显示出了你刚才编写的文章？非常方便吧？赶快试试！
 </p>
 
-				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+
 				]]>
 			</description>
 			<title><![CDATA[优化使用Orgmode发布Octopress的方法]]></title>
-			<link>http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/</link>
+			<link>http://blog.xeonxu.info/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/</link>
 			<pubDate>2012-09-05T07:59:00+08:00</pubDate>
-			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa</guid>
+			<guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa</guid>
 
-			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+			<source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
 		</item>
 		
 		<item>
@@ -1094,15 +1104,17 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 </div>
 </div>
 
-				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+
 				]]>
 			</description>
 			<title><![CDATA[使用Org-Mode来发布博客]]></title>
-			<link>http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/</link>
+			<link>http://blog.xeonxu.info/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/</link>
 			<pubDate>2012-09-03T20:58:00+08:00</pubDate>
-			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke</guid>
+			<guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke</guid>
 
-			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+			<source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
 		</item>
 		
 		<item>
@@ -1660,15 +1672,17 @@ sys     1m20.240s
 </div>
 </div>
 
-				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+
 				]]>
 			</description>
 			<title><![CDATA[搭建Linux下的分布式编译系统]]></title>
-			<link>http://xeonxu.github.com/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/</link>
+			<link>http://blog.xeonxu.info/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/</link>
 			<pubDate>2012-08-30T23:46:00+08:00</pubDate>
-			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong</guid>
+			<guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong</guid>
 
-			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+			<source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
 		</item>
 		
 		<item>
@@ -1685,15 +1699,17 @@ sys     1m20.240s
 
 <p>最后以一个程序员最惯用的开场白来向各位打个招呼:Hello World!</p>
 
-				Included file &#8216;post/copyright.html&#8217; not found in _includes directory
+				<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+
 				]]>
 			</description>
 			<title><![CDATA[Hello World]]></title>
-			<link>http://xeonxu.github.com/blog/2012/08/26/hello-world/</link>
+			<link>http://blog.xeonxu.info/blog/2012/08/26/hello-world/</link>
 			<pubDate>2012-08-26T20:56:00+08:00</pubDate>
-			<guid isPermaLink="false">http://xeonxu.github.com/blog/2012/08/26/hello-world</guid>
+			<guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/08/26/hello-world</guid>
 
-			<source url="http://xeonxu.github.com/rss.xml"><![CDATA[不停地疯]]></source>
+			<source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
 		</item>
 		
 	</channel>

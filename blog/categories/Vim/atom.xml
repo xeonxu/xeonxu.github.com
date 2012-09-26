@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Vim | 不停地疯]]></title>
-  <link href="http://xeonxu.github.com/blog/categories/Vim/atom.xml" rel="self"/>
-  <link href="http://xeonxu.github.com/"/>
-  <updated>2012-09-27T00:38:15+08:00</updated>
-  <id>http://xeonxu.github.com/</id>
+  <link href="http://blog.xeonxu.info/blog/categories/Vim/atom.xml" rel="self"/>
+  <link href="http://blog.xeonxu.info/"/>
+  <updated>2012-09-27T00:58:12+08:00</updated>
+  <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Vim的简单配置]]></title>
-    <link href="http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi/"/>
+    <link href="http://blog.xeonxu.info/blog/2012/09/22/vim-de-jian-dan-pei-zhi/"/>
     <updated>2012-09-22T21:49:00+08:00</updated>
-    <id>http://xeonxu.github.com/blog/2012/09/22/vim-de-jian-dan-pei-zhi</id>
+    <id>http://blog.xeonxu.info/blog/2012/09/22/vim-de-jian-dan-pei-zhi</id>
     <content type="html"><![CDATA[<p>
 自己平时喜欢使用<a href="http://www.gnu.org/software/emacs/">GNU Emacs</a>，但是单位工作环境的限制，使我不得不在<a href="http://www.gnu.org/software/screen/">GNU Screen</a>下运行GNU Emacs。但是貌似Screen和Emacs有点小的兼容性问题，至少我没能调整到完全正常。使用中，Emacs经常会上移一行从而造成画面错乱，让人用的很不爽。为此，我决定在工作环境中暂时使用别的编辑器来替代Emacs。之后，我尝试过使用<a href="http://www.emacswiki.org/emacs/MicroEmacs">Micro Emacs</a>，包括Linus最喜欢用的<a href="http://git.kernel.org/?p=editors/uemacs/uemacs.git;a=tree">uEmacs PK</a>，可惜这玩意儿和GNU Emacs差异有点大，加之所有MicroEmacs对多字节语系支持地都不是很好，而自己又是个懒人也不是特别Geek，就没继续用下去。于是我重新将目光放到了<a href="http://www.vim.org">VIM</a> 上。
 好在工作中对编辑器的要求不是特别高，VIM也不是特别难使，自己又磕磕碰碰地在网上找了些配置添加到自己的Vim上。用起来还不错，可以交叉索引跳转，可以Outline，对我来说，这就够了。
