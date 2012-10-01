@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Hello World - 不停地疯</title>
+  <title>为Tomato添加用户 - 不停地疯</title>
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="关于本Blog
-自己是一个很懒散的人，从接触电脑开始到现在不下14个年头，但要说自己做过什么，一时间还真难以回答。零星的积累都随我那善变的爱好一去不返了，让人有种虚度光阴的感觉。自己也不是没有做过尝试，开玩网络之初就在MyOpera上建立了自己的Blog，当然内容以个人日记流水账为主， &hellip;">
+  <meta name="description" content="手上的RT-N16跑Tomato系统已经两年有余了，两年来Tomato系统没有让我失望过，一直提供着稳定高速的网络服务，此外它还提供了内网文件服务，P2P下载以及科学上网代理等重要功能。最近，本人又败了一个小玩意：Raspberry Pi ， 税前价格$25，到手¥310。入手后， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/08/26/hello-world/">
+  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -78,7 +77,7 @@
   <header>
     
       
-        <h1 class="entry-title">Hello World</h1>
+        <h1 class="entry-title">为Tomato添加用户</h1>
       
     
     
@@ -95,7 +94,7 @@
   
 
 
-<time datetime="2012-08-26T20:56:00+08:00" pubdate data-updated="true">2012年08月26日</time>
+<time datetime="2012-10-01T21:21:00+08:00" pubdate data-updated="true">2012年10月01日</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -104,16 +103,86 @@
   </header>
 
 
-<div class="entry-content"><h1 id="blog">关于本Blog</h1>
-<p>自己是一个很懒散的人，从接触电脑开始到现在不下14个年头，但要说自己做过什么，一时间还真难以回答。零星的积累都随我那善变的爱好一去不返了，让人有种虚度光阴的感觉。自己也不是没有做过尝试，开玩网络之初就在MyOpera上建立了自己的Blog，当然内容以个人日记流水账为主，那时真是快乐的单身年代。可是用了一段MyOpera后总觉得界面和功能不禁人意，而此时的Google正如火如荼，于是便赶了潮流在Blogspot上搭建了人生第二个Blog。可惜好景不长，Blogspot在国内越来越难以访问，原因大家懂的。慢慢的，也就淡了。然而随之时间的流逝，也许是老了，总觉得不记录些什么有愧于人生，从而有了再建立一个Blog的想法。当然，建立本Blog还有以下几个原因:</p>
+<div class="entry-content"><p>
+手上的RT-N16跑Tomato系统已经两年有余了，两年来Tomato系统没有让我失望过，一直提供着稳定高速的网络服务，此外它还提供了内网文件服务，P2P下载以及科学上网代理等重要功能。最近，本人又败了一个小玩意：<a href="http://www.raspberrypi.org">Raspberry Pi</a> ， 税前价格$25，到手¥310。入手后，我在上面安装了ArmedSlack，运行的非常稳定，很不错。于是，本人决定将其打造为一个随身的功能强大的小电脑，包括随插随用的科学上网代理。基本思路是Raspberry Pi启动后通过公钥认证自动连接到家中的RT-N16路由器上，然后通过ssh转发相应端口，即可实现科学上网。不过，这个方法中有一个隐患：因为Tomato默认只提供root/admin账户，权限太大，如果Raspberry Pi使用这个账户进行连接，总是有点不放心。于是，我决定给Tomato系统添加新的用户。
+</p>
+<p>
+Tomato默认并不支持添加账户，即便通过optware安装了adduser后也由于没有passwd命令而失败。不过通过网络搜索，还是让我找到了一个可以添加用户的方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>。我用如下的命令在Tomato中建立了一个名为sshuser的用户：
 
-<ol>
-  <li>之前两个博客太过生活化，流水账没有重点。虽说这也是记录博客的一种方式，但是自己想做点改变。</li>
-  <li>想把自己工作中的一些经验和生活中的感悟，都点点滴滴的记录下来，希望到老了的时候看到时，不会后悔曾经浪费了生命。</li>
-  <li>作为程序员和Emacs追随者，没有不用github和org-mode的理由。加之Emacs又有可以将org-file很好地转换为Octopress Markdown格式的插件，没理由拒绝。</li>
-</ol>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>添加用户  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">UNAM</span><span class="o">=</span>sshuser
+</span><span class="line"><span class="nv">RNAM</span><span class="o">=</span><span class="s2">&quot;For Login Only&quot;</span>
+</span><span class="line"><span class="nv">UNUM</span><span class="o">=</span>200
+</span><span class="line"><span class="nv">UGRP</span><span class="o">=</span><span class="nv">$UNUM</span>
+</span><span class="line"><span class="c">#UGRP=0</span>
+</span><span class="line"><span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UNUM:$UGRP:$RNAM:/tmp:/bin/sh&quot;</span> &gt;&gt; /etc/passwd
+</span><span class="line"><span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UNUM:$UGRP:$RNAM:/home/$UNAM:/bin/sh&quot;</span> &gt;&gt; /etc/passwd.custom
+</span><span class="line"><span class="o">[[</span> <span class="nv">$UGRP</span> -ne 0 <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UGRP:&quot;</span> &gt;&gt;/etc/group
+</span><span class="line"><span class="o">[[</span> <span class="nv">$UGRP</span> -ne 0 <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UGRP:&quot;</span> &gt;&gt;/etc/group.custom
+</span><span class="line">sed -n -e <span class="s2">&quot;s,^root:,$UNAM:,p&quot;</span> &lt; /etc/shadow &gt;&gt; /etc/shadow.custom
+</span><span class="line">
+</span><span class="line">chmod 777 /tmp/home
+</span><span class="line">ssh <span class="nv">$UNAM</span>@localhost <span class="s2">&quot;mkdir /home/$UNAM;touch /home/$UNAM/.profile &amp;&amp; echo success&quot;</span>
+</span><span class="line"><span class="c"># press return for the password prompt, you should see the word &quot;success&quot; reported</span>
+</span><span class="line">
+</span><span class="line">chmod 755 /tmp/home
+</span><span class="line">
+</span><span class="line">nvram setfile2nvram /etc/passwd.custom
+</span><span class="line">nvram setfile2nvram /etc/group.custom
+</span><span class="line">nvram setfile2nvram /etc/shadow.custom
+</span><span class="line">nvram setfile2nvram /home/<span class="nv">$UNAM</span>/.profile
+</span><span class="line">nvram commit
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-<p>最后以一个程序员最惯用的开场白来向各位打个招呼:Hello World!</p>
+最后几句包含nvram的语句是将新建的几个 <code>.custom</code> 文件添加到nvram中，这样这些新添加的文件就可以在重启路由器后还能存在。然后，将以下三句添加到路由器设置中-&gt;脚本设置-&gt;初始化中：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>初始化用户  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">sed -i <span class="s2">&quot;/^sshuser:/d&quot;</span> /etc/passwd
+</span><span class="line">grep <span class="s2">&quot;^sshuser:&quot;</span> &lt; /etc/shadow.custom &gt;&gt; /etc/shadow
+</span><span class="line">grep <span class="s2">&quot;^sshuser:&quot;</span> &lt; /etc/passwd.custom &gt;&gt; /etc/passwd
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+如图：
+<img src="/./images/blog/./574rHz.png" alt="./images/blog/./574rHz.png" />
+新建的用户使用和root一样的密码，如果需要修改，需要相应修改 <code>/etc/shadow</code> 文件。新建用户登录后的效果入下图：
+<img src="/./images/blog/./574dRC.png" alt="./images/blog/./574dRC.png" />
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://tomatousb.org/tut:adding-your-own-users">http://tomatousb.org/tut:adding-your-own-users</a>
+</p>
+
+
+
+
+</div>
+</div>
 </div>
 
 
@@ -136,12 +205,12 @@
   
 
 
-<time datetime="2012-08-26T20:56:00+08:00" pubdate data-updated="true">2012年08月26日</time>
+<time datetime="2012-10-01T21:21:00+08:00" pubdate data-updated="true">2012年10月01日</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/杂谈/'>杂谈</a>, <a class='category' href='/blog/categories/生活/'>生活</a>, <a class='category' href='/blog/categories/随笔/'>随笔</a>
+    <a class='category' href='/blog/categories/-Raspberry/'>"Raspberry</a>, <a class='category' href='/blog/categories/Linux/'>Linux</a>, <a class='category' href='/blog/categories/Pi-/'>Pi"</a>, <a class='category' href='/blog/categories/Tomato/'>Tomato</a>
   
 </span>
 
@@ -150,7 +219,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/08/26/hello-world/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/08/26/hello-world/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/" >Tweet</a>
   
   
   
@@ -161,8 +230,8 @@
     
     <p class="meta">
       
+        <a class="basic-alignment left articlenav" href="/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/" title="Previous Post: 调节Android拨号键盘的震动效果">&laquo; 调节Android拨号键盘的震动效果</a>
       
-        <a class="basic-alignment right articlenav" href="/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/" title="Next Post: 搭建Linux下的分布式编译系统">搭建Linux下的分布式编译系统 &raquo;</a>
       
     </p>
   </footer>
@@ -302,8 +371,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/08/26/hello-world/';
-        var disqus_url = 'http://blog.xeonxu.info/blog/2012/08/26/hello-world/';
+        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/';
+        var disqus_url = 'http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/';
         var disqus_script = 'embed.js';
       
     (function () {
