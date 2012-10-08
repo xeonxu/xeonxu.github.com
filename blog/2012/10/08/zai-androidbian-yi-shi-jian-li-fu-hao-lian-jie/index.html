@@ -1,0 +1,453 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>在Android编译时建立符号链接 - 不停地疯</title>
+  <meta name="author" content="Xeon Xu">
+
+  
+  <meta name="description" content="最近接到一个任务，需要将Busybox环境移植到高通平台的Android项目上。Busybox的目标执行文件有现成编译好的，需要做的工作就是添加一个Android工程，将编译好的二进制文件拷贝到Android的文件系统中，同时还需要生成相应的Busybox命令链接。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="不停地疯" type="application/atom+xml">
+  <link href='http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <div id="logo">
+  	<div id="logoLeft">{</div>
+  	<div id="logoText">Noe</div>
+  	<div id="logoRight">}</div>
+  	<div class="clear"></div>
+  </div>
+  <h1><a href="/">不停地疯</a></h1>
+  
+    <h2>Work as a hacker, hack as a artist.</h2>
+  
+  <div class="clear"></div>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:blog.xeonxu.info" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">博客主页</a></li>
+  <li><a href="/blog/archives">存档列表</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">在Android编译时建立符号链接</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-08T21:48:00+08:00" pubdate data-updated="true">2012年10月08日</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+最近接到一个任务，需要将Busybox环境移植到高通平台的Android项目上。Busybox的目标执行文件有现成编译好的，需要做的工作就是添加一个Android工程，将编译好的二进制文件拷贝到Android的文件系统中，同时还需要生成相应的Busybox命令链接。
+</p>
+<p>
+拷贝文件到指定目录在Android的编译系统中有现成的方法，使用下面这个方法即可：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>拷贝文件到指定目录  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="nv">LOCAL_PATH</span> <span class="o">:=</span> <span class="k">$(</span>call my-dir<span class="k">)</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># Add busybox environment zhiqiang.xu 2012.10.8</span>
+</span><span class="line"><span class="cp">include $(CLEAR_VARS)</span>
+</span><span class="line">LOCAL_MODULE :<span class="o">=</span> busybox_modules
+</span><span class="line">LOCAL_MODULE_STEM :<span class="o">=</span> busybox
+</span><span class="line">LOCAL_SRC_FILES :<span class="o">=</span> busybox
+</span><span class="line">LOCAL_MODULE_TAGS :<span class="o">=</span> eng
+</span><span class="line">LOCAL_MODULE_CLASS :<span class="o">=</span> EXECUTABLES
+</span><span class="line">LOCAL_MODULE_PATH :<span class="o">=</span> <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox
+</span><span class="line"><span class="cp">include $(BUILD_PREBUILT)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+由于Busybox环境主要用于工程调试，所以模块设置为只在eng编译模式下有效。按照以上这段设置，可以将busybox执行文件拷贝到Android文件系统中的 <code>/system/busybox</code> 目录下。
+</p>
+<p>
+而对于生成链接，之前没有接触过。不过在搜索调查了已有的Android工程文件之后，发现系统中也提供了现成的方法，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>recovery使用的软链生成方法  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="nv">BUSYBOX_LINKS</span> <span class="o">:=</span> <span class="k">$(</span>shell cat external/busybox/busybox-minimal.links<span class="k">)</span>
+</span><span class="line"><span class="cp">ifndef BOARD_HAS_SMALL_RECOVERY</span>
+</span><span class="line">exclude :<span class="o">=</span> tune2fs
+</span><span class="line"><span class="cp">ifeq ($(BOARD_HAS_LARGE_FILESYSTEM),true)</span>
+</span><span class="line">exclude +<span class="o">=</span> mke2fs
+</span><span class="line"><span class="cp">endif</span>
+</span><span class="line"><span class="cp">endif</span>
+</span><span class="line">RECOVERY_BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_RECOVERY_ROOT_OUT<span class="k">)</span>/sbin/,<span class="k">$(</span>filter-out <span class="k">$(</span>exclude<span class="k">)</span>,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">))))</span>
+</span><span class="line"><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: BUSYBOX_BINARY :<span class="o">=</span> busybox
+</span><span class="line"><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: <span class="k">$(</span>LOCAL_INSTALLED_MODULE<span class="k">)</span>
+</span><span class="line">        @echo <span class="s2">&quot;Symlink: $@ -&gt; $(BUSYBOX_BINARY)&quot;</span>
+</span><span class="line">        @mkdir -p <span class="k">$(</span>dir <span class="nv">$@</span><span class="k">)</span>
+</span><span class="line">        @rm -rf <span class="nv">$@</span>
+</span><span class="line">        <span class="k">$(</span>hide<span class="k">)</span> ln -sf <span class="k">$(</span>BUSYBOX_BINARY<span class="k">)</span> <span class="nv">$@</span>
+</span><span class="line">
+</span><span class="line">ALL_DEFAULT_INSTALLED_MODULES +<span class="o">=</span> <span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+实现方法使用了标准的Makefile目标，在 <code>$(RECOVERY_BUSYBOX_SYMLINKS)</code> 目标下生成相应链接，看起来似乎是只要将Makefile的目标添加到 <code>ALL_DEFAULT_INSTALLED_MODULES</code> 这个变量后，编译的时候就会按照Makefile的标准生成目标。实验后确实可行，不过同时我也发现了一个不足。那就是使用这种方法后，通过mm/mmm命令进行模块编译的时候是没法正确执行的。换言之， <code>ALL_DEFAULT_INSTALLED_MODULES</code> 变量只有在系统完全编译的时候才会被调用。为此，领悟范例的精神后，自己改了一下实现方法，如下：
+</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>修改后的生成软链的方法  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="cp">ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">define _make_link</span>
+</span><span class="line">   <span class="k">$(</span>shell <span class="nb">echo</span> <span class="s2">&quot;Symlink: $(1) -&gt; $(2)&quot;</span><span class="k">)</span>
+</span><span class="line">   <span class="k">$(</span>shell mkdir -p <span class="k">$(</span>dir <span class="k">$(</span>1<span class="k">)))</span>
+</span><span class="line">   <span class="k">$(</span>shell rm -rf <span class="k">$(</span>1<span class="k">))</span>
+</span><span class="line">   <span class="k">$(</span>shell ln -sf <span class="k">$(</span>2<span class="k">)</span> <span class="k">$(</span>1<span class="k">))</span>
+</span><span class="line"><span class="cp">endef</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># Add busybox environment zhiqiang.xu 2012.10.8</span>
+</span><span class="line"><span class="c"># Now let&#39;s do busybox symlinks</span>
+</span><span class="line"><span class="nv">BUSYBOX_LINKS</span> <span class="o">:=</span> <span class="k">$(</span>shell cat <span class="k">$(</span>LOCAL_PATH<span class="k">)</span>/busybox.links<span class="k">)</span>
+</span><span class="line">BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox/,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">)))</span>
+</span><span class="line">BUSYBOX_BINARY :<span class="o">=</span> /system/busybox/<span class="k">$(</span>LOCAL_SRC_FILES<span class="k">)</span>
+</span><span class="line"><span class="k">$(</span>foreach _item, <span class="k">$(</span>BUSYBOX_SYMLINKS<span class="k">)</span>, <span class="se">\</span>
+</span><span class="line">       <span class="k">$(</span><span class="nb">eval</span> <span class="k">$(</span>call _make_link,<span class="k">$(</span>_item<span class="k">)</span>,<span class="k">$(</span>BUSYBOX_BINARY<span class="k">))))</span>
+</span><span class="line">
+</span><span class="line">_make_link :<span class="o">=</span>
+</span><span class="line"><span class="cp">endif</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>
+修改后的方法使用了自定义宏，不论是全系统编译还是使用mm/mmm进行模块编译，每次编译的时候宏都会展开执行。同时为了区分编译模式，我又添加了相应的判断宏 <code>ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))</code> 将执行部分包括在里面。实验下来效果良好，可以根据当前设定的编译模式生成或者不生成相应软链。
+最后，发现一点，我修改的这个方法由于没有依赖目标，所以每次编译的时候都会执行一遍，编译效率不高，所以这种结构不能用于大负荷的处理工作。好在生成软链不是多重的工作，这么用用也无什么大碍。
+</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Xeon Xu</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-08T21:48:00+08:00" pubdate data-updated="true">2012年10月08日</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/Android/'>Android</a>, <a class='category' href='/blog/categories/Linux/'>Linux</a>, <a class='category' href='/blog/categories/开发/'>开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left articlenav" href="/blog/2012/10/01/wei-tomatotian-jia-yong-hu/" title="Previous Post: 为Tomato添加用户">&laquo; 为Tomato添加用户</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img src="http://tp4.sinaimg.cn/1962652747/180/5605056993/1" alt="">
+  <p>徐至强，码奴一枚，抱怨多，脾气差。做过车载，数字电视，手机三方，MTK，MStar，Android。现就职于上海斐讯数据通信技术有限公司(Phicomm)，在移动终端产品研发中当一名手机驱动工程师。</p>
+</section>
+<section>
+<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+</section>
+<section>
+ <h1>Categories</h1>
+ <ul id="categories">
+ <li class='category'><a href='/blog/categories/Android/'>Android (4)</a></li>
+<li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (6)</a></li>
+<li class='category'><a href='/blog/categories/Octopress/'>Octopress (3)</a></li>
+<li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
+<li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
+<li class='category'><a href='/blog/categories/RaspberryPi/'>RaspberryPi (1)</a></li>
+<li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
+<li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (5)</a></li>
+<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (1)</a></li>
+<li class='category'><a href='/blog/categories/生活/'>生活 (1)</a></li>
+<li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
+<li class='category'><a href='/blog/categories/随笔/'>随笔 (1)</a></li>
+
+ </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/">在Android编译时建立符号链接</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/10/01/wei-tomatotian-jia-yong-hu/">为Tomato添加用户</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/">调节Android拨号键盘的震动效果</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/">关于在Org-Mode下方便插入截图的方法</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/09/22/vim-de-jian-dan-pei-zhi/">Vim的简单配置</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/xeonxu">@xeonxu</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xeonxu',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("xeonxu", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/xeonxu" class="twitter-follow-button" data-show-count="false">Follow @xeonxu</a>
+  
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Xeon Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'xeonxu';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/';
+        var disqus_url = 'http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
