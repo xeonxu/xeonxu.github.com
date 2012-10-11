@@ -1,0 +1,28 @@
+diff --git a/source/atom.xml b/source/atom.xml
+index 83af3f8..c20506b 100644
+--- a/source/atom.xml
++++ b/source/atom.xml
+@@ -9,10 +9,6 @@ layout: nil
+   <link href="{{ site.url }}/"/>
+   <updated>{{ site.time | date_to_xmlschema }}</updated>
+   <id>{{ site.url }}/</id>
+-  <author>
+-    <name><![CDATA[{{ site.author | strip_html }}]]></name>
+-    {% if site.email %}<email><![CDATA[{{ site.email }}]]></email>{% endif %}
+-  </author>
+   <generator uri="http://octopress.org/">Octopress</generator>
+
+   {% for post in site.posts limit: 20 %}
+@@ -20,8 +16,17 @@ layout: nil
+     <title type="html"><![CDATA[{{ post.title | cdata_escape }}]]></title>
+     <link href="{{ site.url }}{{ post.url }}"/>
+     <updated>{{ post.date | date_to_xmlschema }}</updated>
++    <author>
++      <name><![CDATA[{{ site.author | strip_html }}]]></name>
++      {% if site.email %}<email><![CDATA[{{ site.email }}]]></email>{% endif %}
++    </author>
+     <id>{{ site.url }}{{ post.id }}</id>
+     <content type="html"><![CDATA[{{ post.content | expand_urls: site.url | cdata_escape }}]]></content>
+   </entry>
+   {% endfor %}
+ </feed>
