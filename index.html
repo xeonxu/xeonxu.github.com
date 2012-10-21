@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="记得之前Twitter上的@justin7974介绍过Vitamin-R这个软件，是一款个人时间管理类的软件，据说可以和Omnifocus 或者Things配合起来用，看起来不错的样子。只是它20刀的价钱相对它的功能来说，我觉得还是贵了点，所以一直以来都没有下手。前段时间浏览Twitter， &hellip;">
+  <meta name="description" content="前两天单位的在做项目中发现一个Bug：手机在启动后触摸屏有一定几率无法使用。这个Bug非常恼人，因为重现几率非常低，而且只会出现在重启过程中。这意味着不论是调查原因还是验证对策，都将是非常耗时且繁琐的。因为对策问题之前，首先需要重现问题，如此才好分析问题的原因。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,127 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/">小脚本帮大忙</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-21T23:38:00+08:00" pubdate data-updated="true">2012年10月21日</time>
+        
+         | <a href="/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+前两天单位的在做项目中发现一个Bug：手机在启动后触摸屏有一定几率无法使用。这个Bug非常恼人，因为重现几率非常低，而且只会出现在重启过程中。这意味着不论是调查原因还是验证对策，都将是非常耗时且繁琐的。因为对策问题之前，首先需要重现问题，如此才好分析问题的原因。而这个Bug必须要反复重启手机才能重现，人为操作的话太浪费时间效率低下。
+好在这个Bug的行为比较稳定，重现后触屏肯定不能使用。通过adb对比调查正常手机和问题手机的设备节点，发现在出问题的手机中，触屏设备没有注册成功。看来是设备注册失败，导致的触屏异常。于是，我们考虑使用脚本对该Bug进行再现分析。思路如下：
+</p>
+<ol>
+<li>写一个脚本判断触屏驱动的设备节点是否注册成功，如果成功则复位重启；否则保留现场等待分析。
+</li>
+<li>将该脚本添加到 <code>init.rc</code> 中成为一个服务，在启动时调用。
+</li>
+<li>脚本运行时将相应的运行信息输出到外部文件中，从而可以计算出再现率。
+</li>
+</ol>
+
+<p>基于以上想法，写出了以下脚本代码：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>check_tp.sh  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#!/system/bin/sh</span>
+</span><span class="line"><span class="nv">tp_name</span><span class="o">=</span><span class="s2">&quot;xxxx&quot;</span> <span class="c"># xxxx为注册的tp名称</span>
+</span><span class="line"><span class="nv">input_name</span><span class="o">=</span><span class="sb">`</span>cat /sys/class/input/input0/name<span class="sb">`</span>
+</span><span class="line"><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;x_$tp_name&quot;</span> <span class="o">=</span> <span class="s2">&quot;x_$input_name&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+</span><span class="line"><span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is OK.&quot;</span> &gt;&gt; /data/check_tp.log
+</span><span class="line">    reboot
+</span><span class="line"><span class="k">else</span>
+</span><span class="line"><span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is not OK.&quot;</span> &gt;&gt; /data/check_tp.log
+</span><span class="line"><span class="k">fi</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+同时，修改 <code>init.rc</code> 文件，在其中加入：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">service check_tp /system/bin/sh /system/bin/check_tp.sh
+</span><span class="line">    class main
+</span><span class="line">    oneshot
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+然后重新编译bootimage并刷机。最后使用 <code>adb remount&amp;&amp;adb push check_tp.sh /system/bin/&amp;&amp;adb shell chmod 755 /system/bin/check_tp.sh</code> ，将刚才新写的脚本推送到手机上。重启手机，之后就会看到手机不断的上电然后复位重启。
+在运行该脚本不断重启手机8小时之后，手机正常进入了系统。此时操作手机进行验证，发现触屏已经无效。分析 <code>/data/check_tp.log</code> 文件，算出手机共重启了1000多次，从而得出该问题的再现率大概为千分之一。利用该脚本，验证bug方便了好多，大大提高了工作效率。
+</p>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">后记</h2>
+<div class="outline-text-2" id="text-1">
+
+<p>由于以上写的脚本使用到了 <code>if</code> 关键字，而Android系统默认不支持该关键字，必须依赖busybox环境才行。之前我有移植过busybox，但是只在工程模式下生效，所以该脚本在release版本中是不能正常运行的。为了不依赖运行环境，我又将该脚本换了一种写法，改为：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>check_tp2.sh  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#!/system/bin/sh</span>
+</span><span class="line"><span class="nv">tp_name</span><span class="o">=</span><span class="s2">&quot;xxxx&quot;</span> <span class="c"># xxxx为注册的tp名称</span>
+</span><span class="line"><span class="nv">input_name</span><span class="o">=</span><span class="sb">`</span>cat /sys/class/input/input0/name<span class="sb">`</span>
+</span><span class="line"><span class="k">case</span> <span class="nv">$input_name</span> in
+</span><span class="line">    <span class="nv">$tp_name</span><span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is OK.&quot;</span> &gt;&gt; /data/check_tp.log
+</span><span class="line">              reboot
+</span><span class="line">             ;;
+</span><span class="line">    *<span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is not OK.&quot;</span> &gt;&gt; /data/check_tp.log
+</span><span class="line">            ;;
+</span><span class="line"><span class="k">esac</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+这样，即便是在Android原生环境中，也可以正确无误的运行。这样就能将该脚本发给测试，利用它对release版本进行bug验证了。
+</p></div>
+</div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1788,245 +1909,6 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/">使用Org-Mode来发布博客</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-03T20:58:00+08:00" pubdate data-updated="true">2012年09月03日</time>
-        
-         | <a href="/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-原文地址： <a href="http://blog.paphus.com/blog/2012/08/01/introducing-octopress-blogging-for-org-mode/">http://blog.paphus.com/blog/2012/08/01/introducing-octopress-blogging-for-org-mode/</a>
-</p>
-<p>
-在之前的一篇<a href="http://blog.paphus.com/blog/2012/07/21/octopress-and-org-mode/"> 文章 </a>中曾介绍过一种从 <a href="http://www.gnu.org/software/emacs/">Emacs</a> 的 <a href="http://orgmode.org/">Org-Mode</a> 中导出文章到Octopress的方法，但这种方法使用简单的HTML导出，会失去语法高亮的特性。为此我将方法重新进行了设计，并且得到了一种更好的方法来取代之前不靠谱的方法。
-</p>
-<p>
-首先，你需要根据  <a href="http://octopress.org/">Octopress</a> 的官方说明进行设置。我在Clone好Octopress的代码库后，进入克隆产生的目录并执行以下命令：
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="sh"><span class="line">  <span class="c">#!/bin/sh</span>
-</span><span class="line">  <span class="c">#</span>
-</span><span class="line">  curl -L https://get.rvm.io | bash -s stable --ruby
-</span><span class="line">  <span class="nb">source</span> ~/.rvm/scripts/rvm
-</span><span class="line">  rvm install 1.9.2
-</span><span class="line">  rvm rubygems latest
-</span><span class="line">  gem install bundler
-</span><span class="line">  bundle install
-</span><span class="line">  rake install
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-像之前介绍的那样，我们需要在 <code>.emacs</code> 中新增一个叫 <code>save-then-publish</code> 的命令。
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Save Then Publish  </span><a href="http://doc.norang.ca/org-mode.html">source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-</pre></td><td class="code"><pre><code class="scheme"><span class="line">  <span class="p">(</span><span class="nf">defun</span> <span class="nv">save-then-publish</span> <span class="p">()</span>
-</span><span class="line">    <span class="p">(</span><span class="nf">interactive</span><span class="p">)</span>
-</span><span class="line">    <span class="p">(</span><span class="nf">save-buffer</span><span class="p">)</span>
-</span><span class="line">    <span class="p">(</span><span class="nf">org-save-all-org-buffers</span><span class="p">)</span>
-</span><span class="line">    <span class="p">(</span><span class="nf">org-publish-current-project</span><span class="p">))</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-接下来，我们需要设置Org-mode的工程。以我的配置举例来说，我将Octopress的文章放置在 <code>~/git/blog/</code> 目录下。如果你需要将你的文章放在其它什么地方，记得修改下面配置中相应的路径。
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Publish Projects  </span><a href="http://jaderholm.com/blog/blogging-with-org-mode-and-octopress">source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-</pre></td><td class="code"><pre><code class="scheme"><span class="line">  <span class="p">(</span><span class="nf">setq</span> <span class="nv">org-publish-project-alist</span>
-</span><span class="line">        <span class="o">&#39;</span><span class="p">((</span><span class="s">&quot;blog-org&quot;</span> <span class="o">.</span>  <span class="p">(</span><span class="nf">:base-directory</span> <span class="s">&quot;~/git/blog/source/org_posts/&quot;</span>
-</span><span class="line">                                          <span class="nv">:base-extension</span> <span class="s">&quot;org&quot;</span>
-</span><span class="line">                                          <span class="nv">:publishing-directory</span> <span class="s">&quot;~/git/blog/source/_posts/&quot;</span>
-</span><span class="line">                                          <span class="nv">:sub-superscript</span> <span class="s">&quot;&quot;</span>
-</span><span class="line">                                          <span class="nv">:recursive</span> <span class="nv">t</span>
-</span><span class="line">                                          <span class="nv">:publishing-function</span> <span class="nv">org-publish-org-to-octopress</span>
-</span><span class="line">                                          <span class="nv">:headline-levels</span> <span class="mi">4</span>
-</span><span class="line">                                          <span class="nv">:html-extension</span> <span class="s">&quot;markdown&quot;</span>
-</span><span class="line">                                          <span class="nv">:octopress-extension</span> <span class="s">&quot;markdown&quot;</span>
-</span><span class="line">                                          <span class="nv">:body-only</span> <span class="nv">t</span><span class="p">))</span>
-</span><span class="line">          <span class="p">(</span><span class="s">&quot;blog-extra&quot;</span> <span class="o">.</span> <span class="p">(</span><span class="nf">:base-directory</span> <span class="s">&quot;~/git/blog/source/org_posts/&quot;</span>
-</span><span class="line">                                           <span class="nv">:publishing-directory</span> <span class="s">&quot;~/git/blog/source/&quot;</span>
-</span><span class="line">                                           <span class="nv">:base-extension</span> <span class="s">&quot;css\\|pdf\\|png\\|jpg\\|gif\\|svg&quot;</span>
-</span><span class="line">                                           <span class="nv">:publishing-function</span> <span class="nv">org-publish-attachment</span>
-</span><span class="line">                                           <span class="nv">:recursive</span> <span class="nv">t</span>
-</span><span class="line">                                           <span class="nv">:author</span> <span class="nv">nil</span>
-</span><span class="line">                                           <span class="p">))</span>
-</span><span class="line">          <span class="p">(</span><span class="s">&quot;blog&quot;</span> <span class="o">.</span> <span class="p">(</span><span class="nf">:components</span> <span class="p">(</span><span class="s">&quot;blog-org&quot;</span> <span class="s">&quot;blog-extra&quot;</span><span class="p">)))</span>
-</span><span class="line">          <span class="p">))</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-现在，我们开始修改代码目录中的 <code>Rakefile</code> 文件。打开它找到 <b>Misc Configs</b> 设置部分，参照下面例子分别修改 <code>new_post_ext</code> 和 <code>new_page_ext</code> 的内容并添加 <code>org_posts_dir</code> 项:
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Rakefile  </span><a href="https://gist.github.com/1244494">source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-</pre></td><td class="code"><pre><code class="text"><span class="line">  ## -- Misc Configs -- ##
-</span><span class="line">
-</span><span class="line">  public_dir      = &quot;public&quot;    # compiled site directory
-</span><span class="line">  source_dir      = &quot;source&quot;    # source file directory
-</span><span class="line">  blog_index_dir  = &#39;source&#39;    # directory for your blog&#39;s index page (if you put your index in source/blog/index.html, set this to &#39;source/blog&#39;)
-</span><span class="line">  deploy_dir      = &quot;_deploy&quot;   # deploy directory (for Github pages deployment)
-</span><span class="line">  stash_dir       = &quot;_stash&quot;    # directory to stash posts for speedy generation
-</span><span class="line">  posts_dir       = &quot;_posts&quot;    # directory for blog files
-</span><span class="line">  org_posts_dir   = &quot;org_posts&quot;
-</span><span class="line">  themes_dir      = &quot;.themes&quot;   # directory for blog files
-</span><span class="line">  new_post_ext    = &quot;org&quot;  # default new post file extension when using the new_post task
-</span><span class="line">  new_page_ext    = &quot;org&quot;  # default new page file extension when using the new_page task
-</span><span class="line">  server_port     = &quot;4000&quot;      # port for preview server eg. localhost:4000
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-接着修改 <code>Rakefile</code> ，找到下面代码所示的部分并添加 <code>BEGIN_HTML</code> 和 <code>END_HTML</code> 。这样，我们新建文章的时候就能自动生成相应的HTML标签了。
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Rakefile  </span><a href="https://gist.github.com/1244494">source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="text"><span class="line">      post.puts &quot;#+BEGIN_HTML&quot;
-</span><span class="line">      post.puts &quot;---&quot;
-</span><span class="line">      post.puts &quot;layout: post&quot;
-</span><span class="line">      post.puts &quot;title: \&quot;#{title.gsub(/&amp;/,&#39;&amp;amp;&#39;)}\&quot;&quot;
-</span><span class="line">      post.puts &quot;date: #{Time.now.strftime(&#39;%Y-%m-%d %H:%M&#39;)}&quot;
-</span><span class="line">      post.puts &quot;comments: true&quot;
-</span><span class="line">      post.puts &quot;categories: &quot;
-</span><span class="line">      post.puts &quot;---&quot;
-</span><span class="line">      post.puts &quot;#+END_HTML&quot;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-现在，我们可以使用我修改后的HTML导出插件来生成新的文章了。我修改后的导出插件放置在github上，地址在 <a href="https://github.com/craftkiller/orgmode-octopress">https://github.com/craftkiller/orgmode-octopress</a> 。你也可以直接通过 <a href="https://raw.github.com/craftkiller/orgmode-octopress/master/org-octopress.el">org-octopress.el</a> <sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>来下载。将下载的文件存放在你emacs的load-path中，并通过 <code>(require 'org-octopress)</code> 命令来加载。因为我的git代码都存放在 <code>~/git/</code> 目录下，所以我的Emacs配置是这样的：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>.emacs  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="scheme"><span class="line">  <span class="p">(</span><span class="nf">add-to-list</span> <span class="ss">&#39;load-path</span> <span class="s">&quot;~/git/orgmode-octopress&quot;</span><span class="p">)</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">require</span> <span class="ss">&#39;org-octopress</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-终于可以写作了！但是写作之前，你必须像下面示例那样先新增一个org文件并将它移动到org_posts目录下：
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-</pre></td><td class="code"><pre><code class="sh"><span class="line">  <span class="nb">cd </span>blog
-</span><span class="line">  rake <span class="s2">&quot;new_post[title]&quot;</span>
-</span><span class="line">  mv <span class="nb">source</span>/_posts/2012-08-01-title.org <span class="nb">source</span>/org_posts/
-</span><span class="line">  <span class="c"># I keep my posts in GIT so then I add it to the repo</span>
-</span><span class="line">  git add <span class="nb">source</span>/org_posts/2012-08-01-title.org
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-写完文章后，在Emacs中执行 <code>M-x save-then-publish</code> ，然后你可以到shell中执行 <code>rake gen_deploy</code>. 这样，你的文章就成功的发布到网上了。
-</p>
-<p>
-我这次改进主要新增了代码模块的语法高亮特性，不过目前它只能支持小写的 <code>begin_src</code> <code>end_src</code> 代码块。 另外，它也支持 <code>:title</code> <code>:url</code> 和 <code>:urltext</code> 选项。如果你想了解他们的用法，可以看看这篇博文的源代码:<a href="http://blog.paphus.com/org\_posts/2012-08-01-introducing-octopress-blogging-for-org-mode.org">http://blog.paphus.com/org_posts/2012-08-01-introducing-octopress-blogging-for-org-mode.org</a> 。如果有谁希望帮助改进这个HTML导出插件的话，欢迎在github加入。
-</p>
-<p>
-最后，你也许需要修改你的 <code>.htaccess</code> 文件来重定向图像请求。我重定向了所有SVG文件的请求到根目录上，这样静态链接就不会在访问图像的时候报错了。你需要将 <code>.htaccess</code> 文件放置在 <code>source</code> 目录下。
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>.htaccess  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-</pre></td><td class="code"><pre><code class="text"><span class="line">  Options +FollowSymlinks
-</span><span class="line">  RewriteEngine on
-</span><span class="line">  RewriteBase /
-</span><span class="line">  RewriteRule /([^/]+)\.(svg)$ /$1.$2 [R,L]
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 译者注：注意，该插件只支持Emacs 24.x。之前就因为Emacs版本原因，一直无法使用。
-</p>
-
-
-
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2049,18 +1931,18 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 <section>
  <h1>Categories</h1>
  <ul id="categories">
- <li class='category'><a href='/blog/categories/Android/'>Android (4)</a></li>
+ <li class='category'><a href='/blog/categories/Android/'>Android (5)</a></li>
 <li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
 <li class='category'><a href='/blog/categories/GTD/'>GTD (1)</a></li>
-<li class='category'><a href='/blog/categories/Linux/'>Linux (6)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (7)</a></li>
 <li class='category'><a href='/blog/categories/Octopress/'>Octopress (4)</a></li>
 <li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
 <li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
 <li class='category'><a href='/blog/categories/RaspberryPi/'>RaspberryPi (1)</a></li>
 <li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
-<li class='category'><a href='/blog/categories/开发/'>开发 (5)</a></li>
-<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (2)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (6)</a></li>
+<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (3)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (2)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
 <li class='category'><a href='/blog/categories/随笔/'>随笔 (1)</a></li>
@@ -2070,6 +1952,10 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/">小脚本帮大忙</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/">推荐使用Vitamin-R</a>
@@ -2085,10 +1971,6 @@ OK，如此配置后，查看代码编辑代码舒服多了。
     
       <li class="post">
         <a href="/blog/2012/10/01/wei-tomatotian-jia-yong-hu/">为Tomato添加用户</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/">调节Android拨号键盘的震动效果</a>
       </li>
     
   </ul>
