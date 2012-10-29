@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Linux | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/Linux/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2012-10-22T01:28:33+08:00</updated>
+  <updated>2012-10-30T01:03:52+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,52 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[最近看完的两本书]]></title>
+    <link href="http://blog.xeonxu.info/blog/2012/10/29/zui-jin-kan-wan-de-liang-ben-shu/"/>
+    <updated>2012-10-29T22:23:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2012/10/29/zui-jin-kan-wan-de-liang-ben-shu</id>
+    <content type="html"><![CDATA[<p>
+近日看完两本关于Slackware的入门书，一本是大名鼎鼎的《Slackware Linux Essentials》，另一本是《Slackware Linux Basics》。之所以想起来看Slackware相关的书，是因为人生接触的第一个Linux发行版就是Slackware。那时候家里没有网络，从报纸上知道了开源软件和Linux的存在。后来在书店里看到了电子工业出版社出版的《Linux大全》，那是一本很厚的书，书的背面印着获取书中描述的Linux版本的方法，我就是从那里获取到的人生第一个Linux发行版。原版书提供三个Linux发行版可供选择，而电子工业出版社只提供其中的两个发行版，一个是人们熟知的RedHat，而另一个就是Slackware。当时本人处于对计算机技术极度痴迷的状态，总是希望能有一些挑战，所以选择邮购了其中安装及配置较为复杂的一个发行版，也就是Slackware。当然，最后从拿到Slackware光盘，到安装并简单配置到能使用确实花了不少时间，也因为如此，我对Slackware的印象才如此深刻。之后在大学的时候自己买过RedHat/Fedora并用了那么几次，工作了后接触更多的是Ubuntu，但是随着Linux使用经验的逐渐增长以及知识的不断积累，越发觉得之后使用的那些Linux发行版似乎都缺少了一点什么，这种感觉说不上来，但是这种隐隐约约的感觉将我的目光再次引向Slackware发行版。
+</p>
+<p>
+碰巧，前段时间从网上买过一台Raspberry Pi<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，而且正好，又有爱好者将ArmedSlack<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>移植到了Raspberry Pi上，理所当然，我的Raspberry Pi便跑上了Slackware。可惜，虽说最早接触的是Slackware，但是自己对Slackware的了解并不系统，所以下定决心说一定要看完至少一本关于Slackware的著作。于是，才从网上找到上述的两本书。还好，从目前情况来看，这个任务算是完成了，而且超标了。
+</p>
+<p>
+现在说说才看完的这两本书，作为Slackware Linux的官方教材《Slackware Linux Essentials》<sup><a class="footref" name="fnr.3" href="#fn.3">3</a></sup>更新并不频繁，目前作者正在编写第三版，但是该版尚处于Beta状态<sup><a class="footref" name="fnr.4" href="#fn.4">4</a></sup>，所以市面上能买到的只有第二版。鉴于前者更新不够及时，导致了《Slackware Linux Basics》<sup><a class="footref" name="fnr.5" href="#fn.5">5</a></sup>的出现。从名字上看，前者似乎比后者更加全面，但从本人阅读下来的感觉来说，Basics的内容明显要比Essentials的深入一些；从页数上来说，Basics的相比也要多一些，但是这并不是说两本书哪本更好。单从入门角度来讲，我觉得Essentials的内容更适合入门学习；Basics的内容作为Essentials的补充，适合进阶学习。总体来讲，两本书可以互相参考学习。就本人经验，看完其中一本后，另外一本可以很快看完，因为只需要看差异的部分就可以了。虽然这两本书都以Slackware为切入点，但是其内容对于其它发行版也是部分适用的。所以，不论对于想学Slackware还是想学Linux的同学，我是极力推荐去看这两本书的，比市面上买的那些翻译山寨教学书好过不少。至于需要书的同学，可以去脚注找找，两本书官方都提供常用电子档下载，而我是用软件将HTML转成了kindle格式在kindle上读完这两本书的。
+</p>
+<p>
+另外，做个预告，我打算将Raspberry Pi打造为基于ArmedSlack系统的“科学上网机”，目前基本成型，具体实现方法和相关软件会随着博客的更新逐步公开。
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://www.raspberrypi.org">http://www.raspberrypi.org</a>
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 一款基于ARM芯片的Slackware Linux发行版，网址：<a href="http://www.armedslack.org">http://www.armedslack.org</a>
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.3" href="#fnr.3">3</a></sup> <a href="http://slackbook.org">http://slackbook.org</a>
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.4" href="#fnr.4">4</a></sup> <a href="http://slackbook.org/beta/">http://slackbook.org/beta/</a>
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.5" href="#fnr.5">5</a></sup> <a href="http://code.google.com/p/support/">http://code.google.com/p/support/</a>
+</p>
+
+
+
+</div>
+</div>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[小脚本帮大忙]]></title>
@@ -535,195 +581,6 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 
 </div>
 </div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Vim的简单配置]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/09/22/vim-de-jian-dan-pei-zhi/"/>
-    <updated>2012-09-22T21:49:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/09/22/vim-de-jian-dan-pei-zhi</id>
-    <content type="html"><![CDATA[<p>
-自己平时喜欢使用<a href="http://www.gnu.org/software/emacs/">GNU Emacs</a>，但是单位工作环境的限制，使我不得不在<a href="http://www.gnu.org/software/screen/">GNU Screen</a>下运行GNU Emacs。但是貌似Screen和Emacs有点小的兼容性问题，至少我没能调整到完全正常。使用中，Emacs经常会上移一行从而造成画面错乱，让人用的很不爽。为此，我决定在工作环境中暂时使用别的编辑器来替代Emacs。之后，我尝试过使用<a href="http://www.emacswiki.org/emacs/MicroEmacs">Micro Emacs</a>，包括Linus最喜欢用的<a href="http://git.kernel.org/?p=editors/uemacs/uemacs.git;a=tree">uEmacs PK</a>，可惜这玩意儿和GNU Emacs差异有点大，加之所有MicroEmacs对多字节语系支持地都不是很好，而自己又是个懒人也不是特别Geek，就没继续用下去。于是我重新将目光放到了<a href="http://www.vim.org">VIM</a> 上。
-好在工作中对编辑器的要求不是特别高，VIM也不是特别难使，自己又磕磕碰碰地在网上找了些配置添加到自己的Vim上。用起来还不错，可以交叉索引跳转，可以Outline，对我来说，这就够了。
-下面简单列举一下Vim的配置方法，算个存档记录。
-</p>
-<ul>
-<li>Cscope安装配置
-<ol>
-<li>安装Cscope
-     去<a href="http://cscope.sourceforge.net">http://cscope.sourceforge.net</a> 下载cscope源码，然后编译安装。
-</li>
-<li>在个人目录下的 <code>.vimrc</code> 文件中添加如下配置
-</li>
-</ol>
-
-</li>
-</ul>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>cscope配置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>“””””””””””””””””””””””””””””””””””””””””””””””””””””””””””””””
-</span><span class='line'>” cscope setting
-</span><span class='line'>“””””””””””””””””””””””””””””””””””””””””””””””””””””””””””””””
-</span><span class='line'>” <span class="k">if </span>has<span class="o">(</span>“cscope”<span class="o">)</span>
-</span><span class='line'>“   <span class="nb">set </span><span class="nv">csprg</span><span class="o">=</span>/usr/local/bin/cscope
-</span><span class='line'>“   <span class="nb">set </span><span class="nv">csto</span><span class="o">=</span>1
-</span><span class='line'>“   <span class="nb">set </span>cst
-</span><span class='line'>“   <span class="nb">set </span>nocsverb
-</span><span class='line'>“   “ add any database in current directory
-</span><span class='line'>“   <span class="k">if </span>filereadable<span class="o">(</span>“cscope.out”<span class="o">)</span>
-</span><span class='line'>“       cs add cscope.out
-</span><span class='line'>“   endif
-</span><span class='line'>“   <span class="nb">set </span>csverb
-</span><span class='line'>“ endif
-</span><span class='line'>“
-</span><span class='line'>“ nmap &amp;lt;C-@&amp;gt;s :cs find s &lt;c-r&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;cr&gt;&lt;cr&gt;
-</span><span class='line'><span class="s2">&quot; nmap &amp;lt;C-@&amp;gt;g :cs find g &lt;c-r&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">&quot;</span> nmap &amp;lt;C-@&amp;gt;c :cs find c &lt;c-r&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;cr&gt;&lt;cr&gt;
-</span><span class='line'><span class="s2">&quot; nmap &amp;lt;C-@&amp;gt;t :cs find t &lt;c-r&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">&quot;</span> nmap &amp;lt;C-@&amp;gt;e :cs find e &lt;c-r&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;cr&gt;&lt;cr&gt;
-</span><span class='line'><span class="s2">&quot; nmap &amp;lt;C-@&amp;gt;f :cs find f &lt;c-r&gt;=expand(&quot;</span>&lt;cfile&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">&quot;</span> nmap &amp;lt;C-@&amp;gt;i :cs find i ^&lt;c-r&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cfile&gt;&quot;</span><span class="o">)</span>&lt;cr&gt;<span class="nv">$&lt;</span>cr&gt;
-</span><span class='line'><span class="s2">&quot; nmap &amp;lt;C-@&amp;gt;d :cs find d &lt;c-r&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">function! LoadCscope()</span>
-</span><span class='line'><span class="s2">let db = findfile(&quot;</span>cscope.out<span class="s2">&quot;, &quot;</span>.;<span class="s2">&quot;)</span>
-</span><span class='line'><span class="s2">if (!empty(db))</span>
-</span><span class='line'><span class="s2">  let path = strpart(db, 0, match(db, &quot;</span>/cscope.out<span class="s2">$&quot;))</span>
-</span><span class='line'><span class="s2">  set nocsverb &quot;</span> suppress <span class="s1">&#39;duplicate connection&#39;</span> error
-</span><span class='line'>  <span class="nb">set </span><span class="nv">csto</span><span class="o">=</span>0
-</span><span class='line'>  <span class="nb">set </span>cst
-</span><span class='line'>  <span class="s2">&quot; add any database in current directory</span>
-</span><span class='line'><span class="s2">  if filereadable(db)</span>
-</span><span class='line'><span class="s2">     exe &quot;</span>cs add <span class="s2">&quot; . db . &quot;</span> <span class="s2">&quot; . path</span>
-</span><span class='line'><span class="s2">     nmap &lt;c-c&gt;s :cs find s &lt;c-r&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">     nmap &lt;c-c&gt;g :cs find g &lt;c-r&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">     nmap &lt;c-c&gt;c :cs find c &lt;c-r&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">     nmap &lt;c-c&gt;t :cs find t &lt;c-r&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">     nmap &lt;c-c&gt;e :cs find e &lt;c-r&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">     nmap &lt;c-c&gt;f :cs find f &lt;c-r&gt;=expand(&quot;</span>&lt;cfile&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">     nmap &lt;c-c&gt;i :cs find i ^&lt;c-r&gt;=expand(&quot;</span>&lt;cfile&gt;<span class="s2">&quot;)&lt;cr&gt;$&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">     nmap &lt;c-c&gt;d :cs find d &lt;c-r&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;cr&gt;&lt;cr&gt;</span>
-</span><span class='line'><span class="s2">  &quot;</span> <span class="k">else </span>add database pointed to by environment
-</span><span class='line'>  elseif <span class="nv">$CSCOPE_DB</span> !<span class="o">=</span> <span class="s2">&quot;&quot;</span>
-</span><span class='line'>     cs add <span class="nv">$CSCOPE_DB</span>
-</span><span class='line'>  endif
-</span><span class='line'>  <span class="nb">set </span>csverb
-</span><span class='line'>endif
-</span><span class='line'>endfunction
-</span><span class='line'>au BufEnter /* call LoadCscope<span class="o">()</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></cr></cr></cword></c-r></c-c></cr></cr></cfile></c-r></c-c></cr></cr></cfile></c-r></c-c></cr></cr></cword></c-r></c-c></cr></cr></cword></c-r></c-c></cr></cr></cword></c-r></c-c></cr></cr></cword></c-r></c-c></cr></cr></cword></c-r></c-c></cr></cr></cword></c-r></cr></cr></cfile></c-r></cr></cr></cfile></c-r></cr></cr></cword></c-r></cr></cr></cword></c-r></cr></cr></cword></c-r></cr></cr></cword></c-r></cr></cr></cword></c-r></p>
-<ol>
-<li>使用时先去要查看的代码目录，然后执行cscope -bqR。完成之后，直接 <code>vi filename</code> 。在需要查找的符号上使用 <code>C-c s/g/c/t/e/f/i/d</code> 即可调用相应的功能。原来cscope插件使用 <code>C-@</code> 做命令引导键，我为了和Emacs同步，将其改为了 <code>C-c</code> 。
-</li>
-<li>添加Outline显示
-</li>
-</ol>
-
-<p>  Outline显示由Taglist来实现：
-</p>
-<ol>
-<li>去<a href="http://www.vim.org/scripts/script.php?script_id=273">http://www.vim.org/scripts/script.php?script_id=273</a> 下载Taglist。
-</li>
-<li>解压后将 <code>taglist.vim</code> 文件放在个人目录下的 <code>.vim/plugin/</code> 目录中。同时，将解压后的 <code>taglist.txt</code> 文件放在个人目录下的 <code>.vim/doc/</code> 目录中。
-</li>
-<li>最后，添加以下配置到个人目录下的 <code>.vimrc</code> 文件中：
-</li>
-</ol>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>taglist配置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>“ use F8 to toggle taglist
-</span><span class='line'>nnoremap &lt;silent&gt; &lt;f8&gt; :TlistToggle&lt;cr&gt;
-</span><span class='line'><span class="nb">let </span><span class="nv">Tlist_GainFocus_On_ToggleOpen</span><span class="o">=</span>1
-</span><span class='line'><span class="nb">let </span><span class="nv">Tlist_Close_On_Select</span><span class="o">=</span>1
-</span></code></pre></td></tr></table></div></figure></notextile></div></cr></f8></silent></p>
-<p>
-  如此便可方便的通过F8按键打开当前文件的Outline，并将光标置于Outline中，选择条目后自动关闭。
-</p>
-<ul>
-<li>设置高亮搜索，自动缩进以及语法高亮
-  将以下配置添加到个人目录下的 <code>.vimrc</code> 文件中：
-</li>
-</ul>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>高亮缩进配置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">set </span>nu
-</span><span class='line'><span class="nb">set </span>hlsearch
-</span><span class='line'>syntax <span class="nb">enable</span>
-</span><span class='line'><span class="nb">set </span>showmatch
-</span><span class='line'><span class="nb">set </span><span class="nv">ts</span><span class="o">=</span>4
-</span><span class='line'><span class="nb">set </span><span class="nv">softtabstop</span><span class="o">=</span>4
-</span><span class='line'><span class="nb">set </span><span class="nv">shiftwidth</span><span class="o">=</span>4
-</span><span class='line'><span class="nb">set </span>expandtab
-</span><span class='line'><span class="nb">set </span>autoindent
-</span><span class='line'><span class="nb">set </span>cindent
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>
-OK，如此配置后，查看代码编辑代码舒服多了。
-</p>
 ]]></content>
   </entry>
   
