@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 随笔 | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/随笔/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2012-11-05T23:44:46+08:00</updated>
+  <updated>2012-11-18T23:50:18+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,32 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[近期的烦恼]]></title>
+    <link href="http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/"/>
+    <updated>2012-11-18T23:01:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao</id>
+    <content type="html"><![CDATA[<p>
+算下来两周没有在这里写博客了，其中一大原因在于天气渐凉，不高兴一人在电脑旁受冻-_-!!!  咳咳咳，其实天气有一定影响，不过更主要的问题在于最近遇到的事情繁杂，虽然没有什么难不可为，但自己也确实花了些心思。
+</p>
+<p>
+首先是工作上的两个任务。近期项目正好有点空挡，于是自己决定将高通平台的电量管理从MP端移植至AP端内核里，同时添加一些判断逻辑，以使统计的电量结果不至于像原版那样生硬怪异。只可惜高通平台好多处理需要依赖远程调用，而自己手里却没有一份关于远程调用的官方文档。最后通过高通的support搞定了内核中对PMIC的一些操作，但又发现无法正常取得相应中断状态。总之，这个看起来简单地任务搞了2周还没有实质性突破。另外一个任务是协助同事完成一个用户层接口，方便在用户层升级器件的firmware。这个任务进展倒是蛮快，3个小时就写好框架和功能调试。可惜最后发现buffer有4k限制，现在还在找对策方法，这两天就在考虑这个问题。
+</p>
+<p>
+其次，周末在家各种收拾打扫，洗衣做饭。连续两周了，除了干家务和觅食以外，其它什么都没干。想来自己效率低是一个问题，着实应该改进一下。哦，今天物业还过来处理家里渗水的墙面，也算拖了大半年之久的工程开始了第一步。
+</p>
+<p>
+再者，为了维护简历，将简历移植到moderncv上并使用git来管理。后来又想更统一使用orgmode来写简历，但是苦于找不到好的解决方案，现在琢磨着是不是要自己搞一个。
+</p>
+<p>
+最后，算是小成就。前几日知道了支持kindle3的kindlepdfviewer这个越狱软件，抽空搞了一下，发现对扫描版pdf的支持好到不可思议。于是kindle上瞬间多了很多扫描版的图书。首当其冲就是一直想看但一直没有看的《emacs lisp编程入门》和《GEB》。前者已经看了一半以上，作为emacs爱好者，到现在才较为系统的了解学习lisp是有点晚，不过至少我开始入门了:)
+</p>
+<p>
+今日纯属碎碎念，希望下周工作上任务都能快速完成，个人的几个安排都能顺利进行。另，下篇文章没差错的话应该是功夫网专题，否则又要被人数落跳票了。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[最近看完的两本书]]></title>

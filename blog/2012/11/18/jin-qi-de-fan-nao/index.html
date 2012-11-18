@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>为Tomato添加用户 - 不停地疯</title>
+  <title>近期的烦恼 - 不停地疯</title>
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="手上的RT-N16跑Tomato系统已经两年有余了，两年来Tomato系统没有让我失望过，一直提供着稳定高速的网络服务，此外它还提供了内网文件服务，P2P下载以及科学上网代理等重要功能。最近，本人又败了一个小玩意：Raspberry Pi ， 税前价格$25，到手¥310。入手后， &hellip;">
+  <meta name="description" content="算下来两周没有在这里写博客了，其中一大原因在于天气渐凉，不高兴一人在电脑旁受冻-_-!!! 咳咳咳，其实天气有一定影响，不过更主要的问题在于最近遇到的事情繁杂，虽然没有什么难不可为，但自己也确实花了些心思。 首先是工作上的两个任务。近期项目正好有点空挡， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/">
+  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -89,7 +89,7 @@
   <header>
     
       
-        <h1 class="entry-title">为Tomato添加用户</h1>
+        <h1 class="entry-title">近期的烦恼</h1>
       
     
     
@@ -106,7 +106,7 @@
   
 
 
-<time datetime="2012-10-01T21:21:00+08:00" pubdate data-updated="true">2012年10月01日</time>
+<time datetime="2012-11-18T23:01:00+08:00" pubdate data-updated="true">2012年11月18日</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -116,85 +116,23 @@
 
 
 <div class="entry-content"><p>
-手上的RT-N16跑Tomato系统已经两年有余了，两年来Tomato系统没有让我失望过，一直提供着稳定高速的网络服务，此外它还提供了内网文件服务，P2P下载以及科学上网代理等重要功能。最近，本人又败了一个小玩意：<a href="http://www.raspberrypi.org">Raspberry Pi</a> ， 税前价格$25，到手¥310。入手后，我在上面安装了ArmedSlack，运行的非常稳定，很不错。于是，本人决定将其打造为一个随身的功能强大的小电脑，包括随插随用的科学上网代理。基本思路是Raspberry Pi启动后通过公钥认证自动连接到家中的RT-N16路由器上，然后通过ssh转发相应端口，即可实现科学上网。不过，这个方法中有一个隐患：因为Tomato默认只提供root/admin账户，权限太大，如果Raspberry Pi使用这个账户进行连接，总是有点不放心。于是，我决定给Tomato系统添加新的用户。
+算下来两周没有在这里写博客了，其中一大原因在于天气渐凉，不高兴一人在电脑旁受冻-_-!!!  咳咳咳，其实天气有一定影响，不过更主要的问题在于最近遇到的事情繁杂，虽然没有什么难不可为，但自己也确实花了些心思。
 </p>
 <p>
-Tomato默认并不支持添加账户，即便通过optware安装了adduser后也由于没有passwd命令而失败。不过通过网络搜索，还是让我找到了一个可以添加用户的方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>。我用如下的命令在Tomato中建立了一个名为sshuser的用户：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>添加用户  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">UNAM</span><span class="o">=</span>sshuser
-</span><span class="line"><span class="nv">RNAM</span><span class="o">=</span><span class="s2">&quot;For Login Only&quot;</span>
-</span><span class="line"><span class="nv">UNUM</span><span class="o">=</span>200
-</span><span class="line"><span class="nv">UGRP</span><span class="o">=</span><span class="nv">$UNUM</span>
-</span><span class="line"><span class="c">#UGRP=0</span>
-</span><span class="line"><span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UNUM:$UGRP:$RNAM:/tmp:/bin/sh&quot;</span> &gt;&gt; /etc/passwd
-</span><span class="line"><span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UNUM:$UGRP:$RNAM:/home/$UNAM:/bin/sh&quot;</span> &gt;&gt; /etc/passwd.custom
-</span><span class="line"><span class="o">[[</span> <span class="nv">$UGRP</span> -ne 0 <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UGRP:&quot;</span> &gt;&gt;/etc/group
-</span><span class="line"><span class="o">[[</span> <span class="nv">$UGRP</span> -ne 0 <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UGRP:&quot;</span> &gt;&gt;/etc/group.custom
-</span><span class="line">sed -n -e <span class="s2">&quot;s,^root:,$UNAM:,p&quot;</span> &lt; /etc/shadow &gt;&gt; /etc/shadow.custom
-</span><span class="line">
-</span><span class="line">chmod 777 /tmp/home
-</span><span class="line">ssh <span class="nv">$UNAM</span>@localhost <span class="s2">&quot;mkdir /home/$UNAM;touch /home/$UNAM/.profile &amp;&amp; echo success&quot;</span>
-</span><span class="line"><span class="c"># press return for the password prompt, you should see the word &quot;success&quot; reported</span>
-</span><span class="line">
-</span><span class="line">chmod 755 /tmp/home
-</span><span class="line">
-</span><span class="line">nvram setfile2nvram /etc/passwd.custom
-</span><span class="line">nvram setfile2nvram /etc/group.custom
-</span><span class="line">nvram setfile2nvram /etc/shadow.custom
-</span><span class="line">nvram setfile2nvram /home/<span class="nv">$UNAM</span>/.profile
-</span><span class="line">nvram commit
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-最后几句包含nvram的语句是将新建的几个 <code>.custom</code> 文件添加到nvram中，这样这些新添加的文件就可以在重启路由器后还能存在。然后，将以下三句添加到路由器设置中-&gt;脚本设置-&gt;初始化中：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>初始化用户  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">sed -i <span class="s2">&quot;/^sshuser:/d&quot;</span> /etc/passwd
-</span><span class="line">grep <span class="s2">&quot;^sshuser:&quot;</span> &lt; /etc/shadow.custom &gt;&gt; /etc/shadow
-</span><span class="line">grep <span class="s2">&quot;^sshuser:&quot;</span> &lt; /etc/passwd.custom &gt;&gt; /etc/passwd
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-如图：
-<img src="/./images/blog/./574rHz.png" alt="./images/blog/./574rHz.png" />
-新建的用户使用和root一样的密码，如果需要修改，需要相应修改 <code>/etc/shadow</code> 文件。新建用户登录后的效果入下图：
-<img src="/./images/blog/./574dRC.png" alt="./images/blog/./574dRC.png" />
+首先是工作上的两个任务。近期项目正好有点空挡，于是自己决定将高通平台的电量管理从MP端移植至AP端内核里，同时添加一些判断逻辑，以使统计的电量结果不至于像原版那样生硬怪异。只可惜高通平台好多处理需要依赖远程调用，而自己手里却没有一份关于远程调用的官方文档。最后通过高通的support搞定了内核中对PMIC的一些操作，但又发现无法正常取得相应中断状态。总之，这个看起来简单地任务搞了2周还没有实质性突破。另外一个任务是协助同事完成一个用户层接口，方便在用户层升级器件的firmware。这个任务进展倒是蛮快，3个小时就写好框架和功能调试。可惜最后发现buffer有4k限制，现在还在找对策方法，这两天就在考虑这个问题。
 </p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://tomatousb.org/tut:adding-your-own-users">http://tomatousb.org/tut:adding-your-own-users</a>
+<p>
+其次，周末在家各种收拾打扫，洗衣做饭。连续两周了，除了干家务和觅食以外，其它什么都没干。想来自己效率低是一个问题，着实应该改进一下。哦，今天物业还过来处理家里渗水的墙面，也算拖了大半年之久的工程开始了第一步。
 </p>
-
-
-
-
-</div>
-</div>
+<p>
+再者，为了维护简历，将简历移植到moderncv上并使用git来管理。后来又想更统一使用orgmode来写简历，但是苦于找不到好的解决方案，现在琢磨着是不是要自己搞一个。
+</p>
+<p>
+最后，算是小成就。前几日知道了支持kindle3的kindlepdfviewer这个越狱软件，抽空搞了一下，发现对扫描版pdf的支持好到不可思议。于是kindle上瞬间多了很多扫描版的图书。首当其冲就是一直想看但一直没有看的《emacs lisp编程入门》和《GEB》。前者已经看了一半以上，作为emacs爱好者，到现在才较为系统的了解学习lisp是有点晚，不过至少我开始入门了:)
+</p>
+<p>
+今日纯属碎碎念，希望下周工作上任务都能快速完成，个人的几个安排都能顺利进行。另，下篇文章没差错的话应该是功夫网专题，否则又要被人数落跳票了。
+</p>
 </div>
 
 
@@ -217,12 +155,12 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
   
 
 
-<time datetime="2012-10-01T21:21:00+08:00" pubdate data-updated="true">2012年10月01日</time>
+<time datetime="2012-11-18T23:01:00+08:00" pubdate data-updated="true">2012年11月18日</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/Linux/'>Linux</a>, <a class='category' href='/blog/categories/RaspberryPi/'>RaspberryPi</a>, <a class='category' href='/blog/categories/Tomato/'>Tomato</a>
+    <a class='category' href='/blog/categories/杂谈/'>杂谈</a>, <a class='category' href='/blog/categories/生活/'>生活</a>, <a class='category' href='/blog/categories/随笔/'>随笔</a>
   
 </span>
 
@@ -256,7 +194,7 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
   
 
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -270,10 +208,8 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
     
     <p class="meta">
       
-        <a class="basic-alignment left articlenav" href="/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/" title="Previous Post: 调节Android拨号键盘的震动效果">&laquo; 调节Android拨号键盘的震动效果</a>
+        <a class="basic-alignment left articlenav" href="/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan/" title="Previous Post: 使用tmux改进终端体验">&laquo; 使用tmux改进终端体验</a>
       
-      
-        <a class="basic-alignment right articlenav" href="/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/" title="Next Post: 在Android编译时建立符号链接">在Android编译时建立符号链接 &raquo;</a>
       
     </p>
   </footer>
@@ -413,8 +349,8 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/';
-        var disqus_url = 'http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/';
+        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/';
+        var disqus_url = 'http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/';
         var disqus_script = 'embed.js';
       
     (function () {
