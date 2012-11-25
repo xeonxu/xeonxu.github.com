@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="自己平时喜欢使用GNU Emacs，但是单位工作环境的限制，使我不得不在GNU Screen下运行GNU Emacs。但是貌似Screen和Emacs有点小的兼容性问题，至少我没能调整到完全正常。使用中，Emacs经常会上移一行从而造成画面错乱，让人用的很不爽。为此， &hellip;">
+  <meta name="description" content="本来使用 Org-Mode 来写博客就很舒服了， 插入图片也很容易，使用 [[图片地址]] 的方法就可以。但是对于编写需要插入截图的文档来说，就得先截图，然后保存图片到相应位置，之后才能使用上面的方法来插入图片。 有幸，前面搜索资料时发现了一篇文章1，其中介绍了一种更加自动化的方式在 Org- &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,182 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/">关于在Org-Mode下方便插入截图的方法</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-23T23:58:00+08:00" pubdate data-updated="true">2012年09月23日</time>
+        
+         | <a href="/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+本来使用 <code>Org-Mode</code> 来写博客就很舒服了， 插入图片也很容易，使用
+</p>
+
+<pre class="example">[[图片地址]]
+</pre>
+
+<p>
+的方法就可以。但是对于编写需要插入截图的文档来说，就得先截图，然后保存图片到相应位置，之后才能使用上面的方法来插入图片。
+</p>
+<p>
+有幸，前面搜索资料时发现了一篇文章<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，其中介绍了一种更加自动化的方式在 <code>Org-Mode</code> 中插入截图。试用后觉得非常方便，不过我又做了一些改动，以适应Mac OSX。同时为使用Octopress，重新设置了图片目录，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>my-screenshot  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="nf">defun</span> <span class="nv">my-screenshot</span> <span class="p">()</span>
+</span><span class="line">  <span class="s">&quot;Take a screenshot into a unique-named file in the current buffer file</span>
+</span><span class="line"><span class="s">directory and insert a link to this file.&quot;</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">interactive</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">setq</span> <span class="nv">filename</span>
+</span><span class="line">        <span class="p">(</span><span class="nf">concat</span> <span class="p">(</span><span class="nf">make-temp-name</span> <span class="s">&quot;./&quot;</span><span class="p">)</span> <span class="s">&quot;.png&quot;</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">setq</span> <span class="nv">fullfilename</span>
+</span><span class="line">                 <span class="p">(</span><span class="nf">concat</span> <span class="p">(</span><span class="nf">file-name-directory</span> <span class="p">(</span><span class="nf">buffer-file-name</span><span class="p">))</span> <span class="s">&quot;images/blog/&quot;</span> <span class="nv">filename</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nf">file-accessible-directory-p</span> <span class="p">(</span><span class="nf">concat</span> <span class="p">(</span><span class="nf">file-name-directory</span>
+</span><span class="line">                                            <span class="p">(</span><span class="nf">buffer-file-name</span><span class="p">))</span> <span class="s">&quot;images/blog/&quot;</span><span class="p">))</span>
+</span><span class="line">      <span class="nv">nil</span>
+</span><span class="line">    <span class="p">(</span><span class="nf">make-directory</span> <span class="s">&quot;images/blog/&quot;</span> <span class="nv">t</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">call-process-shell-command</span> <span class="s">&quot;screencapture&quot;</span> <span class="nv">nil</span> <span class="nv">nil</span> <span class="nv">nil</span> <span class="nv">nil</span> <span class="s">&quot;-i&quot;</span> <span class="p">(</span><span class="nf">concat</span>
+</span><span class="line">                                                            <span class="s">&quot;\&quot;&quot;</span> <span class="nv">fullfilename</span> <span class="s">&quot;\&quot;&quot;</span> <span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&quot;[[./images/blog/&quot;</span> <span class="nv">filename</span> <span class="s">&quot;]]&quot;</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">org-display-inline-images</span><span class="p">)</span>
+</span><span class="line"><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+另外，还需要给 <code>org-octopress.el</code> 打个补丁，否则发布文档中图片的索引会有问题，造成某些页面下无法显示：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>org-octopress.el补丁  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/org-octopress.el b/org-octopress.el</span>
+</span><span class="line"><span class="gh">index 7f87742..36eed86 100644</span>
+</span><span class="line"><span class="gd">--- a/org-octopress.el</span>
+</span><span class="line"><span class="gi">+++ b/org-octopress.el</span>
+</span><span class="line"><span class="gu">@@ -961,7 +961,7 @@ OPT-PLIST is the export options list.&quot;</span>
+</span><span class="line">          (if (string-match &quot;^file:&quot; desc)
+</span><span class="line">              (setq desc (substring desc (match-end 0)))))
+</span><span class="line">        (setq desc (org-add-props
+</span><span class="line"><span class="gd">-                      (concat &quot;&lt;img src=\&quot;&quot; desc &quot;\&quot; alt=\&quot;&quot;</span>
+</span><span class="line"><span class="gi">+                      (concat &quot;&lt;img src=\&quot;/&quot; desc &quot;\&quot; alt=\&quot;/&quot;</span>
+</span><span class="line">                               (file-name-nondirectory desc) &quot;\&quot;/&gt;&quot;)
+</span><span class="line">                       &#39;(org-protected t))))
+</span><span class="line">       (cond
+</span><span class="line"><span class="gu">@@ -1960,7 +1960,7 @@ PUB-DIR is set, use this as the publishing directory.&quot;</span>
+</span><span class="line">   &quot;Create image tag with source and attributes.&quot;
+</span><span class="line">   (save-match-data
+</span><span class="line">     (if (string-match &quot;^ltxpng/&quot; src)
+</span><span class="line"><span class="gd">-       (format &quot;&lt;img src=\&quot;%s\&quot; alt=\&quot;%s\&quot;/&gt;&quot;</span>
+</span><span class="line"><span class="gi">+       (format &quot;&lt;img src=\&quot;/%s\&quot; alt=\&quot;/%s\&quot;/&gt;&quot;</span>
+</span><span class="line">                 src (org-find-text-property-in-string &#39;org-latex-src src))
+</span><span class="line">       (let* ((caption (org-find-text-property-in-string &#39;org-caption src))
+</span><span class="line">             (attr (org-find-text-property-in-string &#39;org-attributes src))
+</span><span class="line"><span class="gu">@@ -1972,7 +1972,7 @@ PUB-DIR is set, use this as the publishing directory.&quot;</span>
+</span><span class="line"> &lt;p&gt;&quot;
+</span><span class="line">                    (if org-par-open &quot;&lt;/p&gt;\n&quot; &quot;&quot;)
+</span><span class="line">                    (if label (format &quot;id=\&quot;%s\&quot; &quot; (org-solidify-link-text label)) &quot;&quot;)))
+</span><span class="line"><span class="gd">-       (format &quot;&lt;img src=\&quot;%s\&quot;%s /&gt;&quot;</span>
+</span><span class="line"><span class="gi">+       (format &quot;&lt;img src=\&quot;/%s\&quot;%s /&gt;&quot;</span>
+</span><span class="line">                src
+</span><span class="line">                (if (string-match &quot;\\&lt;alt=&quot; (or attr &quot;&quot;))
+</span><span class="line">                    (concat &quot; &quot; attr )
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+修改完成以后，就可以在编写Org文档的时候执行 <code>M-x my-screenshot</code> 进行抓屏了，抓好的图片存放在当前目录的 <code>./image/blog/</code> 下，命名使用随机命名方式。最后，这个脚本还会开启Emacs <code>Org-Mode</code> 的内嵌图片显示，达到图文并茂的效果。如果不需要该功能，可以使用快捷键 <code>C-c C-x C-v</code> 来关闭。
+</p>
+<p>
+截个之前<a href="#fig-Vim">配置好的Vim</a>，看看效果吧!
+</p>
+
+<div id="fig-Vim" class="figure">
+<p><img src="/./images/blog/./90530rcx.png" alt="./images/blog/./90530rcx.png" /></p>
+<p>Vim with taglist</p>
+</div>
+
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://dreamrunner.org/wiki/public_html/Emacs/org-mode.html">http://dreamrunner.org/wiki/public_html/Emacs/org-mode.html</a>
+</p>
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1533,17 +1709,17 @@ sys     1m20.240s
 <section>
  <h1>Categories</h1>
  <ul id="categories">
- <li class='category'><a href='/blog/categories/Android/'>Android (5)</a></li>
+ <li class='category'><a href='/blog/categories/Android/'>Android (6)</a></li>
 <li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
 <li class='category'><a href='/blog/categories/GTD/'>GTD (1)</a></li>
-<li class='category'><a href='/blog/categories/Linux/'>Linux (9)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (10)</a></li>
 <li class='category'><a href='/blog/categories/Octopress/'>Octopress (4)</a></li>
 <li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
 <li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
 <li class='category'><a href='/blog/categories/RaspberryPi/'>RaspberryPi (1)</a></li>
 <li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
-<li class='category'><a href='/blog/categories/开发/'>开发 (7)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (8)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (5)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (3)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
@@ -1554,6 +1730,10 @@ sys     1m20.240s
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">在Linux内核模块中操作I2C设备</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/11/18/jin-qi-de-fan-nao/">近期的烦恼</a>
@@ -1569,10 +1749,6 @@ sys     1m20.240s
     
       <li class="post">
         <a href="/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/">小脚本帮大忙</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/">推荐使用Vitamin-R</a>
       </li>
     
   </ul>

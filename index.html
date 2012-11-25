@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="算下来两周没有在这里写博客了，其中一大原因在于天气渐凉，不高兴一人在电脑旁受冻-_-!!! 咳咳咳，其实天气有一定影响，不过更主要的问题在于最近遇到的事情繁杂，虽然没有什么难不可为，但自己也确实花了些心思。 首先是工作上的两个任务。近期项目正好有点空挡， &hellip;">
+  <meta name="description" content="近期公司项目较为空闲，抽空做了一些学习性质的研发内容，其中涉及到在Linux内核模块中使用I2C对外部器件进行控制的操作。虽然在Linux中操作使用I2C设备并不复杂，但本人接触Linux内核驱动开发时间并不算长，此次学习中也算较为系统的了解了Linux中对I2C设备的操控方式，谨在此做下记录 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,132 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">在Linux内核模块中操作I2C设备</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-25T00:02:00+08:00" pubdate data-updated="true">2012年11月25日</time>
+        
+         | <a href="/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+近期公司项目较为空闲，抽空做了一些学习性质的研发内容，其中涉及到在Linux内核模块中使用I2C对外部器件进行控制的操作。虽然在Linux中操作使用I2C设备并不复杂，但本人接触Linux内核驱动开发时间并不算长，此次学习中也算较为系统的了解了Linux中对I2C设备的操控方式，谨在此做下记录。
+</p>
+<p>
+通过Linux内核文档中关于操作I2C设备的文章后不难看出Linux中注册使用I2C设备一般通过四种方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>：
+</p>
+<ol>
+<li>通过总线号声明设备
+</li>
+<li>立即探测设备
+</li>
+<li>通过Probe探测相应设备
+</li>
+<li>在用户空间立即探测
+</li>
+</ol>
+
+<p>
+简单来说，第一种方式一般应用在嵌入式设备中。因为对于嵌入式设备来说，外围器件基本都是固定的，只需提供有限几款器件的支持即可。使用这种方式的时候，需要在板级配置文件中定义并设置 <code>i2c_board_info</code> 这个结构体的内容。其中需要配置设备名称和设备地址，此外设备中断和私有数据结构也可以选择设置。然后使用 <code>i2c_register_board_info</code> 这个接口对设置的设备进行注册使用。需要注意的是这种方法注册的设备是在注册I2C总线驱动时进行驱动适配的。
+</p>
+<p>
+第二种方法可以通过给定的I2C适配器以及相应的I2C板级结构体，自行通过 <code>i2c_new_device</code> 接口进行添加注册所需的设备。这种方法灵活性要较第一种方法大，可以很方便的在模块中使用。
+</p>
+<p>
+第三种方法是 <code>2.6</code> 内核之前的做法，使用 <code>detect</code> 方法去探测总线上的设备驱动。因为探测机制的原因，会导致一些副作用的发生，所以不建议使用，除非真的没有别的办法。
+</p>
+<p>
+第四种方法是在Linux的控制台上，在用户空间通过sysfs，使用 <code>/sys/bus/i2c/devices/i2c-3/new_device</code> 节点进行设备的添加注册。
+</p>
+<p>
+从上面可以看出，如果需要在Linux内核中以模块的方式对I2C设备进行驱动控制的话，第二种方法是比较推荐的。通过测试，在module的init中使用
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_adapter</span> <span class="o">*</span><span class="n">i2c_adap</span><span class="p">;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
+</span><span class="line"><span class="n">i2c_adap</span> <span class="o">=</span> <span class="n">i2c_get_adapter</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class="line"><span class="n">i2c_client</span> <span class="o">=</span> <span class="n">i2c_new_device</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">i2c_device</span><span class="p">);</span>
+</span><span class="line"><span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+即可成功注册I2C设备。其中:
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_board_info</span> <span class="n">ft5306_i2c_device</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">    <span class="n">I2C_BOARD_INFO</span><span class="p">(</span><span class="s">&quot;test_i2c&quot;</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">),</span>
+</span><span class="line"><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+以上，对于如何在模块中注册使用I2C设备简单做了描述。那么如何在另外的模块中对已经注册的I2C设备进行反注册呢？由于内核中操作I2C设备都是通过 <code>i2c_client</code> 结构进行，所以问题可以抽象为如何在内核中获取指定设备的 <code>i2c_client</code> 结构指针。通过查阅内核API，也找到了一个方法可以达到这样的目的，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">i2c_dev</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="n">i2c_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">if</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">)</span>
+</span><span class="line">    <span class="n">i2c_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
+</span><span class="line"><span class="k">if</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">)</span>
+</span><span class="line">    <span class="n">i2c_unregister_device</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+该反注册例子的内容就是对前面注册的 <code>0x11</code> 地址的设备进行反注册。注意 <code>bus_find_device_by_name</code> 函数中第三项参数，该参数是需要查找的设备在总线上注册的名称。&#8221;1&#8221;代表着1号适配器，&#8221;0011&#8221;是16位的I2C地址。如此便可方便的在内核模块中对I2C设备进行挂载和解挂了。
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 参考Linux内核目录下的Documentation/i2c/instantiating-devices
+</p>
+
+
+
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1702,182 +1828,6 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/">关于在Org-Mode下方便插入截图的方法</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-23T23:58:00+08:00" pubdate data-updated="true">2012年09月23日</time>
-        
-         | <a href="/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-本来使用 <code>Org-Mode</code> 来写博客就很舒服了， 插入图片也很容易，使用
-</p>
-
-<pre class="example">[[图片地址]]
-</pre>
-
-<p>
-的方法就可以。但是对于编写需要插入截图的文档来说，就得先截图，然后保存图片到相应位置，之后才能使用上面的方法来插入图片。
-</p>
-<p>
-有幸，前面搜索资料时发现了一篇文章<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，其中介绍了一种更加自动化的方式在 <code>Org-Mode</code> 中插入截图。试用后觉得非常方便，不过我又做了一些改动，以适应Mac OSX。同时为使用Octopress，重新设置了图片目录，如下：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>my-screenshot  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="nf">defun</span> <span class="nv">my-screenshot</span> <span class="p">()</span>
-</span><span class="line">  <span class="s">&quot;Take a screenshot into a unique-named file in the current buffer file</span>
-</span><span class="line"><span class="s">directory and insert a link to this file.&quot;</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">interactive</span><span class="p">)</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">setq</span> <span class="nv">filename</span>
-</span><span class="line">        <span class="p">(</span><span class="nf">concat</span> <span class="p">(</span><span class="nf">make-temp-name</span> <span class="s">&quot;./&quot;</span><span class="p">)</span> <span class="s">&quot;.png&quot;</span><span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">setq</span> <span class="nv">fullfilename</span>
-</span><span class="line">                 <span class="p">(</span><span class="nf">concat</span> <span class="p">(</span><span class="nf">file-name-directory</span> <span class="p">(</span><span class="nf">buffer-file-name</span><span class="p">))</span> <span class="s">&quot;images/blog/&quot;</span> <span class="nv">filename</span><span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nf">file-accessible-directory-p</span> <span class="p">(</span><span class="nf">concat</span> <span class="p">(</span><span class="nf">file-name-directory</span>
-</span><span class="line">                                            <span class="p">(</span><span class="nf">buffer-file-name</span><span class="p">))</span> <span class="s">&quot;images/blog/&quot;</span><span class="p">))</span>
-</span><span class="line">      <span class="nv">nil</span>
-</span><span class="line">    <span class="p">(</span><span class="nf">make-directory</span> <span class="s">&quot;images/blog/&quot;</span> <span class="nv">t</span><span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">call-process-shell-command</span> <span class="s">&quot;screencapture&quot;</span> <span class="nv">nil</span> <span class="nv">nil</span> <span class="nv">nil</span> <span class="nv">nil</span> <span class="s">&quot;-i&quot;</span> <span class="p">(</span><span class="nf">concat</span>
-</span><span class="line">                                                            <span class="s">&quot;\&quot;&quot;</span> <span class="nv">fullfilename</span> <span class="s">&quot;\&quot;&quot;</span> <span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&quot;[[./images/blog/&quot;</span> <span class="nv">filename</span> <span class="s">&quot;]]&quot;</span><span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">org-display-inline-images</span><span class="p">)</span>
-</span><span class="line"><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-另外，还需要给 <code>org-octopress.el</code> 打个补丁，否则发布文档中图片的索引会有问题，造成某些页面下无法显示：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>org-octopress.el补丁  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/org-octopress.el b/org-octopress.el</span>
-</span><span class="line"><span class="gh">index 7f87742..36eed86 100644</span>
-</span><span class="line"><span class="gd">--- a/org-octopress.el</span>
-</span><span class="line"><span class="gi">+++ b/org-octopress.el</span>
-</span><span class="line"><span class="gu">@@ -961,7 +961,7 @@ OPT-PLIST is the export options list.&quot;</span>
-</span><span class="line">          (if (string-match &quot;^file:&quot; desc)
-</span><span class="line">              (setq desc (substring desc (match-end 0)))))
-</span><span class="line">        (setq desc (org-add-props
-</span><span class="line"><span class="gd">-                      (concat &quot;&lt;img src=\&quot;&quot; desc &quot;\&quot; alt=\&quot;&quot;</span>
-</span><span class="line"><span class="gi">+                      (concat &quot;&lt;img src=\&quot;/&quot; desc &quot;\&quot; alt=\&quot;/&quot;</span>
-</span><span class="line">                               (file-name-nondirectory desc) &quot;\&quot;/&gt;&quot;)
-</span><span class="line">                       &#39;(org-protected t))))
-</span><span class="line">       (cond
-</span><span class="line"><span class="gu">@@ -1960,7 +1960,7 @@ PUB-DIR is set, use this as the publishing directory.&quot;</span>
-</span><span class="line">   &quot;Create image tag with source and attributes.&quot;
-</span><span class="line">   (save-match-data
-</span><span class="line">     (if (string-match &quot;^ltxpng/&quot; src)
-</span><span class="line"><span class="gd">-       (format &quot;&lt;img src=\&quot;%s\&quot; alt=\&quot;%s\&quot;/&gt;&quot;</span>
-</span><span class="line"><span class="gi">+       (format &quot;&lt;img src=\&quot;/%s\&quot; alt=\&quot;/%s\&quot;/&gt;&quot;</span>
-</span><span class="line">                 src (org-find-text-property-in-string &#39;org-latex-src src))
-</span><span class="line">       (let* ((caption (org-find-text-property-in-string &#39;org-caption src))
-</span><span class="line">             (attr (org-find-text-property-in-string &#39;org-attributes src))
-</span><span class="line"><span class="gu">@@ -1972,7 +1972,7 @@ PUB-DIR is set, use this as the publishing directory.&quot;</span>
-</span><span class="line"> &lt;p&gt;&quot;
-</span><span class="line">                    (if org-par-open &quot;&lt;/p&gt;\n&quot; &quot;&quot;)
-</span><span class="line">                    (if label (format &quot;id=\&quot;%s\&quot; &quot; (org-solidify-link-text label)) &quot;&quot;)))
-</span><span class="line"><span class="gd">-       (format &quot;&lt;img src=\&quot;%s\&quot;%s /&gt;&quot;</span>
-</span><span class="line"><span class="gi">+       (format &quot;&lt;img src=\&quot;/%s\&quot;%s /&gt;&quot;</span>
-</span><span class="line">                src
-</span><span class="line">                (if (string-match &quot;\\&lt;alt=&quot; (or attr &quot;&quot;))
-</span><span class="line">                    (concat &quot; &quot; attr )
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-修改完成以后，就可以在编写Org文档的时候执行 <code>M-x my-screenshot</code> 进行抓屏了，抓好的图片存放在当前目录的 <code>./image/blog/</code> 下，命名使用随机命名方式。最后，这个脚本还会开启Emacs <code>Org-Mode</code> 的内嵌图片显示，达到图文并茂的效果。如果不需要该功能，可以使用快捷键 <code>C-c C-x C-v</code> 来关闭。
-</p>
-<p>
-截个之前<a href="#fig-Vim">配置好的Vim</a>，看看效果吧!
-</p>
-
-<div id="fig-Vim" class="figure">
-<p><img src="/./images/blog/./90530rcx.png" alt="./images/blog/./90530rcx.png" /></p>
-<p>Vim with taglist</p>
-</div>
-
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://dreamrunner.org/wiki/public_html/Emacs/org-mode.html">http://dreamrunner.org/wiki/public_html/Emacs/org-mode.html</a>
-</p>
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1900,17 +1850,17 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 <section>
  <h1>Categories</h1>
  <ul id="categories">
- <li class='category'><a href='/blog/categories/Android/'>Android (5)</a></li>
+ <li class='category'><a href='/blog/categories/Android/'>Android (6)</a></li>
 <li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
 <li class='category'><a href='/blog/categories/GTD/'>GTD (1)</a></li>
-<li class='category'><a href='/blog/categories/Linux/'>Linux (9)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (10)</a></li>
 <li class='category'><a href='/blog/categories/Octopress/'>Octopress (4)</a></li>
 <li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
 <li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
 <li class='category'><a href='/blog/categories/RaspberryPi/'>RaspberryPi (1)</a></li>
 <li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
-<li class='category'><a href='/blog/categories/开发/'>开发 (7)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (8)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (5)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (3)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
@@ -1921,6 +1871,10 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">在Linux内核模块中操作I2C设备</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/11/18/jin-qi-de-fan-nao/">近期的烦恼</a>
@@ -1936,10 +1890,6 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
     
       <li class="post">
         <a href="/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/">小脚本帮大忙</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/">推荐使用Vitamin-R</a>
       </li>
     
   </ul>

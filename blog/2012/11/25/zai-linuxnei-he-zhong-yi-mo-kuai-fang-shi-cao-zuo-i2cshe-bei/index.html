@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>推荐使用Vitamin-R - 不停地疯</title>
+  <title>在Linux内核模块中操作I2C设备 - 不停地疯</title>
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="记得之前Twitter上的@justin7974介绍过Vitamin-R这个软件，是一款个人时间管理类的软件，据说可以和Omnifocus 或者Things配合起来用，看起来不错的样子。只是它20刀的价钱相对它的功能来说，我觉得还是贵了点，所以一直以来都没有下手。前段时间浏览Twitter， &hellip;">
+  <meta name="description" content="近期公司项目较为空闲，抽空做了一些学习性质的研发内容，其中涉及到在Linux内核模块中使用I2C对外部器件进行控制的操作。虽然在Linux中操作使用I2C设备并不复杂，但本人接触Linux内核驱动开发时间并不算长，此次学习中也算较为系统的了解了Linux中对I2C设备的操控方式，谨在此做下记录 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/">
+  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -89,7 +89,7 @@
   <header>
     
       
-        <h1 class="entry-title">推荐使用Vitamin-R</h1>
+        <h1 class="entry-title">在Linux内核模块中操作I2C设备</h1>
       
     
     
@@ -106,7 +106,7 @@
   
 
 
-<time datetime="2012-10-14T21:24:00+08:00" pubdate data-updated="true">2012年10月14日</time>
+<time datetime="2012-11-25T00:02:00+08:00" pubdate data-updated="true">2012年11月25日</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -116,46 +116,92 @@
 
 
 <div class="entry-content"><p>
-记得之前Twitter上的@justin7974介绍过Vitamin-R这个软件，是一款个人时间管理类的软件，据说可以和<a href="http://www.omnigroup.com/products/omnifocus/">Omnifocus</a> 或者Things配合起来用，看起来不错的样子。只是它20刀的价钱相对它的功能来说，我觉得还是贵了点，所以一直以来都没有下手。前段时间浏览Twitter，突然看见一条新闻，说Vitamin-R在<a href="https://itunes.apple.com/us/app/vitamin-r/id402438916?mt=12">AppStore</a> 上1折优惠只要2刀。于是，毫不犹豫的下单买了它。
+近期公司项目较为空闲，抽空做了一些学习性质的研发内容，其中涉及到在Linux内核模块中使用I2C对外部器件进行控制的操作。虽然在Linux中操作使用I2C设备并不复杂，但本人接触Linux内核驱动开发时间并不算长，此次学习中也算较为系统的了解了Linux中对I2C设备的操控方式，谨在此做下记录。
 </p>
 <p>
-Vitamin-R运行起来的界面非常简单，运行时会在菜单栏上出来一个&#8221;R&#8221;图标。点击这个图标就会出现如下界面：
+通过Linux内核文档中关于操作I2C设备的文章后不难看出Linux中注册使用I2C设备一般通过四种方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>：
 </p>
-<p>
-<img src="/./images/blog/./79722mqA.png" alt="./images/blog/./79722mqA.png" />
-</p>
+<ol>
+<li>通过总线号声明设备
+</li>
+<li>立即探测设备
+</li>
+<li>通过Probe探测相应设备
+</li>
+<li>在用户空间立即探测
+</li>
+</ol>
 
 <p>
-截图中是我自己设置的一个”写博客“的工作目标，时长设置为20分钟。设置了目标后，自己就可以和时间赛跑开始干活了。软件默认会在一定时间过后用声音提示用户，以注意所消耗的时间。等倒计时结束，他会以用户设定的方式提醒用户设定的时间已到，并要求用户对自己这段时间的工作情况进行评价和记录。如此，用户便可以对自己完成一个任务所消耗的时间以及投入程度有一个了解，以便未来更高效的工作和制定计划。
+简单来说，第一种方式一般应用在嵌入式设备中。因为对于嵌入式设备来说，外围器件基本都是固定的，只需提供有限几款器件的支持即可。使用这种方式的时候，需要在板级配置文件中定义并设置 <code>i2c_board_info</code> 这个结构体的内容。其中需要配置设备名称和设备地址，此外设备中断和私有数据结构也可以选择设置。然后使用 <code>i2c_register_board_info</code> 这个接口对设置的设备进行注册使用。需要注意的是这种方法注册的设备是在注册I2C总线驱动时进行驱动适配的。
 </p>
 <p>
-说到Vitamin-R最让我关注的一个功能，那就是和Omnifocus的整合了。使用也非常简单，直接将Omnifocus中的任务条目用鼠标拖进Vitamin-R的时间片描述中，然后设置任务时间开始即可。任务时间到期后会出现如下这个界面：
+第二种方法可以通过给定的I2C适配器以及相应的I2C板级结构体，自行通过 <code>i2c_new_device</code> 接口进行添加注册所需的设备。这种方法灵活性要较第一种方法大，可以很方便的在模块中使用。
+</p>
+<p>
+第三种方法是 <code>2.6</code> 内核之前的做法，使用 <code>detect</code> 方法去探测总线上的设备驱动。因为探测机制的原因，会导致一些副作用的发生，所以不建议使用，除非真的没有别的办法。
+</p>
+<p>
+第四种方法是在Linux的控制台上，在用户空间通过sysfs，使用 <code>/sys/bus/i2c/devices/i2c-3/new_device</code> 节点进行设备的添加注册。
+</p>
+<p>
+从上面可以看出，如果需要在Linux内核中以模块的方式对I2C设备进行驱动控制的话，第二种方法是比较推荐的。通过测试，在module的init中使用
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_adapter</span> <span class="o">*</span><span class="n">i2c_adap</span><span class="p">;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
+</span><span class="line"><span class="n">i2c_adap</span> <span class="o">=</span> <span class="n">i2c_get_adapter</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class="line"><span class="n">i2c_client</span> <span class="o">=</span> <span class="n">i2c_new_device</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">i2c_device</span><span class="p">);</span>
+</span><span class="line"><span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+即可成功注册I2C设备。其中:
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_board_info</span> <span class="n">ft5306_i2c_device</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">    <span class="n">I2C_BOARD_INFO</span><span class="p">(</span><span class="s">&quot;test_i2c&quot;</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">),</span>
+</span><span class="line"><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+以上，对于如何在模块中注册使用I2C设备简单做了描述。那么如何在另外的模块中对已经注册的I2C设备进行反注册呢？由于内核中操作I2C设备都是通过 <code>i2c_client</code> 结构进行，所以问题可以抽象为如何在内核中获取指定设备的 <code>i2c_client</code> 结构指针。通过查阅内核API，也找到了一个方法可以达到这样的目的，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">i2c_dev</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="n">i2c_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">if</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">)</span>
+</span><span class="line">    <span class="n">i2c_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
+</span><span class="line"><span class="k">if</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">)</span>
+</span><span class="line">    <span class="n">i2c_unregister_device</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+该反注册例子的内容就是对前面注册的 <code>0x11</code> 地址的设备进行反注册。注意 <code>bus_find_device_by_name</code> 函数中第三项参数，该参数是需要查找的设备在总线上注册的名称。&#8221;1&#8221;代表着1号适配器，&#8221;0011&#8221;是16位的I2C地址。如此便可方便的在内核模块中对I2C设备进行挂载和解挂了。
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 参考Linux内核目录下的Documentation/i2c/instantiating-devices
 </p>
 
-<p>
-<img src="/./images/blog/./79722NJT.png" alt="./images/blog/./79722NJT.png" />
-</p>
 
-<p>
-将下面两个复选框选中，点继续，然后完成。如此这样，你会发现Omnifocus中的任务也会相应的被标记为完成状态。
-</p>
-<p>
-此外，Vitamin支持丰富的快捷键，比如使用CMD-OPT-N，可以打开一个类似便签的界面，用来记录当前任务的一些随笔想法：
-</p>
 
-<p>
-<img src="/./images/blog/./79722ndf.png" alt="./images/blog/./79722ndf.png" />
-</p>
-
-<p>
-如截图中所示，除了记录当前任务，还能记录一些其它内容。而这些功能都可以通过快捷键来很方便的调用。
-</p>
-<p>
-当然，Vitamin-R还有一些很有用的功能，比如噪声发生器(Noise Machine)。可以让用户在安静的工作环境中设置一些噪音，模拟自然界的声音，以让用户更关注工作的内容。
-</p>
-<p>
-好了，就介绍到这里。还是那句话，软件本身使用很简单，设置项也不多，至于值不值20刀的价格就见仁见智了，不过2刀是绝对值了:)
-</p>
+</div>
+</div>
 </div>
 
 
@@ -178,12 +224,12 @@ Vitamin-R运行起来的界面非常简单，运行时会在菜单栏上出来�
   
 
 
-<time datetime="2012-10-14T21:24:00+08:00" pubdate data-updated="true">2012年10月14日</time>
+<time datetime="2012-11-25T00:02:00+08:00" pubdate data-updated="true">2012年11月25日</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/GTD/'>GTD</a>, <a class='category' href='/blog/categories/杂谈/'>杂谈</a>, <a class='category' href='/blog/categories/生活/'>生活</a>
+    <a class='category' href='/blog/categories/Android/'>Android</a>, <a class='category' href='/blog/categories/Linux/'>Linux</a>, <a class='category' href='/blog/categories/开发/'>开发</a>
   
 </span>
 
@@ -217,7 +263,7 @@ Vitamin-R运行起来的界面非常简单，运行时会在菜单栏上出来�
   
 
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -231,10 +277,8 @@ Vitamin-R运行起来的界面非常简单，运行时会在菜单栏上出来�
     
     <p class="meta">
       
-        <a class="basic-alignment left articlenav" href="/blog/2012/10/11/gei-octopressde-rssshu-chu-tian-jia-zuo-zhe-xin-xi/" title="Previous Post: 给Octopress的RSS输出中添加文章作者信息">&laquo; 给Octopress的RSS输出中添加文章作者信息</a>
+        <a class="basic-alignment left articlenav" href="/blog/2012/11/18/jin-qi-de-fan-nao/" title="Previous Post: 近期的烦恼">&laquo; 近期的烦恼</a>
       
-      
-        <a class="basic-alignment right articlenav" href="/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/" title="Next Post: 小脚本帮大忙">小脚本帮大忙 &raquo;</a>
       
     </p>
   </footer>
@@ -374,8 +418,8 @@ Vitamin-R运行起来的界面非常简单，运行时会在菜单栏上出来�
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/';
-        var disqus_url = 'http://blog.xeonxu.info/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/';
+        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/';
+        var disqus_url = 'http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/';
         var disqus_script = 'embed.js';
       
     (function () {
