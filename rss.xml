@@ -4,8 +4,153 @@
     <description><![CDATA[不停地疯]]></description>
     <title><![CDATA[不停地疯]]></title>
     <link>http://blog.xeonxu.info/</link>
-    <pubDate>2012-12-02T15:44:26+08:00</pubDate>
+    <pubDate>2012-12-03T22:57:36+08:00</pubDate>
 
+    
+    <item>
+      <description>
+	<![CDATA[
+		 <p>
+之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的<a href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">文章</a> ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是，当你将模块从内核中卸载后，系统将无法再次注册内核中原有的驱动，导致相应设备无法使用。今天补充的方法可以在挂载模块时使用模块内的设备驱动，而在卸载后恢复回系统原来的驱动。
+</p>
+<p>
+内容相当简单，上次我们已经可以通过内核提供的接口函数，找到相应I2C总线相应地址I2C设备的I2C client结构指针。而拥有该指针后，其实就可以做很多事了。比如调用 <code>i2c_master_send</code> 接口向该client指向的设备发送I2C命令。这样，如果需要扩展内核中原有的驱动程序，比如向procfs或sysfs中添加相应的用户空间接口等。一般可以在 <code>module_init</code> 中注册sysfs入口的操作函数，然后在操作函数中通过操作该client指针而实现一定的功能。这种方法可以沿用系统内核中原有的设备驱动，可以单纯添加一些系统驱动中没有的功能。
+</p>
+<p>
+除此之外，还有一种替换内核中现有驱动的方法。通过查阅源代码，可以发现内核中还提供一个 <code>device_reprobe(dev)</code> 的API，该函数接受一个device结构体指针，实现重新匹配设备驱动的操作。同时，I2C client结构体中也有相应的device结构体。我们知道Linux内核匹配I2C设备驱动是通过名称来进行匹配的，所以，我们的方法就是用Hack的方式将系统中获取到的I2C Client结构体的名称改为我们需要的名称。一般修改为我们模块中新建的驱动的名称，这样，当调用 <code>device_reprobe</code> 接口后，系统会将原有驱动remove并重新为相应I2C设备适配一个驱动程序。当然，没有出错的话，它会适配到我们修改的名称指向的驱动。如此，我们便可以在内核模块中编写独立的设备驱动程序了。以下是简单示例框架:
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_driver</span> <span class="n">my_driver</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">    <span class="p">.</span><span class="n">driver</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">        <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span>
+</span><span class="line">        <span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">THIS_MODULE</span><span class="p">,</span>
+</span><span class="line">    <span class="p">},</span>
+</span><span class="line">    <span class="p">.</span><span class="n">probe</span> <span class="o">=</span> <span class="n">my_probe</span><span class="p">,</span>
+</span><span class="line">    <span class="p">.</span><span class="n">remove</span> <span class="o">=</span> <span class="n">my_remove</span><span class="p">,</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_driver_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">ts_dev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">i2c_add_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">ts_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ts_dev</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Did not match the device name:1-0011!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="n">this_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">this_client</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
+</span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
+</span><span class="line">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">  <span class="nl">device_error_exit:</span>
+</span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line">    <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;ts i2c del driver&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+只需要实现其中的 <code>my_probe</code> , <code>my_remove</code> 等函数即可实现一个完整的驱动。需要注意的是一定要在调用 <code>device_reprobe</code> 接口之前将相应的设备驱动使用 <code>i2c_add_driver</code> 添加到系统中，否则重新适配中会找不到驱动。移除模块时，用同样的方法将I2C client的名称更改为系统中原有驱动的名称，并重新适配驱动，即可实现卸载模块后系统能够使用原有驱动的功能。示例如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">ORIGIN_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="o">&amp;</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">dev</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+最后需要注意，文中方法皆为本人翻查文档自己琢磨搞出来的，所以不排除存在隐患的可能，但在自己测试环境下使用中没有发现任何问题。如果有疑问，也希望各位看官能提出自己的看法。
+</p>
+
+		 <p class='post-footer'>
+  <h1>License</h1>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
+  Original link:
+  <a href='http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/'>http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/</a><br/>
+  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
+  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
+</p>
+
+	]]>
+      </description>
+      <title><![CDATA[获取并操作内核中已注册的I2C设备]]></title>
+      <link>http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/</link>
+      <pubDate>2012-12-03T00:00:00+08:00</pubDate>
+      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei</guid>
+
+      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
+      <author>
+	<name><![CDATA[Xeon Xu]]></name>
+	
+      </author>
+    </item>
     
     <item>
       <description>

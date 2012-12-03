@@ -1,0 +1,502 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>获取并操作内核中已注册的I2C设备 - 不停地疯</title>
+  <meta name="author" content="Xeon Xu">
+
+  
+  <meta name="description" content="之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的文章 ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="不停地疯" type="application/atom+xml">
+  <link href='http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-35590281-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <div id="logo">
+  	<div id="logoLeft">{</div>
+  	<div id="logoText">Noe</div>
+  	<div id="logoRight">}</div>
+  	<div class="clear"></div>
+  </div>
+  <h1><a href="/">不停地疯</a></h1>
+  
+    <h2>Work as a hacker, hack as a artist.</h2>
+  
+  <div class="clear"></div>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:blog.xeonxu.info" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">博客主页</a></li>
+  <li><a href="/blog/archives">存档列表</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">获取并操作内核中已注册的I2C设备</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-03T00:00:00+08:00" pubdate data-updated="true">2012年12月03日</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>
+之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的<a href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">文章</a> ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是，当你将模块从内核中卸载后，系统将无法再次注册内核中原有的驱动，导致相应设备无法使用。今天补充的方法可以在挂载模块时使用模块内的设备驱动，而在卸载后恢复回系统原来的驱动。
+</p>
+<p>
+内容相当简单，上次我们已经可以通过内核提供的接口函数，找到相应I2C总线相应地址I2C设备的I2C client结构指针。而拥有该指针后，其实就可以做很多事了。比如调用 <code>i2c_master_send</code> 接口向该client指向的设备发送I2C命令。这样，如果需要扩展内核中原有的驱动程序，比如向procfs或sysfs中添加相应的用户空间接口等。一般可以在 <code>module_init</code> 中注册sysfs入口的操作函数，然后在操作函数中通过操作该client指针而实现一定的功能。这种方法可以沿用系统内核中原有的设备驱动，可以单纯添加一些系统驱动中没有的功能。
+</p>
+<p>
+除此之外，还有一种替换内核中现有驱动的方法。通过查阅源代码，可以发现内核中还提供一个 <code>device_reprobe(dev)</code> 的API，该函数接受一个device结构体指针，实现重新匹配设备驱动的操作。同时，I2C client结构体中也有相应的device结构体。我们知道Linux内核匹配I2C设备驱动是通过名称来进行匹配的，所以，我们的方法就是用Hack的方式将系统中获取到的I2C Client结构体的名称改为我们需要的名称。一般修改为我们模块中新建的驱动的名称，这样，当调用 <code>device_reprobe</code> 接口后，系统会将原有驱动remove并重新为相应I2C设备适配一个驱动程序。当然，没有出错的话，它会适配到我们修改的名称指向的驱动。如此，我们便可以在内核模块中编写独立的设备驱动程序了。以下是简单示例框架:
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_driver</span> <span class="n">my_driver</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">    <span class="p">.</span><span class="n">driver</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">        <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span>
+</span><span class="line">        <span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">THIS_MODULE</span><span class="p">,</span>
+</span><span class="line">    <span class="p">},</span>
+</span><span class="line">    <span class="p">.</span><span class="n">probe</span> <span class="o">=</span> <span class="n">my_probe</span><span class="p">,</span>
+</span><span class="line">    <span class="p">.</span><span class="n">remove</span> <span class="o">=</span> <span class="n">my_remove</span><span class="p">,</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_driver_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">ts_dev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">i2c_add_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">ts_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ts_dev</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Did not match the device name:1-0011!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="n">this_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">this_client</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
+</span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
+</span><span class="line">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">  <span class="nl">device_error_exit:</span>
+</span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line">    <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;ts i2c del driver&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+只需要实现其中的 <code>my_probe</code> , <code>my_remove</code> 等函数即可实现一个完整的驱动。需要注意的是一定要在调用 <code>device_reprobe</code> 接口之前将相应的设备驱动使用 <code>i2c_add_driver</code> 添加到系统中，否则重新适配中会找不到驱动。移除模块时，用同样的方法将I2C client的名称更改为系统中原有驱动的名称，并重新适配驱动，即可实现卸载模块后系统能够使用原有驱动的功能。示例如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">ORIGIN_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="o">&amp;</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">dev</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+最后需要注意，文中方法皆为本人翻查文档自己琢磨搞出来的，所以不排除存在隐患的可能，但在自己测试环境下使用中没有发现任何问题。如果有疑问，也希望各位看官能提出自己的看法。
+</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Xeon Xu</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-03T00:00:00+08:00" pubdate data-updated="true">2012年12月03日</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/Android/'>Android</a>, <a class='category' href='/blog/categories/Linux/'>Linux</a>, <a class='category' href='/blog/categories/开发/'>开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <script type="text/javascript" charset="utf-8">
+(function(){
+  var _w = 90 , _h = 24;
+  var param = {
+    url:location.href,
+    type:'2',
+    count:'1', /**是否显示分享数，1显示(可选)*/
+    appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+    title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+    pic:'', /**分享图片的路径(可选)*/
+    ralateUid:'1962652747', /**关联用户的UID，分享微博会@该用户(可选)*/
+	language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+    rnd:new Date().valueOf()
+  }
+  var temp = [];
+  for( var p in param ){
+    temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+  }
+  document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="http://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+})()
+</script>
+
+  
+
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+  <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left articlenav" href="/blog/2012/12/02/raspberry-pishang-da-jian-zi-dong-sshdai-li/" title="Previous Post: Raspberry Pi上搭建自动ssh代理">&laquo; Raspberry Pi上搭建自动ssh代理</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img src="http://tp4.sinaimg.cn/1962652747/180/5605056993/1" alt="">
+  <p>徐至强，码奴一枚，抱怨多，脾气差。做过车载，数字电视，手机三方，MTK，MStar，Android。现就职于上海斐讯数据通信技术有限公司(Phicomm)，在移动终端产品研发中当一名手机驱动工程师。</p>
+</section>
+<section>
+<h1>License</h1>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。
+</section>
+<section>
+ <h1>Categories</h1>
+ <ul id="categories">
+ <li class='category'><a href='/blog/categories/Android/'>Android (7)</a></li>
+<li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
+<li class='category'><a href='/blog/categories/GTD/'>GTD (1)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (11)</a></li>
+<li class='category'><a href='/blog/categories/Octopress/'>Octopress (4)</a></li>
+<li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
+<li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
+<li class='category'><a href='/blog/categories/RaspberryPi/'>RaspberryPi (2)</a></li>
+<li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
+<li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
+<li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (9)</a></li>
+<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (5)</a></li>
+<li class='category'><a href='/blog/categories/生活/'>生活 (3)</a></li>
+<li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
+<li class='category'><a href='/blog/categories/随笔/'>随笔 (3)</a></li>
+
+ </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/">获取并操作内核中已注册的I2C设备</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/12/02/raspberry-pishang-da-jian-zi-dong-sshdai-li/">Raspberry Pi上搭建自动ssh代理</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">在Linux内核模块中操作I2C设备</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/11/18/jin-qi-de-fan-nao/">近期的烦恼</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan/">使用tmux改进终端体验</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/xeonxu">@xeonxu</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xeonxu',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("xeonxu", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/xeonxu" class="twitter-follow-button" data-show-count="false">Follow @xeonxu</a>
+  
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Xeon Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'xeonxu';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/';
+        var disqus_url = 'http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

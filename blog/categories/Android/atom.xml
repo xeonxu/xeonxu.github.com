@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/Android/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2012-12-02T15:44:26+08:00</updated>
+  <updated>2012-12-03T22:57:36+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,128 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[获取并操作内核中已注册的I2C设备]]></title>
+    <link href="http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/"/>
+    <updated>2012-12-03T00:00:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei</id>
+    <content type="html"><![CDATA[<p>
+之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的<a href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">文章</a> ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是，当你将模块从内核中卸载后，系统将无法再次注册内核中原有的驱动，导致相应设备无法使用。今天补充的方法可以在挂载模块时使用模块内的设备驱动，而在卸载后恢复回系统原来的驱动。
+</p>
+<p>
+内容相当简单，上次我们已经可以通过内核提供的接口函数，找到相应I2C总线相应地址I2C设备的I2C client结构指针。而拥有该指针后，其实就可以做很多事了。比如调用 <code>i2c_master_send</code> 接口向该client指向的设备发送I2C命令。这样，如果需要扩展内核中原有的驱动程序，比如向procfs或sysfs中添加相应的用户空间接口等。一般可以在 <code>module_init</code> 中注册sysfs入口的操作函数，然后在操作函数中通过操作该client指针而实现一定的功能。这种方法可以沿用系统内核中原有的设备驱动，可以单纯添加一些系统驱动中没有的功能。
+</p>
+<p>
+除此之外，还有一种替换内核中现有驱动的方法。通过查阅源代码，可以发现内核中还提供一个 <code>device_reprobe(dev)</code> 的API，该函数接受一个device结构体指针，实现重新匹配设备驱动的操作。同时，I2C client结构体中也有相应的device结构体。我们知道Linux内核匹配I2C设备驱动是通过名称来进行匹配的，所以，我们的方法就是用Hack的方式将系统中获取到的I2C Client结构体的名称改为我们需要的名称。一般修改为我们模块中新建的驱动的名称，这样，当调用 <code>device_reprobe</code> 接口后，系统会将原有驱动remove并重新为相应I2C设备适配一个驱动程序。当然，没有出错的话，它会适配到我们修改的名称指向的驱动。如此，我们便可以在内核模块中编写独立的设备驱动程序了。以下是简单示例框架:
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_driver</span> <span class="n">my_driver</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">.</span><span class="n">driver</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">THIS_MODULE</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="p">.</span><span class="n">probe</span> <span class="o">=</span> <span class="n">my_probe</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">.</span><span class="n">remove</span> <span class="o">=</span> <span class="n">my_remove</span><span class="p">,</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_driver_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">ts_dev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">i2c_add_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">ts_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ts_dev</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Did not match the device name:1-0011!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="n">this_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">this_client</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nl">device_error_exit:</span>
+</span><span class='line'>    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;ts i2c del driver&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+只需要实现其中的 <code>my_probe</code> , <code>my_remove</code> 等函数即可实现一个完整的驱动。需要注意的是一定要在调用 <code>device_reprobe</code> 接口之前将相应的设备驱动使用 <code>i2c_add_driver</code> 添加到系统中，否则重新适配中会找不到驱动。移除模块时，用同样的方法将I2C client的名称更改为系统中原有驱动的名称，并重新适配驱动，即可实现卸载模块后系统能够使用原有驱动的功能。示例如下：
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">name</span><span class="p">,</span> <span class="n">ORIGIN_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">dev</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+最后需要注意，文中方法皆为本人翻查文档自己琢磨搞出来的，所以不排除存在隐患的可能，但在自己测试环境下使用中没有发现任何问题。如果有疑问，也希望各位看官能提出自己的看法。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[在Linux内核模块中操作I2C设备]]></title>
@@ -535,58 +657,6 @@
 
 <p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 修改震动设置后，必须同时编译Contact和Phone，并同时更新到手机上才能生效，具体原因不明白，感觉很怪异。
 </p>
-
-
-
-</div>
-</div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[高通编译环境一键安装包]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/"/>
-    <updated>2012-09-09T14:22:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao</id>
-    <content type="html"><![CDATA[<p>
-之前一直都在Marvell平台上开发Android，Marvell平台的CP只Release二进制文件，所以开发过程中一般只需要修改并编译AP端的代码就可以了。最近一个月，由于项目需要，开始转到开发高通平台的Android。初步接触下来，高通平台和Marvell平台有很大不同。最显著一点就是，Marvell平台中是AP启动起来后再挂CP跑；而高通平台则是先启动CP<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，然后CP初始化AP并加载程序运行。另一方面，高通的CP相比AP有更大的控制权限，像对GPIO，PMIC的控制等都是CP进行控制，AP端如果需要对这些资源进行操作，则必须先由CP程序分配相应权限给AP才可以。AP和CP的交互则使用共享内存的方式进行同步。
-</p>
-<p>
-高通这种架构特点注定了OEM商需要同时修改AP和CP的代码，所以高通的软件包在Release的时候是分为AP包和MP<sup><a class="footref" name="fnr.1.2" href="#fn.1">1</a></sup>包的。AP包中包括Android，Kernel，AP端的bootloader lk等；而MP包中则包括AMSS，qcsbl，oemsbl等。AP包的编译环境一般都架设在Linux下，使用Android的官方搭建方法就可以搞定。而MP包属于高通的特有产物，需要按照高通的搭建文档来进行，使用RVCT编译器，python以及perl环境。实际搭建下来，MP包的编译环境极为繁琐，从头摸索搭建，没有3、4天是不可能完成的。即便有人之前搭建过，文档工具都准备好的情况下，搭建一个可用的环境也至少需要4个小时。为了方便以后开发人员更加方便快捷的搭建开发环境，我花了2个周末的时间，搭建调试并打包制作了高通编译环境的一键安装包。
-</p>
-<p>
-该一键安装包分为Windows版和Linux版。是的，你没有看错，还有Linux版本的编译环境！用过的人都懂的，Linux版的编译环境比Windows编译环境的效率高的不是一点两点<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>。不过有一点需要强调： <b>我制作的编译包中，RVCT的版本不是高通官方建议的版本</b> 。高通官方文档中说，编译环境需要RVCT 2.2 593版本。而我制作的编译包中RVCT版本分别是Windows 2.2 616，Linux 2.2 686版本。修正版本号比高通官方建议的高，但是高通官方对于高版本的编译环境是否可用没有明确的答复，只是说没有测试过<sup><a class="footref" name="fnr.3" href="#fn.3">3</a></sup>。我个人简单测试过，分别使用593版本的RVCT，616版本RVCT和686版本RVCT编译同一套代码，对编译出来的bin文件进行比较，发现除了日期和签名部分有不同外，其余部分都是相同的。另外，这三种编译器编译出来的文件分别刷到手机上，也都可以正常运行。但是， <b>即便如此我也还是不能保证编译环境是完全没有问题的</b> 。所以，对于要求比较高的朋友，可以在研发中使用我的环境，正式发布版本的时候使用高通官方建议的593版本进行编译。
-</p>
-<p>
-最后放出下载地址（由于CSDN只有60M的上传权限，所以只有Linux环境了，并且需要5个资源分。国外下载地址没有任何限制）：
-</p>
-<p>
-国内下载：
-</p>
-<p>
-<a href="http://download.csdn.net/detail/noexu/4558455">Linux编译环境</a>
-</p>
-<p>
-国外下载：
-</p>
-<p>
-<a href="https://docs.google.com/open?id=0B5GJiOxO7LkWT0F3cDhyTG5ZR2s">Linux编译环境</a>
-<a href="https://docs.google.com/open?id=0B5GJiOxO7LkWUkp6N0RCbHF2SWc">Windows编译环境</a>
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 高通平台中将CP称为MP，本质是一样的。
-</p>
-
-
-<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 相同配置的机器至少有5:1的效率，windows上编译需要50分钟的代码，Linux上只需要10分钟。
-</p>
-
-
-<p class="footnote"><sup><a class="footnum" name="fn.3" href="#fnr.3">3</a></sup> 根据高通文档的编写时间点以及国企一贯保守的工作习惯上来推断，我猜测高版本应该是没有问题的，因为文档写作之初RVCT 616版本的补丁还没有发布，只是高通方面没人更新。所以，流传到现在就是只能使用593版本的RVCT了。当然这只是我本人的推断。
-</p>
-
 
 
 

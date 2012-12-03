@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="这是一篇 功夫网 系列文章，本篇作为该系列文章的第一篇，一直拖了好久才真正开始动笔。这篇文章中，我将要介绍的是如何在Raspberry Pi上搭建基于SSH连接的Socks代理服务器。关于我为什么使用Raspberry Pi，是因为我觉得这玩意小巧，携带方便，而且买了它不用也是闲着。 &hellip;">
+  <meta name="description" content="之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的文章 ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,163 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/">获取并操作内核中已注册的I2C设备</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-03T00:00:00+08:00" pubdate data-updated="true">2012年12月03日</time>
+        
+         | <a href="/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的<a href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">文章</a> ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是，当你将模块从内核中卸载后，系统将无法再次注册内核中原有的驱动，导致相应设备无法使用。今天补充的方法可以在挂载模块时使用模块内的设备驱动，而在卸载后恢复回系统原来的驱动。
+</p>
+<p>
+内容相当简单，上次我们已经可以通过内核提供的接口函数，找到相应I2C总线相应地址I2C设备的I2C client结构指针。而拥有该指针后，其实就可以做很多事了。比如调用 <code>i2c_master_send</code> 接口向该client指向的设备发送I2C命令。这样，如果需要扩展内核中原有的驱动程序，比如向procfs或sysfs中添加相应的用户空间接口等。一般可以在 <code>module_init</code> 中注册sysfs入口的操作函数，然后在操作函数中通过操作该client指针而实现一定的功能。这种方法可以沿用系统内核中原有的设备驱动，可以单纯添加一些系统驱动中没有的功能。
+</p>
+<p>
+除此之外，还有一种替换内核中现有驱动的方法。通过查阅源代码，可以发现内核中还提供一个 <code>device_reprobe(dev)</code> 的API，该函数接受一个device结构体指针，实现重新匹配设备驱动的操作。同时，I2C client结构体中也有相应的device结构体。我们知道Linux内核匹配I2C设备驱动是通过名称来进行匹配的，所以，我们的方法就是用Hack的方式将系统中获取到的I2C Client结构体的名称改为我们需要的名称。一般修改为我们模块中新建的驱动的名称，这样，当调用 <code>device_reprobe</code> 接口后，系统会将原有驱动remove并重新为相应I2C设备适配一个驱动程序。当然，没有出错的话，它会适配到我们修改的名称指向的驱动。如此，我们便可以在内核模块中编写独立的设备驱动程序了。以下是简单示例框架:
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_driver</span> <span class="n">my_driver</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">    <span class="p">.</span><span class="n">driver</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">        <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span>
+</span><span class="line">        <span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">THIS_MODULE</span><span class="p">,</span>
+</span><span class="line">    <span class="p">},</span>
+</span><span class="line">    <span class="p">.</span><span class="n">probe</span> <span class="o">=</span> <span class="n">my_probe</span><span class="p">,</span>
+</span><span class="line">    <span class="p">.</span><span class="n">remove</span> <span class="o">=</span> <span class="n">my_remove</span><span class="p">,</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_driver_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">ts_dev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">i2c_add_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">ts_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ts_dev</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Did not match the device name:1-0011!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="n">this_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">this_client</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
+</span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
+</span><span class="line">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">  <span class="nl">device_error_exit:</span>
+</span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line">    <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;ts i2c del driver&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+只需要实现其中的 <code>my_probe</code> , <code>my_remove</code> 等函数即可实现一个完整的驱动。需要注意的是一定要在调用 <code>device_reprobe</code> 接口之前将相应的设备驱动使用 <code>i2c_add_driver</code> 添加到系统中，否则重新适配中会找不到驱动。移除模块时，用同样的方法将I2C client的名称更改为系统中原有驱动的名称，并重新适配驱动，即可实现卸载模块后系统能够使用原有驱动的功能。示例如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">ORIGIN_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="o">&amp;</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">dev</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+最后需要注意，文中方法皆为本人翻查文档自己琢磨搞出来的，所以不排除存在隐患的可能，但在自己测试环境下使用中没有发现任何问题。如果有疑问，也希望各位看官能提出自己的看法。
+</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1727,125 +1884,6 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/10/01/wei-tomatotian-jia-yong-hu/">为Tomato添加用户</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-01T21:21:00+08:00" pubdate data-updated="true">2012年10月01日</time>
-        
-         | <a href="/blog/2012/10/01/wei-tomatotian-jia-yong-hu/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-手上的RT-N16跑Tomato系统已经两年有余了，两年来Tomato系统没有让我失望过，一直提供着稳定高速的网络服务，此外它还提供了内网文件服务，P2P下载以及科学上网代理等重要功能。最近，本人又败了一个小玩意：<a href="http://www.raspberrypi.org">Raspberry Pi</a> ， 税前价格$25，到手¥310。入手后，我在上面安装了ArmedSlack，运行的非常稳定，很不错。于是，本人决定将其打造为一个随身的功能强大的小电脑，包括随插随用的科学上网代理。基本思路是Raspberry Pi启动后通过公钥认证自动连接到家中的RT-N16路由器上，然后通过ssh转发相应端口，即可实现科学上网。不过，这个方法中有一个隐患：因为Tomato默认只提供root/admin账户，权限太大，如果Raspberry Pi使用这个账户进行连接，总是有点不放心。于是，我决定给Tomato系统添加新的用户。
-</p>
-<p>
-Tomato默认并不支持添加账户，即便通过optware安装了adduser后也由于没有passwd命令而失败。不过通过网络搜索，还是让我找到了一个可以添加用户的方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>。我用如下的命令在Tomato中建立了一个名为sshuser的用户：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>添加用户  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">UNAM</span><span class="o">=</span>sshuser
-</span><span class="line"><span class="nv">RNAM</span><span class="o">=</span><span class="s2">&quot;For Login Only&quot;</span>
-</span><span class="line"><span class="nv">UNUM</span><span class="o">=</span>200
-</span><span class="line"><span class="nv">UGRP</span><span class="o">=</span><span class="nv">$UNUM</span>
-</span><span class="line"><span class="c">#UGRP=0</span>
-</span><span class="line"><span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UNUM:$UGRP:$RNAM:/tmp:/bin/sh&quot;</span> &gt;&gt; /etc/passwd
-</span><span class="line"><span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UNUM:$UGRP:$RNAM:/home/$UNAM:/bin/sh&quot;</span> &gt;&gt; /etc/passwd.custom
-</span><span class="line"><span class="o">[[</span> <span class="nv">$UGRP</span> -ne 0 <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UGRP:&quot;</span> &gt;&gt;/etc/group
-</span><span class="line"><span class="o">[[</span> <span class="nv">$UGRP</span> -ne 0 <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UGRP:&quot;</span> &gt;&gt;/etc/group.custom
-</span><span class="line">sed -n -e <span class="s2">&quot;s,^root:,$UNAM:,p&quot;</span> &lt; /etc/shadow &gt;&gt; /etc/shadow.custom
-</span><span class="line">
-</span><span class="line">chmod 777 /tmp/home
-</span><span class="line">ssh <span class="nv">$UNAM</span>@localhost <span class="s2">&quot;mkdir /home/$UNAM;touch /home/$UNAM/.profile &amp;&amp; echo success&quot;</span>
-</span><span class="line"><span class="c"># press return for the password prompt, you should see the word &quot;success&quot; reported</span>
-</span><span class="line">
-</span><span class="line">chmod 755 /tmp/home
-</span><span class="line">
-</span><span class="line">nvram setfile2nvram /etc/passwd.custom
-</span><span class="line">nvram setfile2nvram /etc/group.custom
-</span><span class="line">nvram setfile2nvram /etc/shadow.custom
-</span><span class="line">nvram setfile2nvram /home/<span class="nv">$UNAM</span>/.profile
-</span><span class="line">nvram commit
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-最后几句包含nvram的语句是将新建的几个 <code>.custom</code> 文件添加到nvram中，这样这些新添加的文件就可以在重启路由器后还能存在。然后，将以下三句添加到路由器设置中-&gt;脚本设置-&gt;初始化中：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>初始化用户  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">sed -i <span class="s2">&quot;/^sshuser:/d&quot;</span> /etc/passwd
-</span><span class="line">grep <span class="s2">&quot;^sshuser:&quot;</span> &lt; /etc/shadow.custom &gt;&gt; /etc/shadow
-</span><span class="line">grep <span class="s2">&quot;^sshuser:&quot;</span> &lt; /etc/passwd.custom &gt;&gt; /etc/passwd
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-如图：
-<img src="/./images/blog/./574rHz.png" alt="./images/blog/./574rHz.png" />
-新建的用户使用和root一样的密码，如果需要修改，需要相应修改 <code>/etc/shadow</code> 文件。新建用户登录后的效果入下图：
-<img src="/./images/blog/./574dRC.png" alt="./images/blog/./574dRC.png" />
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://tomatousb.org/tut:adding-your-own-users">http://tomatousb.org/tut:adding-your-own-users</a>
-</p>
-
-
-
-
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1868,10 +1906,10 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 <section>
  <h1>Categories</h1>
  <ul id="categories">
- <li class='category'><a href='/blog/categories/Android/'>Android (6)</a></li>
+ <li class='category'><a href='/blog/categories/Android/'>Android (7)</a></li>
 <li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
 <li class='category'><a href='/blog/categories/GTD/'>GTD (1)</a></li>
-<li class='category'><a href='/blog/categories/Linux/'>Linux (10)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (11)</a></li>
 <li class='category'><a href='/blog/categories/Octopress/'>Octopress (4)</a></li>
 <li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
 <li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
@@ -1879,7 +1917,7 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 <li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
 <li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
-<li class='category'><a href='/blog/categories/开发/'>开发 (8)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (9)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (5)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (3)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
@@ -1890,6 +1928,10 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/">获取并操作内核中已注册的I2C设备</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/12/02/raspberry-pishang-da-jian-zi-dong-sshdai-li/">Raspberry Pi上搭建自动ssh代理</a>
@@ -1905,10 +1947,6 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
     
       <li class="post">
         <a href="/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan/">使用tmux改进终端体验</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/10/29/zui-jin-kan-wan-de-liang-ben-shu/">最近看完的两本书</a>
       </li>
     
   </ul>
