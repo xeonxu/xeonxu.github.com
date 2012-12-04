@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="手上的RT-N16跑Tomato系统已经两年有余了，两年来Tomato系统没有让我失望过，一直提供着稳定高速的网络服务，此外它还提供了内网文件服务，P2P下载以及科学上网代理等重要功能。最近，本人又败了一个小玩意：Raspberry Pi ， 税前价格$25，到手¥310。入手后， &hellip;">
+  <meta name="description" content="最近接到一个任务，需要将Busybox环境移植到高通平台的Android项目上。Busybox的目标执行文件有现成编译好的，需要做的工作就是添加一个Android工程，将编译好的二进制文件拷贝到Android的文件系统中，同时还需要生成相应的Busybox命令链接。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,164 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/">在Android编译时建立符号链接</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-08T21:48:00+08:00" pubdate data-updated="true">2012年10月08日</time>
+        
+         | <a href="/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+最近接到一个任务，需要将Busybox环境移植到高通平台的Android项目上。Busybox的目标执行文件有现成编译好的，需要做的工作就是添加一个Android工程，将编译好的二进制文件拷贝到Android的文件系统中，同时还需要生成相应的Busybox命令链接。
+</p>
+<p>
+拷贝文件到指定目录在Android的编译系统中有现成的方法，使用下面这个方法即可：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>拷贝文件到指定目录  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="nv">LOCAL_PATH</span> <span class="o">:=</span> <span class="k">$(</span>call my-dir<span class="k">)</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># Add busybox environment zhiqiang.xu 2012.10.8</span>
+</span><span class="line"><span class="cp">include $(CLEAR_VARS)</span>
+</span><span class="line">LOCAL_MODULE :<span class="o">=</span> busybox_modules
+</span><span class="line">LOCAL_MODULE_STEM :<span class="o">=</span> busybox
+</span><span class="line">LOCAL_SRC_FILES :<span class="o">=</span> busybox
+</span><span class="line">LOCAL_MODULE_TAGS :<span class="o">=</span> eng
+</span><span class="line">LOCAL_MODULE_CLASS :<span class="o">=</span> EXECUTABLES
+</span><span class="line">LOCAL_MODULE_PATH :<span class="o">=</span> <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox
+</span><span class="line"><span class="cp">include $(BUILD_PREBUILT)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+由于Busybox环境主要用于工程调试，所以模块设置为只在eng编译模式下有效。按照以上这段设置，可以将busybox执行文件拷贝到Android文件系统中的 <code>/system/busybox</code> 目录下。
+</p>
+<p>
+而对于生成链接，之前没有接触过。不过在搜索调查了已有的Android工程文件之后，发现系统中也提供了现成的方法，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>recovery使用的软链生成方法  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="nv">BUSYBOX_LINKS</span> <span class="o">:=</span> <span class="k">$(</span>shell cat external/busybox/busybox-minimal.links<span class="k">)</span>
+</span><span class="line"><span class="cp">ifndef BOARD_HAS_SMALL_RECOVERY</span>
+</span><span class="line">exclude :<span class="o">=</span> tune2fs
+</span><span class="line"><span class="cp">ifeq ($(BOARD_HAS_LARGE_FILESYSTEM),true)</span>
+</span><span class="line">exclude +<span class="o">=</span> mke2fs
+</span><span class="line"><span class="cp">endif</span>
+</span><span class="line"><span class="cp">endif</span>
+</span><span class="line">RECOVERY_BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_RECOVERY_ROOT_OUT<span class="k">)</span>/sbin/,<span class="k">$(</span>filter-out <span class="k">$(</span>exclude<span class="k">)</span>,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">))))</span>
+</span><span class="line"><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: BUSYBOX_BINARY :<span class="o">=</span> busybox
+</span><span class="line"><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: <span class="k">$(</span>LOCAL_INSTALLED_MODULE<span class="k">)</span>
+</span><span class="line">        @echo <span class="s2">&quot;Symlink: $@ -&gt; $(BUSYBOX_BINARY)&quot;</span>
+</span><span class="line">        @mkdir -p <span class="k">$(</span>dir <span class="nv">$@</span><span class="k">)</span>
+</span><span class="line">        @rm -rf <span class="nv">$@</span>
+</span><span class="line">        <span class="k">$(</span>hide<span class="k">)</span> ln -sf <span class="k">$(</span>BUSYBOX_BINARY<span class="k">)</span> <span class="nv">$@</span>
+</span><span class="line">
+</span><span class="line">ALL_DEFAULT_INSTALLED_MODULES +<span class="o">=</span> <span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+实现方法使用了标准的Makefile目标，在 <code>$(RECOVERY_BUSYBOX_SYMLINKS)</code> 目标下生成相应链接，看起来似乎是只要将Makefile的目标添加到 <code>ALL_DEFAULT_INSTALLED_MODULES</code> 这个变量后，编译的时候就会按照Makefile的标准生成目标。实验后确实可行，不过同时我也发现了一个不足。那就是使用这种方法后，通过mm/mmm命令进行模块编译的时候是没法正确执行的。换言之， <code>ALL_DEFAULT_INSTALLED_MODULES</code> 变量只有在系统完全编译的时候才会被调用。为此，领悟范例的精神后，自己改了一下实现方法，如下：
+</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>修改后的生成软链的方法  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="cp">ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">define _make_link</span>
+</span><span class="line">   <span class="k">$(</span>shell <span class="nb">echo</span> <span class="s2">&quot;Symlink: $(1) -&gt; $(2)&quot;</span><span class="k">)</span>
+</span><span class="line">   <span class="k">$(</span>shell mkdir -p <span class="k">$(</span>dir <span class="k">$(</span>1<span class="k">)))</span>
+</span><span class="line">   <span class="k">$(</span>shell rm -rf <span class="k">$(</span>1<span class="k">))</span>
+</span><span class="line">   <span class="k">$(</span>shell ln -sf <span class="k">$(</span>2<span class="k">)</span> <span class="k">$(</span>1<span class="k">))</span>
+</span><span class="line"><span class="cp">endef</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># Add busybox environment zhiqiang.xu 2012.10.8</span>
+</span><span class="line"><span class="c"># Now let&#39;s do busybox symlinks</span>
+</span><span class="line"><span class="nv">BUSYBOX_LINKS</span> <span class="o">:=</span> <span class="k">$(</span>shell cat <span class="k">$(</span>LOCAL_PATH<span class="k">)</span>/busybox.links<span class="k">)</span>
+</span><span class="line">BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox/,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">)))</span>
+</span><span class="line">BUSYBOX_BINARY :<span class="o">=</span> /system/busybox/<span class="k">$(</span>LOCAL_SRC_FILES<span class="k">)</span>
+</span><span class="line"><span class="k">$(</span>foreach _item, <span class="k">$(</span>BUSYBOX_SYMLINKS<span class="k">)</span>, <span class="se">\</span>
+</span><span class="line">       <span class="k">$(</span><span class="nb">eval</span> <span class="k">$(</span>call _make_link,<span class="k">$(</span>_item<span class="k">)</span>,<span class="k">$(</span>BUSYBOX_BINARY<span class="k">))))</span>
+</span><span class="line">
+</span><span class="line">_make_link :<span class="o">=</span>
+</span><span class="line"><span class="cp">endif</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>
+修改后的方法使用了自定义宏，不论是全系统编译还是使用mm/mmm进行模块编译，每次编译的时候宏都会展开执行。同时为了区分编译模式，我又添加了相应的判断宏 <code>ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))</code> 将执行部分包括在里面。实验下来效果良好，可以根据当前设定的编译模式生成或者不生成相应软链。
+最后，发现一点，我修改的这个方法由于没有依赖目标，所以每次编译的时候都会执行一遍，编译效率不高，所以这种结构不能用于大负荷的处理工作。好在生成软链不是多重的工作，这么用用也无什么大碍。
+</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2108,10 +2266,10 @@ sys     1m20.240s
 <section>
  <h1>Categories</h1>
  <ul id="categories">
- <li class='category'><a href='/blog/categories/Android/'>Android (7)</a></li>
+ <li class='category'><a href='/blog/categories/Android/'>Android (8)</a></li>
 <li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
 <li class='category'><a href='/blog/categories/GTD/'>GTD (1)</a></li>
-<li class='category'><a href='/blog/categories/Linux/'>Linux (11)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (12)</a></li>
 <li class='category'><a href='/blog/categories/Octopress/'>Octopress (4)</a></li>
 <li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
 <li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
@@ -2119,7 +2277,7 @@ sys     1m20.240s
 <li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
 <li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
-<li class='category'><a href='/blog/categories/开发/'>开发 (9)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (10)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (5)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (3)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
@@ -2130,6 +2288,10 @@ sys     1m20.240s
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/">在高通平台Android环境下编译内核模块</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/">获取并操作内核中已注册的I2C设备</a>
@@ -2145,10 +2307,6 @@ sys     1m20.240s
     
       <li class="post">
         <a href="/blog/2012/11/18/jin-qi-de-fan-nao/">近期的烦恼</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan/">使用tmux改进终端体验</a>
       </li>
     
   </ul>

@@ -4,8 +4,90 @@
     <description><![CDATA[不停地疯]]></description>
     <title><![CDATA[不停地疯]]></title>
     <link>http://blog.xeonxu.info/</link>
-    <pubDate>2012-12-03T22:57:36+08:00</pubDate>
+    <pubDate>2012-12-04T23:40:48+08:00</pubDate>
 
+    
+    <item>
+      <description>
+	<![CDATA[
+		 <p>
+高通Android环境中Linux内核会作为Android的一部分进行编译，直接使用make即可一次性从头编到尾。而有的平台比如Marvell，内核的编译操作相对比较独立，必须使用标准的内核编译命令进行单独编译。一般来说，用高通的这种方式比较傻瓜化，一步到底的感觉；而用Marvell的方式用户干预较多，灵活性也更大。当然这里不是比较他们孰优孰劣，对我来说这两种方式各有千秋。在遇到具体问题时，有时还会觉得独立编译内核的方式比较方便，比如编译内核模块这一点上。
+</p>
+<p>
+编译内核模块之前必须先编译内核，编译内核之前必须先指定内核配置。在独立编译内核情况下，编译一遍内核后，可以直接使用 <code>make module</code> 来编译内核模块，如果修改了相应模块文件，使用相同的命令也能很快的进行增量编译。而在高通环境下，由于内核的编译过程已经被集成到Android的编译中，所以每次编译内核或者内核模块时，都必须通过Android的编译环境进行启用。虽然Android提供诸如 <code>make bootimage</code> 命令，可以只编译bootimage相关内容，但是Android庞大的编译体系在初始化时也会占用很多的时间。前段时间在调试一个独立的内核模块时就一直被这个问题困扰着，每次修改模块代码后都必须通过 <code>make bootimage</code> 来编译。虽然只有一个文件，但是每次编译都花费至少1min30sec，严重影响了开发进度。为此，自己参考内核模块独立编译的Makefile和Android的环境特点写了一个内核模块编译Makefile。
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="c"># Author: zhiqiang.xu</span>
+</span><span class="line"><span class="c"># EMail:  xeonxu@gmail.com</span>
+</span><span class="line"><span class="nv">CROSS_ARCH</span><span class="o">:=</span><span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;$(ARM_EABI_TOOLCHAIN)/arm-eabi-&quot;</span>
+</span><span class="line">KDIR:<span class="o">=</span><span class="k">$(</span>ANDROID_PRODUCT_OUT<span class="k">)</span>/obj/KERNEL_OBJ/
+</span><span class="line">PWD:<span class="o">=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
+</span><span class="line">
+</span><span class="line">obj-m:<span class="o">=</span> my_module.o
+</span><span class="line">.PHONY: modules package clean
+</span><span class="line">all:package
+</span><span class="line">modules:
+</span><span class="line">    @if <span class="o">[</span> <span class="s2">&quot;$(ANDROID_BUILD_TOP)_yes&quot;</span> <span class="o">=</span> <span class="s2">&quot;_yes&quot;</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;You have to run \&quot;. build/envsetup.sh\&quot; to init enviroment first. \nAnd then you have to run</span>
+</span><span class="line"><span class="s2">\&quot;choosecombo\&quot; to setup the project.&quot;</span><span class="o">&amp;&amp;</span><span class="nb">exit </span>1; <span class="k">fi</span>
+</span><span class="line">    @if <span class="o">[</span> ! -d <span class="k">$(</span>KDIR<span class="k">)</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;Build kernle first.&quot;</span><span class="o">&amp;&amp;</span><span class="nb">cd</span> <span class="k">$(</span>ANDROID_BUILD_TOP<span class="k">)</span><span class="o">&amp;&amp;</span>make bootimage&amp;&amp;cd -; <span class="k">fi</span>
+</span><span class="line">    <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>CROSS_ARCH<span class="k">)</span> -C <span class="k">$(</span>KDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span><span class="line">
+</span><span class="line">package:modules
+</span><span class="line">    @mkdir -p ./package
+</span><span class="line">    @cp <span class="k">$(</span>obj-m:.o<span class="o">=</span>.ko<span class="k">)</span> ./package
+</span><span class="line">
+</span><span class="line">clean:
+</span><span class="line">    rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers package
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+该Makefile默认会将当前目录下的 <code>my_module.c</code> 文件编译为内核模块。同时，在编译时会强制检查Android的环境是否正确配置，如果没有配置它会进行相应提示后退出编译处理。编译模块时使用的内核配置是编译Android时指定项目所配置的内核配置。如果内核还没有编译，则在编译模块之前会自动编译内核主体。如果一切OK，则每次只会编译修改过的模块文件。编译好后会将模块文件单独拷贝到当前目录下的 <code>package</code> 目录中，方便使用。
+</p>
+<p>
+使用该编译脚本后，模块的编写调试效率高了不少，至少每次编译模块都可以在5sec内搞定了。加上上机实测调试，也能在30sec内完成。生命很可贵，像我一样当个懒人吧。
+</p>
+
+		 <p class='post-footer'>
+  <h1>License</h1>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
+  Original link:
+  <a href='http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/'>http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/</a><br/>
+  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
+  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
+</p>
+
+	]]>
+      </description>
+      <title><![CDATA[在高通平台Android环境下编译内核模块]]></title>
+      <link>http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/</link>
+      <pubDate>2012-12-04T22:14:00+08:00</pubDate>
+      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai</guid>
+
+      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
+      <author>
+	<name><![CDATA[Xeon Xu]]></name>
+	
+      </author>
+    </item>
     
     <item>
       <description>

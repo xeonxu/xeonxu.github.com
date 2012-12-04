@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的文章 ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是 &hellip;">
+  <meta name="description" content="高通Android环境中Linux内核会作为Android的一部分进行编译，直接使用make即可一次性从头编到尾。而有的平台比如Marvell，内核的编译操作相对比较独立，必须使用标准的内核编译命令进行单独编译。一般来说，用高通的这种方式比较傻瓜化，一步到底的感觉； &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,100 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/">在高通平台Android环境下编译内核模块</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-04T22:14:00+08:00" pubdate data-updated="true">2012年12月04日</time>
+        
+         | <a href="/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+高通Android环境中Linux内核会作为Android的一部分进行编译，直接使用make即可一次性从头编到尾。而有的平台比如Marvell，内核的编译操作相对比较独立，必须使用标准的内核编译命令进行单独编译。一般来说，用高通的这种方式比较傻瓜化，一步到底的感觉；而用Marvell的方式用户干预较多，灵活性也更大。当然这里不是比较他们孰优孰劣，对我来说这两种方式各有千秋。在遇到具体问题时，有时还会觉得独立编译内核的方式比较方便，比如编译内核模块这一点上。
+</p>
+<p>
+编译内核模块之前必须先编译内核，编译内核之前必须先指定内核配置。在独立编译内核情况下，编译一遍内核后，可以直接使用 <code>make module</code> 来编译内核模块，如果修改了相应模块文件，使用相同的命令也能很快的进行增量编译。而在高通环境下，由于内核的编译过程已经被集成到Android的编译中，所以每次编译内核或者内核模块时，都必须通过Android的编译环境进行启用。虽然Android提供诸如 <code>make bootimage</code> 命令，可以只编译bootimage相关内容，但是Android庞大的编译体系在初始化时也会占用很多的时间。前段时间在调试一个独立的内核模块时就一直被这个问题困扰着，每次修改模块代码后都必须通过 <code>make bootimage</code> 来编译。虽然只有一个文件，但是每次编译都花费至少1min30sec，严重影响了开发进度。为此，自己参考内核模块独立编译的Makefile和Android的环境特点写了一个内核模块编译Makefile。
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="c"># Author: zhiqiang.xu</span>
+</span><span class="line"><span class="c"># EMail:  xeonxu@gmail.com</span>
+</span><span class="line"><span class="nv">CROSS_ARCH</span><span class="o">:=</span><span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;$(ARM_EABI_TOOLCHAIN)/arm-eabi-&quot;</span>
+</span><span class="line">KDIR:<span class="o">=</span><span class="k">$(</span>ANDROID_PRODUCT_OUT<span class="k">)</span>/obj/KERNEL_OBJ/
+</span><span class="line">PWD:<span class="o">=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
+</span><span class="line">
+</span><span class="line">obj-m:<span class="o">=</span> my_module.o
+</span><span class="line">.PHONY: modules package clean
+</span><span class="line">all:package
+</span><span class="line">modules:
+</span><span class="line">    @if <span class="o">[</span> <span class="s2">&quot;$(ANDROID_BUILD_TOP)_yes&quot;</span> <span class="o">=</span> <span class="s2">&quot;_yes&quot;</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;You have to run \&quot;. build/envsetup.sh\&quot; to init enviroment first. \nAnd then you have to run</span>
+</span><span class="line"><span class="s2">\&quot;choosecombo\&quot; to setup the project.&quot;</span><span class="o">&amp;&amp;</span><span class="nb">exit </span>1; <span class="k">fi</span>
+</span><span class="line">    @if <span class="o">[</span> ! -d <span class="k">$(</span>KDIR<span class="k">)</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;Build kernle first.&quot;</span><span class="o">&amp;&amp;</span><span class="nb">cd</span> <span class="k">$(</span>ANDROID_BUILD_TOP<span class="k">)</span><span class="o">&amp;&amp;</span>make bootimage&amp;&amp;cd -; <span class="k">fi</span>
+</span><span class="line">    <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>CROSS_ARCH<span class="k">)</span> -C <span class="k">$(</span>KDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span><span class="line">
+</span><span class="line">package:modules
+</span><span class="line">    @mkdir -p ./package
+</span><span class="line">    @cp <span class="k">$(</span>obj-m:.o<span class="o">=</span>.ko<span class="k">)</span> ./package
+</span><span class="line">
+</span><span class="line">clean:
+</span><span class="line">    rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers package
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+该Makefile默认会将当前目录下的 <code>my_module.c</code> 文件编译为内核模块。同时，在编译时会强制检查Android的环境是否正确配置，如果没有配置它会进行相应提示后退出编译处理。编译模块时使用的内核配置是编译Android时指定项目所配置的内核配置。如果内核还没有编译，则在编译模块之前会自动编译内核主体。如果一切OK，则每次只会编译修改过的模块文件。编译好后会将模块文件单独拷贝到当前目录下的 <code>package</code> 目录中，方便使用。
+</p>
+<p>
+使用该编译脚本后，模块的编写调试效率高了不少，至少每次编译模块都可以在5sec内搞定了。加上上机实测调试，也能在30sec内完成。生命很可贵，像我一样当个懒人吧。
+</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1726,164 +1820,6 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/">在Android编译时建立符号链接</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-08T21:48:00+08:00" pubdate data-updated="true">2012年10月08日</time>
-        
-         | <a href="/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-最近接到一个任务，需要将Busybox环境移植到高通平台的Android项目上。Busybox的目标执行文件有现成编译好的，需要做的工作就是添加一个Android工程，将编译好的二进制文件拷贝到Android的文件系统中，同时还需要生成相应的Busybox命令链接。
-</p>
-<p>
-拷贝文件到指定目录在Android的编译系统中有现成的方法，使用下面这个方法即可：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>拷贝文件到指定目录  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="nv">LOCAL_PATH</span> <span class="o">:=</span> <span class="k">$(</span>call my-dir<span class="k">)</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># Add busybox environment zhiqiang.xu 2012.10.8</span>
-</span><span class="line"><span class="cp">include $(CLEAR_VARS)</span>
-</span><span class="line">LOCAL_MODULE :<span class="o">=</span> busybox_modules
-</span><span class="line">LOCAL_MODULE_STEM :<span class="o">=</span> busybox
-</span><span class="line">LOCAL_SRC_FILES :<span class="o">=</span> busybox
-</span><span class="line">LOCAL_MODULE_TAGS :<span class="o">=</span> eng
-</span><span class="line">LOCAL_MODULE_CLASS :<span class="o">=</span> EXECUTABLES
-</span><span class="line">LOCAL_MODULE_PATH :<span class="o">=</span> <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox
-</span><span class="line"><span class="cp">include $(BUILD_PREBUILT)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-由于Busybox环境主要用于工程调试，所以模块设置为只在eng编译模式下有效。按照以上这段设置，可以将busybox执行文件拷贝到Android文件系统中的 <code>/system/busybox</code> 目录下。
-</p>
-<p>
-而对于生成链接，之前没有接触过。不过在搜索调查了已有的Android工程文件之后，发现系统中也提供了现成的方法，如下：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>recovery使用的软链生成方法  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="nv">BUSYBOX_LINKS</span> <span class="o">:=</span> <span class="k">$(</span>shell cat external/busybox/busybox-minimal.links<span class="k">)</span>
-</span><span class="line"><span class="cp">ifndef BOARD_HAS_SMALL_RECOVERY</span>
-</span><span class="line">exclude :<span class="o">=</span> tune2fs
-</span><span class="line"><span class="cp">ifeq ($(BOARD_HAS_LARGE_FILESYSTEM),true)</span>
-</span><span class="line">exclude +<span class="o">=</span> mke2fs
-</span><span class="line"><span class="cp">endif</span>
-</span><span class="line"><span class="cp">endif</span>
-</span><span class="line">RECOVERY_BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_RECOVERY_ROOT_OUT<span class="k">)</span>/sbin/,<span class="k">$(</span>filter-out <span class="k">$(</span>exclude<span class="k">)</span>,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">))))</span>
-</span><span class="line"><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: BUSYBOX_BINARY :<span class="o">=</span> busybox
-</span><span class="line"><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: <span class="k">$(</span>LOCAL_INSTALLED_MODULE<span class="k">)</span>
-</span><span class="line">        @echo <span class="s2">&quot;Symlink: $@ -&gt; $(BUSYBOX_BINARY)&quot;</span>
-</span><span class="line">        @mkdir -p <span class="k">$(</span>dir <span class="nv">$@</span><span class="k">)</span>
-</span><span class="line">        @rm -rf <span class="nv">$@</span>
-</span><span class="line">        <span class="k">$(</span>hide<span class="k">)</span> ln -sf <span class="k">$(</span>BUSYBOX_BINARY<span class="k">)</span> <span class="nv">$@</span>
-</span><span class="line">
-</span><span class="line">ALL_DEFAULT_INSTALLED_MODULES +<span class="o">=</span> <span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-实现方法使用了标准的Makefile目标，在 <code>$(RECOVERY_BUSYBOX_SYMLINKS)</code> 目标下生成相应链接，看起来似乎是只要将Makefile的目标添加到 <code>ALL_DEFAULT_INSTALLED_MODULES</code> 这个变量后，编译的时候就会按照Makefile的标准生成目标。实验后确实可行，不过同时我也发现了一个不足。那就是使用这种方法后，通过mm/mmm命令进行模块编译的时候是没法正确执行的。换言之， <code>ALL_DEFAULT_INSTALLED_MODULES</code> 变量只有在系统完全编译的时候才会被调用。为此，领悟范例的精神后，自己改了一下实现方法，如下：
-</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>修改后的生成软链的方法  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="cp">ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))</span>
-</span><span class="line">
-</span><span class="line"><span class="cp">define _make_link</span>
-</span><span class="line">   <span class="k">$(</span>shell <span class="nb">echo</span> <span class="s2">&quot;Symlink: $(1) -&gt; $(2)&quot;</span><span class="k">)</span>
-</span><span class="line">   <span class="k">$(</span>shell mkdir -p <span class="k">$(</span>dir <span class="k">$(</span>1<span class="k">)))</span>
-</span><span class="line">   <span class="k">$(</span>shell rm -rf <span class="k">$(</span>1<span class="k">))</span>
-</span><span class="line">   <span class="k">$(</span>shell ln -sf <span class="k">$(</span>2<span class="k">)</span> <span class="k">$(</span>1<span class="k">))</span>
-</span><span class="line"><span class="cp">endef</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># Add busybox environment zhiqiang.xu 2012.10.8</span>
-</span><span class="line"><span class="c"># Now let&#39;s do busybox symlinks</span>
-</span><span class="line"><span class="nv">BUSYBOX_LINKS</span> <span class="o">:=</span> <span class="k">$(</span>shell cat <span class="k">$(</span>LOCAL_PATH<span class="k">)</span>/busybox.links<span class="k">)</span>
-</span><span class="line">BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox/,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">)))</span>
-</span><span class="line">BUSYBOX_BINARY :<span class="o">=</span> /system/busybox/<span class="k">$(</span>LOCAL_SRC_FILES<span class="k">)</span>
-</span><span class="line"><span class="k">$(</span>foreach _item, <span class="k">$(</span>BUSYBOX_SYMLINKS<span class="k">)</span>, <span class="se">\</span>
-</span><span class="line">       <span class="k">$(</span><span class="nb">eval</span> <span class="k">$(</span>call _make_link,<span class="k">$(</span>_item<span class="k">)</span>,<span class="k">$(</span>BUSYBOX_BINARY<span class="k">))))</span>
-</span><span class="line">
-</span><span class="line">_make_link :<span class="o">=</span>
-</span><span class="line"><span class="cp">endif</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>
-修改后的方法使用了自定义宏，不论是全系统编译还是使用mm/mmm进行模块编译，每次编译的时候宏都会展开执行。同时为了区分编译模式，我又添加了相应的判断宏 <code>ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))</code> 将执行部分包括在里面。实验下来效果良好，可以根据当前设定的编译模式生成或者不生成相应软链。
-最后，发现一点，我修改的这个方法由于没有依赖目标，所以每次编译的时候都会执行一遍，编译效率不高，所以这种结构不能用于大负荷的处理工作。好在生成软链不是多重的工作，这么用用也无什么大碍。
-</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1906,10 +1842,10 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
 <section>
  <h1>Categories</h1>
  <ul id="categories">
- <li class='category'><a href='/blog/categories/Android/'>Android (7)</a></li>
+ <li class='category'><a href='/blog/categories/Android/'>Android (8)</a></li>
 <li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
 <li class='category'><a href='/blog/categories/GTD/'>GTD (1)</a></li>
-<li class='category'><a href='/blog/categories/Linux/'>Linux (11)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (12)</a></li>
 <li class='category'><a href='/blog/categories/Octopress/'>Octopress (4)</a></li>
 <li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
 <li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
@@ -1917,7 +1853,7 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
 <li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
 <li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
-<li class='category'><a href='/blog/categories/开发/'>开发 (9)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (10)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (5)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (3)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
@@ -1928,6 +1864,10 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/">在高通平台Android环境下编译内核模块</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/">获取并操作内核中已注册的I2C设备</a>
@@ -1943,10 +1883,6 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
     
       <li class="post">
         <a href="/blog/2012/11/18/jin-qi-de-fan-nao/">近期的烦恼</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan/">使用tmux改进终端体验</a>
       </li>
     
   </ul>
