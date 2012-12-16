@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Android | 不停地疯]]></title>
-  <link href="http://blog.xeonxu.info/blog/categories/Android/atom.xml" rel="self"/>
+  <title><![CDATA[Category: android | 不停地疯]]></title>
+  <link href="http://blog.xeonxu.info/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2012-12-04T23:40:48+08:00</updated>
+  <updated>2012-12-16T16:01:48+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -14,80 +14,27 @@
 
   
   <entry>
-    <title type="html"><![CDATA[在高通平台Android环境下编译内核模块]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/"/>
-    <updated>2012-12-04T22:14:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai</id>
+    <title type="html"><![CDATA[嵌入式系统内核驱动模块化转换的简单框架]]></title>
+    <link href="http://blog.xeonxu.info/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia/"/>
+    <updated>2012-12-15T15:57:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia</id>
     <content type="html"><![CDATA[<p>
-高通Android环境中Linux内核会作为Android的一部分进行编译，直接使用make即可一次性从头编到尾。而有的平台比如Marvell，内核的编译操作相对比较独立，必须使用标准的内核编译命令进行单独编译。一般来说，用高通的这种方式比较傻瓜化，一步到底的感觉；而用Marvell的方式用户干预较多，灵活性也更大。当然这里不是比较他们孰优孰劣，对我来说这两种方式各有千秋。在遇到具体问题时，有时还会觉得独立编译内核的方式比较方便，比如编译内核模块这一点上。
+如前篇文章所述，使用模块化方式开发内核驱动可以有效减少编译时间，从而提高开发效率。除此之外，内核模块使用 <code>insmod</code> 载入内核时可以像使用应用程序一样像内核模块中传入特定参数，参数完全由开发者定义。像中断号，GPIO管脚，总线号，设备地址，log等级等等，都可以通过内核参数进行传入。这意味着可以在只编译一次内核驱动模块的情况下，通过传入不同的参数就可以修改驱动程序的属性，大大提高灵活性，对于Debug更加方便。
 </p>
 <p>
-编译内核模块之前必须先编译内核，编译内核之前必须先指定内核配置。在独立编译内核情况下，编译一遍内核后，可以直接使用 <code>make module</code> 来编译内核模块，如果修改了相应模块文件，使用相同的命令也能很快的进行增量编译。而在高通环境下，由于内核的编译过程已经被集成到Android的编译中，所以每次编译内核或者内核模块时，都必须通过Android的编译环境进行启用。虽然Android提供诸如 <code>make bootimage</code> 命令，可以只编译bootimage相关内容，但是Android庞大的编译体系在初始化时也会占用很多的时间。前段时间在调试一个独立的内核模块时就一直被这个问题困扰着，每次修改模块代码后都必须通过 <code>make bootimage</code> 来编译。虽然只有一个文件，但是每次编译都花费至少1min30sec，严重影响了开发进度。为此，自己参考内核模块独立编译的Makefile和Android的环境特点写了一个内核模块编译Makefile。
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># Author: zhiqiang.xu</span>
-</span><span class='line'><span class="c"># EMail:  xeonxu@gmail.com</span>
-</span><span class='line'><span class="nv">CROSS_ARCH</span><span class="o">:=</span><span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;$(ARM_EABI_TOOLCHAIN)/arm-eabi-&quot;</span>
-</span><span class='line'>KDIR:<span class="o">=</span><span class="k">$(</span>ANDROID_PRODUCT_OUT<span class="k">)</span>/obj/KERNEL_OBJ/
-</span><span class='line'>PWD:<span class="o">=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
-</span><span class='line'>
-</span><span class='line'>obj-m:<span class="o">=</span> my_module.o
-</span><span class='line'>.PHONY: modules package clean
-</span><span class='line'>all:package
-</span><span class='line'>modules:
-</span><span class='line'>    @if <span class="o">[</span> <span class="s2">&quot;$(ANDROID_BUILD_TOP)_yes&quot;</span> <span class="o">=</span> <span class="s2">&quot;_yes&quot;</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;You have to run \&quot;. build/envsetup.sh\&quot; to init enviroment first. \nAnd then you have to run</span>
-</span><span class='line'><span class="s2">\&quot;choosecombo\&quot; to setup the project.&quot;</span>&amp;amp;&amp;amp;exit 1; <span class="k">fi</span>
-</span><span class='line'>    @if <span class="o">[</span> ! -d <span class="k">$(</span>KDIR<span class="k">)</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;Build kernle first.&quot;</span>&amp;amp;&amp;amp;cd <span class="k">$(</span>ANDROID_BUILD_TOP<span class="k">)</span>&amp;amp;&amp;amp;make bootimage&amp;amp;&amp;amp;cd -; <span class="k">fi</span>
-</span><span class='line'>    <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>CROSS_ARCH<span class="k">)</span> -C <span class="k">$(</span>KDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
-</span><span class='line'>
-</span><span class='line'>package:modules
-</span><span class='line'>    @mkdir -p ./package
-</span><span class='line'>    @cp <span class="k">$(</span>obj-m:.o<span class="o">=</span>.ko<span class="k">)</span> ./package
-</span><span class='line'>
-</span><span class='line'>clean:
-</span><span class='line'>    rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers package
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-该Makefile默认会将当前目录下的 <code>my_module.c</code> 文件编译为内核模块。同时，在编译时会强制检查Android的环境是否正确配置，如果没有配置它会进行相应提示后退出编译处理。编译模块时使用的内核配置是编译Android时指定项目所配置的内核配置。如果内核还没有编译，则在编译模块之前会自动编译内核主体。如果一切OK，则每次只会编译修改过的模块文件。编译好后会将模块文件单独拷贝到当前目录下的 <code>package</code> 目录中，方便使用。
+由于在嵌入式系统中，注册设备驱动时也要相应将设备注册到系统中，而设备注册逻辑一般都存放在如 <code>Board_xxxx.c</code> 这类板级驱动文件中。这种安排方式在模块化驱动中显得不是很方便，因为载入模块的系统中需要先注册过设备，这也意味着需要先将相应设备信息添加入板级配置文件后才能使用模块驱动。为此，我想实现一个简单的包装框架，实现以下两个目的：
 </p>
+<ol>
+<li>修改尽可能少的代码进行驱动模块化
+</li>
+<li>模块化的驱动可以方便的整合到原系统中，无需做多余的改动
+</li>
+</ol>
+
 <p>
-使用该编译脚本后，模块的编写调试效率高了不少，至少每次编译模块都可以在5sec内搞定了。加上上机实测调试，也能在30sec内完成。生命很可贵，像我一样当个懒人吧。
-</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[获取并操作内核中已注册的I2C设备]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/"/>
-    <updated>2012-12-03T00:00:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei</id>
-    <content type="html"><![CDATA[<p>
-之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的<a href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">文章</a> ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是，当你将模块从内核中卸载后，系统将无法再次注册内核中原有的驱动，导致相应设备无法使用。今天补充的方法可以在挂载模块时使用模块内的设备驱动，而在卸载后恢复回系统原来的驱动。
-</p>
-<p>
-内容相当简单，上次我们已经可以通过内核提供的接口函数，找到相应I2C总线相应地址I2C设备的I2C client结构指针。而拥有该指针后，其实就可以做很多事了。比如调用 <code>i2c_master_send</code> 接口向该client指向的设备发送I2C命令。这样，如果需要扩展内核中原有的驱动程序，比如向procfs或sysfs中添加相应的用户空间接口等。一般可以在 <code>module_init</code> 中注册sysfs入口的操作函数，然后在操作函数中通过操作该client指针而实现一定的功能。这种方法可以沿用系统内核中原有的设备驱动，可以单纯添加一些系统驱动中没有的功能。
-</p>
-<p>
-除此之外，还有一种替换内核中现有驱动的方法。通过查阅源代码，可以发现内核中还提供一个 <code>device_reprobe(dev)</code> 的API，该函数接受一个device结构体指针，实现重新匹配设备驱动的操作。同时，I2C client结构体中也有相应的device结构体。我们知道Linux内核匹配I2C设备驱动是通过名称来进行匹配的，所以，我们的方法就是用Hack的方式将系统中获取到的I2C Client结构体的名称改为我们需要的名称。一般修改为我们模块中新建的驱动的名称，这样，当调用 <code>device_reprobe</code> 接口后，系统会将原有驱动remove并重新为相应I2C设备适配一个驱动程序。当然，没有出错的话，它会适配到我们修改的名称指向的驱动。如此，我们便可以在内核模块中编写独立的设备驱动程序了。以下是简单示例框架:
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+按照这个想法，我使用ft5x0x的tp驱动完成了驱动模块化转换的简单框架。其中包含两个部分，分别如下：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>模块包装文件  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -127,324 +74,191 @@
 <span class='line-number'>38</span>
 <span class='line-number'>39</span>
 <span class='line-number'>40</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &amp;lt;linux/kernel.h&amp;gt;</span>
+</span><span class='line'><span class="cp">#include &amp;lt;linux/module.h&amp;gt;</span>
+</span><span class='line'><span class="cp">#include &amp;lt;linux/slab.h&amp;gt;</span>
+</span><span class='line'><span class="cp">#include &amp;lt;linux/i2c.h&amp;gt;</span>
+</span><span class='line'><span class="cp">#include &amp;lt;linux/err.h&amp;gt;</span>
+</span><span class='line'><span class="cp">#include &amp;lt;linux/delay.h&amp;gt;</span>
+</span><span class='line'><span class="cp">#include &amp;lt;linux/gpio.h&amp;gt;</span>
+</span><span class='line'><span class="cp">#include &amp;lt;asm/uaccess.h&amp;gt;</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_driver</span> <span class="n">my_driver</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>    <span class="p">.</span><span class="n">driver</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>        <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span>
-</span><span class='line'>        <span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">THIS_MODULE</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">},</span>
-</span><span class='line'>    <span class="p">.</span><span class="n">probe</span> <span class="o">=</span> <span class="n">my_probe</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">.</span><span class="n">remove</span> <span class="o">=</span> <span class="n">my_remove</span><span class="p">,</span>
+</span><span class='line'><span class="cp">#include &amp;lt;linux/fs.h&amp;gt;</span>
+</span><span class='line'><span class="cp">#include &amp;lt;linux/mm.h&amp;gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#include &quot;ft5x06_ts.h&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">extern</span> <span class="kt">int</span> <span class="n">init_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class='line'><span class="k">extern</span> <span class="kt">void</span> <span class="n">exit_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define module_PRINT_ERR     (1U &amp;lt;&amp;lt; 0)</span>
+</span><span class='line'><span class="cp">#define module_PRINT_WARNING (1U &amp;lt;&amp;lt; 1)</span>
+</span><span class='line'><span class="cp">#define module_PRINT_INFO    (1U &amp;lt;&amp;lt; 2)</span>
+</span><span class='line'><span class="cp">#define module_PRINT_DEBUG   (1U &amp;lt;&amp;lt; 3)</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#ifndef DEFAULT_DEV_NAME</span>
+</span><span class='line'><span class="cp">#define DEFAULT_DEV_NAME &quot;ft5x0x_ts&quot;</span>
+</span><span class='line'><span class="cp">#endif</span>
+</span><span class='line'><span class="cp">#ifndef DEFAULT_DEV_ADAP</span>
+</span><span class='line'><span class="cp">#define DEFAULT_DEV_ADAP 255</span>
+</span><span class='line'><span class="cp">#endif</span>
+</span><span class='line'><span class="cp">#ifndef DEFAULT_DEV_ADDR</span>
+</span><span class='line'><span class="cp">#define DEFAULT_DEV_ADDR 0x38</span>
+</span><span class='line'><span class="cp">#endif</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define pr_module(debug_level_mask, args...)                    \</span>
+</span><span class='line'><span class="cp">    do {                                                        \</span>
+</span><span class='line'><span class="cp">        if (debug_mask &amp;amp; module_PRINT_##debug_level_mask) {     \</span>
+</span><span class='line'><span class="cp">            printk(KERN_##debug_level_mask &quot;[module_driver] &quot;args);    \</span>
+</span><span class='line'><span class="cp">        }                                                       \</span>
+</span><span class='line'><span class="cp">    } while (0)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="n">debug_mask</span> <span class="o">=</span> <span class="n">module_PRINT_ERR</span> <span class="o">|</span> \
+</span><span class='line'>    <span class="n">module_PRINT_INFO</span>  <span class="o">|</span> \
+</span><span class='line'>    <span class="n">module_PRINT_WARNING</span>  <span class="o">|</span> <span class="n">module_PRINT_DEBUG</span> <span class="p">;</span>
+</span><span class='line'><span class="n">module_param_named</span><span class="p">(</span><span class="n">debug_mask</span><span class="p">,</span> <span class="n">debug_mask</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="n">S_IRUGO</span> <span class="o">|</span> <span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">S_IWGRP</span><span class="p">);</span>
+</span><span class='line'><span class="k">static</span> <span class="n">u8</span> <span class="n">local_device_adap</span> <span class="o">=</span> <span class="n">DEFAULT_DEV_ADAP</span><span class="p">;</span>
+</span><span class='line'><span class="n">module_param_named</span><span class="p">(</span><span class="n">adap</span><span class="p">,</span> <span class="n">local_device_adap</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">S_IRUGO</span> <span class="o">|</span> <span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">S_IWGRP</span><span class="p">);</span>
+</span><span class='line'><span class="n">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">adap</span><span class="p">,</span> <span class="s">&quot;Set the i2c adapter of device.&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="k">static</span> <span class="n">u8</span> <span class="n">local_device_addr</span> <span class="o">=</span> <span class="n">DEFAULT_DEV_ADDR</span><span class="p">;</span>
+</span><span class='line'><span class="n">module_param_named</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">local_device_addr</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">S_IRUGO</span> <span class="o">|</span> <span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">S_IWGRP</span><span class="p">);</span>
+</span><span class='line'><span class="n">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="s">&quot;Set the address of device.&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'><span class="k">static</span> <span class="k">struct</span> <span class="n">MODULE_DRIVER_INFO</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">i2c_board_info</span> <span class="o">*</span><span class="n">this_device_info</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">prepare_func</span><span class="p">)(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span> <span class="n">module_driver_info</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">.</span><span class="n">this_device_info</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">ft5x0x_device_info</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">.</span><span class="n">prepare_func</span> <span class="o">=</span> <span class="n">ft5x06_touchpad_setup</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_driver_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">ts_dev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class='line'>    <span class="cm">/* int rc; */</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">i2c_adapter</span> <span class="o">*</span><span class="n">i2c_adap</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="n">i2c_add_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">pr_module</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span><span class="s">&quot;Enter in %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="n">ts_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ts_dev</span><span class="p">)</span>
+</span><span class='line'>    <span class="cm">/* Init GPIOs */</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="n">module_driver_info</span><span class="p">.</span><span class="n">prepare_func</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">(</span><span class="o">*</span><span class="n">module_driver_info</span><span class="p">.</span><span class="n">prepare_func</span><span class="p">)();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/* Add device driver. */</span>
+</span><span class='line'>    <span class="n">init_wrapper</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">module_driver_info</span><span class="p">.</span><span class="n">this_device_info</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">addr</span> <span class="o">=</span> <span class="n">local_device_addr</span><span class="p">;</span>
+</span><span class='line'>    <span class="cm">/* Add i2c device to platform */</span>
+</span><span class='line'>    <span class="n">i2c_adap</span> <span class="o">=</span> <span class="n">i2c_get_adapter</span><span class="p">(</span><span class="n">local_device_adap</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nb">NULL</span> <span class="o">==</span> <span class="n">i2c_adap</span><span class="p">)</span>
 </span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>        <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Did not match the device name:1-0011!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-</span><span class='line'>        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">pr_module</span><span class="p">(</span><span class="n">ERR</span><span class="p">,</span> <span class="s">&quot;%s: i2c_get_adapter for %d failed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span> <span class="n">local_device_adap</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">goto</span> <span class="n">error_adapter</span><span class="p">;</span>
 </span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="n">this_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">this_client</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">this_client</span> <span class="o">=</span> <span class="n">i2c_new_device</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">,</span> <span class="n">module_driver_info</span><span class="p">.</span><span class="n">this_device_info</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nb">NULL</span> <span class="o">==</span> <span class="n">this_client</span><span class="p">)</span>
 </span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">pr_module</span><span class="p">(</span><span class="n">ERR</span><span class="p">,</span> <span class="s">&quot;%s: i2c_new_device for %s failed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span> <span class="n">module_driver_info</span><span class="p">.</span><span class="n">this_device_info</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">type</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">goto</span> <span class="n">error_device</span><span class="p">;</span>
 </span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">pr_module</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span> <span class="s">&quot;%s: this_client:%p, addr:%#x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span> <span class="n">this_client</span><span class="p">,</span> <span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">addr</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
 </span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="nl">device_error_exit:</span>
-</span><span class='line'>    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;ts i2c del driver&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="nl">error_device:</span>
+</span><span class='line'>    <span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
+</span><span class='line'>  <span class="nl">error_adapter:</span>
+</span><span class='line'>    <span class="n">exit_wrapper</span><span class="p">();</span>
 </span><span class='line'>    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-只需要实现其中的 <code>my_probe</code> , <code>my_remove</code> 等函数即可实现一个完整的驱动。需要注意的是一定要在调用 <code>device_reprobe</code> 接口之前将相应的设备驱动使用 <code>i2c_add_driver</code> 添加到系统中，否则重新适配中会找不到驱动。移除模块时，用同样的方法将I2C client的名称更改为系统中原有驱动的名称，并重新适配驱动，即可实现卸载模块后系统能够使用原有驱动的功能。示例如下：
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">name</span><span class="p">,</span> <span class="n">ORIGIN_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">dev</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">pr_module</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span><span class="s">&quot;Enter in %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">exit_wrapper</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">i2c_unregister_device</span><span class="p">(</span><span class="n">this_client</span><span class="p">);</span>
 </span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-最后需要注意，文中方法皆为本人翻查文档自己琢磨搞出来的，所以不排除存在隐患的可能，但在自己测试环境下使用中没有发现任何问题。如果有疑问，也希望各位看官能提出自己的看法。
-</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[在Linux内核模块中操作I2C设备]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/"/>
-    <updated>2012-11-25T00:02:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei</id>
-    <content type="html"><![CDATA[<p>
-近期公司项目较为空闲，抽空做了一些学习性质的研发内容，其中涉及到在Linux内核模块中使用I2C对外部器件进行控制的操作。虽然在Linux中操作使用I2C设备并不复杂，但本人接触Linux内核驱动开发时间并不算长，此次学习中也算较为系统的了解了Linux中对I2C设备的操控方式，谨在此做下记录。
-</p>
-<p>
-通过Linux内核文档中关于操作I2C设备的文章后不难看出Linux中注册使用I2C设备一般通过四种方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>：
-</p>
-<ol>
-<li>通过总线号声明设备
-</li>
-<li>立即探测设备
-</li>
-<li>通过Probe探测相应设备
-</li>
-<li>在用户空间立即探测
-</li>
-</ol>
-
-<p>
-简单来说，第一种方式一般应用在嵌入式设备中。因为对于嵌入式设备来说，外围器件基本都是固定的，只需提供有限几款器件的支持即可。使用这种方式的时候，需要在板级配置文件中定义并设置 <code>i2c_board_info</code> 这个结构体的内容。其中需要配置设备名称和设备地址，此外设备中断和私有数据结构也可以选择设置。然后使用 <code>i2c_register_board_info</code> 这个接口对设置的设备进行注册使用。需要注意的是这种方法注册的设备是在注册I2C总线驱动时进行驱动适配的。
-</p>
-<p>
-第二种方法可以通过给定的I2C适配器以及相应的I2C板级结构体，自行通过 <code>i2c_new_device</code> 接口进行添加注册所需的设备。这种方法灵活性要较第一种方法大，可以很方便的在模块中使用。
-</p>
-<p>
-第三种方法是 <code>2.6</code> 内核之前的做法，使用 <code>detect</code> 方法去探测总线上的设备驱动。因为探测机制的原因，会导致一些副作用的发生，所以不建议使用，除非真的没有别的办法。
-</p>
-<p>
-第四种方法是在Linux的控制台上，在用户空间通过sysfs，使用 <code>/sys/bus/i2c/devices/i2c-3/new_device</code> 节点进行设备的添加注册。
-</p>
-<p>
-从上面可以看出，如果需要在Linux内核中以模块的方式对I2C设备进行驱动控制的话，第二种方法是比较推荐的。通过测试，在module的init中使用
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">struct</span> <span class="n">i2c_adapter</span> <span class="o">*</span><span class="n">i2c_adap</span><span class="p">;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
-</span><span class='line'><span class="n">i2c_adap</span> <span class="o">=</span> <span class="n">i2c_get_adapter</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-</span><span class='line'><span class="n">i2c_client</span> <span class="o">=</span> <span class="n">i2c_new_device</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">i2c_device</span><span class="p">);</span>
-</span><span class='line'><span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-即可成功注册I2C设备。其中:
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_board_info</span> <span class="n">ft5306_i2c_device</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">I2C_BOARD_INFO</span><span class="p">(</span><span class="s">&quot;test_i2c&quot;</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">),</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-以上，对于如何在模块中注册使用I2C设备简单做了描述。那么如何在另外的模块中对已经注册的I2C设备进行反注册呢？由于内核中操作I2C设备都是通过 <code>i2c_client</code> 结构进行，所以问题可以抽象为如何在内核中获取指定设备的 <code>i2c_client</code> 结构指针。通过查阅内核API，也找到了一个方法可以达到这样的目的，如下：
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">i2c_dev</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">i2c_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">i2c_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
-</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">i2c_unregister_device</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-该反注册例子的内容就是对前面注册的 <code>0x11</code> 地址的设备进行反注册。注意 <code>bus_find_device_by_name</code> 函数中第三项参数，该参数是需要查找的设备在总线上注册的名称。"1"代表着1号适配器，"0011"是16位的I2C地址。如此便可方便的在内核模块中对I2C设备进行挂载和解挂了。
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 参考Linux内核目录下的Documentation/i2c/instantiating-devices
-</p>
-
-
-
-</div>
-</div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[小脚本帮大忙]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/"/>
-    <updated>2012-10-21T23:38:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/10/21/xiao-jiao-ben-bang-da-mang</id>
-    <content type="html"><![CDATA[<p>
-前两天单位的在做项目中发现一个Bug：手机在启动后触摸屏有一定几率无法使用。这个Bug非常恼人，因为重现几率非常低，而且只会出现在重启过程中。这意味着不论是调查原因还是验证对策，都将是非常耗时且繁琐的。因为对策问题之前，首先需要重现问题，如此才好分析问题的原因。而这个Bug必须要反复重启手机才能重现，人为操作的话太浪费时间效率低下。
-好在这个Bug的行为比较稳定，重现后触屏肯定不能使用。通过adb对比调查正常手机和问题手机的设备节点，发现在出问题的手机中，触屏设备没有注册成功。看来是设备注册失败，导致的触屏异常。于是，我们考虑使用脚本对该Bug进行再现分析。思路如下：
-</p>
-<ol>
-<li>写一个脚本判断触屏驱动的设备节点是否注册成功，如果成功则复位重启；否则保留现场等待分析。
-</li>
-<li>将该脚本添加到 <code>init.rc</code> 中成为一个服务，在启动时调用。
-</li>
-<li>脚本运行时将相应的运行信息输出到外部文件中，从而可以计算出再现率。
-</li>
-</ol>
-
-<p>基于以上想法，写出了以下脚本代码：
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>check_tp.sh  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/system/bin/sh</span>
-</span><span class='line'><span class="nv">tp_name</span><span class="o">=</span><span class="s2">&quot;xxxx&quot;</span> <span class="c"># xxxx为注册的tp名称</span>
-</span><span class='line'><span class="nv">input_name</span><span class="o">=</span><span class="sb">`</span>cat /sys/class/input/input0/name<span class="sb">`</span>
-</span><span class='line'><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;x_$tp_name&quot;</span> <span class="o">=</span> <span class="s2">&quot;x_$input_name&quot;</span> <span class="o">]</span>; <span class="k">then</span>
-</span><span class='line'><span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is OK.&quot;</span> &amp;gt;&amp;gt; /data/check_tp.log
-</span><span class='line'>    reboot
-</span><span class='line'><span class="k">else</span>
-</span><span class='line'><span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is not OK.&quot;</span> &amp;gt;&amp;gt; /data/check_tp.log
-</span><span class='line'><span class="k">fi</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-同时，修改 <code>init.rc</code> 文件，在其中加入：
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>service check_tp /system/bin/sh /system/bin/check_tp.sh
-</span><span class='line'>    class main
-</span><span class='line'>    oneshot
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-然后重新编译bootimage并刷机。最后使用 <code>adb remount&amp;&amp;adb push check_tp.sh /system/bin/&amp;&amp;adb shell chmod 755 /system/bin/check_tp.sh</code> ，将刚才新写的脚本推送到手机上。重启手机，之后就会看到手机不断的上电然后复位重启。
-在运行该脚本不断重启手机8小时之后，手机正常进入了系统。此时操作手机进行验证，发现触屏已经无效。分析 <code>/data/check_tp.log</code> 文件，算出手机共重启了1000多次，从而得出该问题的再现率大概为千分之一。利用该脚本，验证bug方便了好多，大大提高了工作效率。
-</p>
-
-<div id="outline-container-1" class="outline-2">
-<h2 id="sec-1">后记</h2>
-<div class="outline-text-2" id="text-1">
-
-<p>由于以上写的脚本使用到了 <code>if</code> 关键字，而Android系统默认不支持该关键字，必须依赖busybox环境才行。之前我有移植过busybox，但是只在工程模式下生效，所以该脚本在release版本中是不能正常运行的。为了不依赖运行环境，我又将该脚本换了一种写法，改为：
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>check_tp2.sh  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/system/bin/sh</span>
-</span><span class='line'><span class="nv">tp_name</span><span class="o">=</span><span class="s2">&quot;xxxx&quot;</span> <span class="c"># xxxx为注册的tp名称</span>
-</span><span class='line'><span class="nv">input_name</span><span class="o">=</span><span class="sb">`</span>cat /sys/class/input/input0/name<span class="sb">`</span>
-</span><span class='line'><span class="k">case</span> <span class="nv">$input_name</span> in
-</span><span class='line'>    <span class="nv">$tp_name</span><span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is OK.&quot;</span> &amp;gt;&amp;gt; /data/check_tp.log
-</span><span class='line'>              reboot
-</span><span class='line'>             ;;
-</span><span class='line'>    *<span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is not OK.&quot;</span> &amp;gt;&amp;gt; /data/check_tp.log
-</span><span class='line'>            ;;
-</span><span class='line'><span class="k">esac</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-这样，即便是在Android原生环境中，也可以正确无误的运行。这样就能将该脚本发给测试，利用它对release版本进行bug验证了。
-</p></div>
-</div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[在Android编译时建立符号链接]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/"/>
-    <updated>2012-10-08T21:48:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie</id>
-    <content type="html"><![CDATA[<p>
-最近接到一个任务，需要将Busybox环境移植到高通平台的Android项目上。Busybox的目标执行文件有现成编译好的，需要做的工作就是添加一个Android工程，将编译好的二进制文件拷贝到Android的文件系统中，同时还需要生成相应的Busybox命令链接。
-</p>
-<p>
-拷贝文件到指定目录在Android的编译系统中有现成的方法，使用下面这个方法即可：
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>拷贝文件到指定目录  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="nv">LOCAL_PATH</span> <span class="o">:=</span> <span class="k">$(</span>call my-dir<span class="k">)</span>
+</span><span class='line'><span class="n">module_init</span><span class="p">(</span><span class="n">module_driver_init</span><span class="p">);</span>
+</span><span class='line'><span class="n">module_exit</span><span class="p">(</span><span class="n">module_driver_exit</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'><span class="c"># Add busybox environment zhiqiang.xu 2012.10.8</span>
-</span><span class='line'><span class="cp">include $(CLEAR_VARS)</span>
-</span><span class='line'>LOCAL_MODULE :<span class="o">=</span> busybox_modules
-</span><span class='line'>LOCAL_MODULE_STEM :<span class="o">=</span> busybox
-</span><span class='line'>LOCAL_SRC_FILES :<span class="o">=</span> busybox
-</span><span class='line'>LOCAL_MODULE_TAGS :<span class="o">=</span> eng
-</span><span class='line'>LOCAL_MODULE_CLASS :<span class="o">=</span> EXECUTABLES
-</span><span class='line'>LOCAL_MODULE_PATH :<span class="o">=</span> <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox
-</span><span class='line'><span class="cp">include $(BUILD_PREBUILT)</span>
+</span><span class='line'><span class="n">MODULE_AUTHOR</span><span class="p">(</span><span class="s">&quot;zhiqiang.xu&amp;lt;zhiqiang.xu@phicomm.com.cn&amp;gt;&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="n">MODULE_DESCRIPTION</span><span class="p">(</span><span class="s">&quot;i2c device module driver&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="n">MODULE_LICENSE</span><span class="p">(</span><span class="s">&quot;GPL v2&quot;</span><span class="p">);</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
-由于Busybox环境主要用于工程调试，所以模块设置为只在eng编译模式下有效。按照以上这段设置，可以将busybox执行文件拷贝到Android文件系统中的 <code>/system/busybox</code> 目录下。
-</p>
-<p>
-而对于生成链接，之前没有接触过。不过在搜索调查了已有的Android工程文件之后，发现系统中也提供了现成的方法，如下：
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>recovery使用的软链生成方法  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="nv">BUSYBOX_LINKS</span> <span class="o">:=</span> <span class="k">$(</span>shell cat external/busybox/busybox-minimal.links<span class="k">)</span>
-</span><span class='line'><span class="cp">ifndef BOARD_HAS_SMALL_RECOVERY</span>
-</span><span class='line'>exclude :<span class="o">=</span> tune2fs
-</span><span class='line'><span class="cp">ifeq ($(BOARD_HAS_LARGE_FILESYSTEM),true)</span>
-</span><span class='line'>exclude +<span class="o">=</span> mke2fs
-</span><span class='line'><span class="cp">endif</span>
-</span><span class='line'><span class="cp">endif</span>
-</span><span class='line'>RECOVERY_BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_RECOVERY_ROOT_OUT<span class="k">)</span>/sbin/,<span class="k">$(</span>filter-out <span class="k">$(</span>exclude<span class="k">)</span>,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">))))</span>
-</span><span class='line'><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: BUSYBOX_BINARY :<span class="o">=</span> busybox
-</span><span class='line'><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: <span class="k">$(</span>LOCAL_INSTALLED_MODULE<span class="k">)</span>
-</span><span class='line'>        @echo <span class="s2">&quot;Symlink: $@ -&amp;gt; $(BUSYBOX_BINARY)&quot;</span>
-</span><span class='line'>        @mkdir -p <span class="k">$(</span>dir <span class="nv">$@</span><span class="k">)</span>
-</span><span class='line'>        @rm -rf <span class="nv">$@</span>
-</span><span class='line'>        <span class="k">$(</span>hide<span class="k">)</span> ln -sf <span class="k">$(</span>BUSYBOX_BINARY<span class="k">)</span> <span class="nv">$@</span>
-</span><span class='line'>
-</span><span class='line'>ALL_DEFAULT_INSTALLED_MODULES +<span class="o">=</span> <span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-实现方法使用了标准的Makefile目标，在 <code>$(RECOVERY_BUSYBOX_SYMLINKS)</code> 目标下生成相应链接，看起来似乎是只要将Makefile的目标添加到 <code>ALL_DEFAULT_INSTALLED_MODULES</code> 这个变量后，编译的时候就会按照Makefile的标准生成目标。实验后确实可行，不过同时我也发现了一个不足。那就是使用这种方法后，通过mm/mmm命令进行模块编译的时候是没法正确执行的。换言之， <code>ALL_DEFAULT_INSTALLED_MODULES</code> 变量只有在系统完全编译的时候才会被调用。为此，领悟范例的精神后，自己改了一下实现方法，如下：
+以上为部分内容， 其中需要实现板级设备信息 <code>ft5x0x_device_info</code> 和设备初始化函数 <code>ft5x06_touchpad_setup</code> 。其实也就是将板级文件中的相应信息拷贝过来即可。
 </p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>修改后的生成软链的方法  </span></figcaption>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>原驱动文件的修改  </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -464,29 +278,87 @@
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="cp">ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))&lt;/p&gt;</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#if defined(MODULE)</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">init_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">ft5x0x_ts_init</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">init_wrapper</span><span class="p">);</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
 </span><span class='line'>
-</span><span class='line'><span class="err">&lt;p&gt;define</span> <span class="err">_make_link</span>
-</span><span class='line'>   <span class="k">$(</span>shell <span class="nb">echo</span> “Symlink: <span class="k">$(</span>1<span class="k">)</span> -&amp;gt; <span class="k">$(</span>2<span class="k">)</span>”<span class="k">)</span>
-</span><span class='line'>   <span class="k">$(</span>shell mkdir -p <span class="k">$(</span>dir <span class="k">$(</span>1<span class="k">)))</span>
-</span><span class='line'>   <span class="k">$(</span>shell rm -rf <span class="k">$(</span>1<span class="k">))</span>
-</span><span class='line'>   <span class="k">$(</span>shell ln -sf <span class="k">$(</span>2<span class="k">)</span> <span class="k">$(</span>1<span class="k">))</span>
-</span><span class='line'>endef&lt;/p&gt;
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kt">void</span> <span class="n">exit_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">ft5x0x_ts_exit</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">exit_wrapper</span><span class="p">);</span>
+</span><span class='line'><span class="cp">#else</span>
+</span><span class='line'><span class="n">module_init</span><span class="p">(</span><span class="n">ft5x0x_ts_init</span><span class="p">);</span>
+</span><span class='line'><span class="n">module_exit</span><span class="p">(</span><span class="n">ft5x0x_ts_exit</span><span class="p">);</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
 </span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;add-busybox-environment-zhiqiangxu-2012108&quot;</span>&gt;Add busybox environment zhiqiang.xu 2012.10.8&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;# Now <span class="nb">let</span>’s <span class="k">do </span>busybox symlinks
-</span><span class='line'>BUSYBOX_LINKS :<span class="o">=</span> <span class="k">$(</span>shell cat <span class="k">$(</span>LOCAL_PATH<span class="k">)</span>/busybox.links<span class="k">)</span>
-</span><span class='line'>BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox/,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">)))</span>
-</span><span class='line'>BUSYBOX_BINARY :<span class="o">=</span> /system/busybox/<span class="k">$(</span>LOCAL_SRC_FILES<span class="k">)</span>
-</span><span class='line'><span class="k">$(</span>foreach _item, <span class="k">$(</span>BUSYBOX_SYMLINKS<span class="k">)</span>, <span class="se">\</span>
-</span><span class='line'>       <span class="k">$(</span><span class="nb">eval</span> <span class="k">$(</span>call _make_link,<span class="k">$(</span>_item<span class="k">)</span>,<span class="k">$(</span>BUSYBOX_BINARY<span class="k">))))</span>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;_make_link :<span class="o">=</span>
-</span><span class='line'><span class="cp">endif</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">MODULE_AUTHOR</span><span class="p">(</span><span class="err">“</span><span class="o">&lt;</span><span class="n">luowj</span><span class="o">&gt;</span><span class="s">&quot;);</span>
+</span><span class='line'><span class="n">MODULE_DESCRIPTION</span><span class="p">(</span><span class="s">&quot;FocalTech ft5x0x TouchScreen driver&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="n">MODULE_LICENSE</span><span class="p">(</span><span class="s">&quot;GPL&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="cp">#endif</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></luowj></p>
 <p>
-修改后的方法使用了自定义宏，不论是全系统编译还是使用mm/mmm进行模块编译，每次编译的时候宏都会展开执行。同时为了区分编译模式，我又添加了相应的判断宏 <code>ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))</code> 将执行部分包括在里面。实验下来效果良好，可以根据当前设定的编译模式生成或者不生成相应软链。
-最后，发现一点，我修改的这个方法由于没有依赖目标，所以每次编译的时候都会执行一遍，编译效率不高，所以这种结构不能用于大负荷的处理工作。好在生成软链不是多重的工作，这么用用也无什么大碍。
+由于内核模块中只能存在一对 <code>module_init</code> 和 <code>module_exit</code> ，所以在原驱动文件中使用模块宏 <code>MODULE</code> 将这部分排除，同时使用统一的包装函数名称将驱动初始化函数和退出函数包装起来，并导出符号。
+</p>
+<p>
+最后，参照上篇文章内容编写 <code>Makefile</code> 文件，如下：
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># Author: zhiqiang.xu</span>
+</span><span class='line'><span class="c"># EMail : xeonxu@gmail.com</span>
+</span><span class='line'><span class="c"># Date  : 2012-12-11</span>
+</span><span class='line'><span class="nv">CROSS_ARCH</span><span class="o">:=</span><span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;$(ARM_EABI_TOOLCHAIN)/arm-eabi-&quot;</span>
+</span><span class='line'>KDIR:<span class="o">=</span><span class="k">$(</span>ANDROID_PRODUCT_OUT<span class="k">)</span>/obj/KERNEL_OBJ/
+</span><span class='line'>PWD:<span class="o">=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>test_driver-objs :<span class="o">=</span> module_driver.o ft5x06_ts.o focaltech_ctl.o  ft5x06_ex_fun.o
+</span><span class='line'>obj-m:<span class="o">=</span> test_driver.o
+</span><span class='line'>.PHONY: modules package clean
+</span><span class='line'>all:package
+</span><span class='line'>modules:
+</span><span class='line'>    @if <span class="o">[</span> <span class="s2">&quot;$(ANDROID_BUILD_TOP)&quot;</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;You have to run \&quot;. build/envsetup.sh\&quot; to init enviroment first. \nAnd then you have to run</span>
+</span><span class='line'><span class="s2">\&quot;choosecombo\&quot; to setup the project.&quot;</span>&amp;amp;&amp;amp;exit 1; <span class="k">fi</span>
+</span><span class='line'>    @if <span class="o">[</span> ! -d <span class="k">$(</span>KDIR<span class="k">)</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;Build kernel first.&quot;</span>&amp;amp;&amp;amp;cd <span class="k">$(</span>ANDROID_BUILD_TOP<span class="k">)</span>&amp;amp;&amp;amp;make -j4 bootimage&amp;amp;&amp;amp;cd -; <span class="k">fi</span>
+</span><span class='line'>    <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>CROSS_ARCH<span class="k">)</span> -C <span class="k">$(</span>KDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span><span class='line'>
+</span><span class='line'>package:modules
+</span><span class='line'>    @mkdir -p ./package
+</span><span class='line'>    @cp *.bat ./package
+</span><span class='line'>    @cp <span class="k">$(</span>obj-m:.o<span class="o">=</span>.ko<span class="k">)</span> ./package
+</span><span class='line'>    @tar --transform<span class="o">=</span><span class="s1">&#39;s,package,test_driver,&#39;</span> -jcf test_driver.tar.bz2 ./package/
+</span><span class='line'>
+</span><span class='line'>clean:
+</span><span class='line'>    rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers package test_driver.tar.bz2
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+修改后的驱动文件使用make即可直接编译出模块驱动，同时该驱动中也包含了设备注册的相关处理，所以相对来说更加独立。完整的驱动文件如下：
+<a href="https://docs.google.com/open?id=0B5GJiOxO7LkWVDVQMy0tcDBoejg"> <code>test_driver.tar.bz2</code> </a>
 </p>
 ]]></content>
   </entry>

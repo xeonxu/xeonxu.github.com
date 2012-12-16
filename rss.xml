@@ -4,8 +4,382 @@
     <description><![CDATA[不停地疯]]></description>
     <title><![CDATA[不停地疯]]></title>
     <link>http://blog.xeonxu.info/</link>
-    <pubDate>2012-12-04T23:40:48+08:00</pubDate>
+    <pubDate>2012-12-16T16:01:48+08:00</pubDate>
 
+    
+    <item>
+      <description>
+	<![CDATA[
+		 <p>
+如前篇文章所述，使用模块化方式开发内核驱动可以有效减少编译时间，从而提高开发效率。除此之外，内核模块使用 <code>insmod</code> 载入内核时可以像使用应用程序一样像内核模块中传入特定参数，参数完全由开发者定义。像中断号，GPIO管脚，总线号，设备地址，log等级等等，都可以通过内核参数进行传入。这意味着可以在只编译一次内核驱动模块的情况下，通过传入不同的参数就可以修改驱动程序的属性，大大提高灵活性，对于Debug更加方便。
+</p>
+<p>
+由于在嵌入式系统中，注册设备驱动时也要相应将设备注册到系统中，而设备注册逻辑一般都存放在如 <code>Board_xxxx.c</code> 这类板级驱动文件中。这种安排方式在模块化驱动中显得不是很方便，因为载入模块的系统中需要先注册过设备，这也意味着需要先将相应设备信息添加入板级配置文件后才能使用模块驱动。为此，我想实现一个简单的包装框架，实现以下两个目的：
+</p>
+<ol>
+<li>修改尽可能少的代码进行驱动模块化
+</li>
+<li>模块化的驱动可以方便的整合到原系统中，无需做多余的改动
+</li>
+</ol>
+
+<p>
+按照这个想法，我使用ft5x0x的tp驱动完成了驱动模块化转换的简单框架。其中包含两个部分，分别如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>模块包装文件  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+<span class="line-number">62</span>
+<span class="line-number">63</span>
+<span class="line-number">64</span>
+<span class="line-number">65</span>
+<span class="line-number">66</span>
+<span class="line-number">67</span>
+<span class="line-number">68</span>
+<span class="line-number">69</span>
+<span class="line-number">70</span>
+<span class="line-number">71</span>
+<span class="line-number">72</span>
+<span class="line-number">73</span>
+<span class="line-number">74</span>
+<span class="line-number">75</span>
+<span class="line-number">76</span>
+<span class="line-number">77</span>
+<span class="line-number">78</span>
+<span class="line-number">79</span>
+<span class="line-number">80</span>
+<span class="line-number">81</span>
+<span class="line-number">82</span>
+<span class="line-number">83</span>
+<span class="line-number">84</span>
+<span class="line-number">85</span>
+<span class="line-number">86</span>
+<span class="line-number">87</span>
+<span class="line-number">88</span>
+<span class="line-number">89</span>
+<span class="line-number">90</span>
+<span class="line-number">91</span>
+<span class="line-number">92</span>
+<span class="line-number">93</span>
+<span class="line-number">94</span>
+<span class="line-number">95</span>
+<span class="line-number">96</span>
+<span class="line-number">97</span>
+<span class="line-number">98</span>
+<span class="line-number">99</span>
+<span class="line-number">100</span>
+<span class="line-number">101</span>
+<span class="line-number">102</span>
+<span class="line-number">103</span>
+<span class="line-number">104</span>
+<span class="line-number">105</span>
+<span class="line-number">106</span>
+<span class="line-number">107</span>
+<span class="line-number">108</span>
+<span class="line-number">109</span>
+<span class="line-number">110</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="cp">#include &lt;linux/kernel.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/module.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/slab.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/i2c.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/err.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/delay.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/gpio.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;asm/uaccess.h&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#include &lt;linux/fs.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/mm.h&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#include &quot;ft5x06_ts.h&quot;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">extern</span> <span class="kt">int</span> <span class="n">init_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class="line"><span class="k">extern</span> <span class="kt">void</span> <span class="n">exit_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#define module_PRINT_ERR     (1U &lt;&lt; 0)</span>
+</span><span class="line"><span class="cp">#define module_PRINT_WARNING (1U &lt;&lt; 1)</span>
+</span><span class="line"><span class="cp">#define module_PRINT_INFO    (1U &lt;&lt; 2)</span>
+</span><span class="line"><span class="cp">#define module_PRINT_DEBUG   (1U &lt;&lt; 3)</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#ifndef DEFAULT_DEV_NAME</span>
+</span><span class="line"><span class="cp">#define DEFAULT_DEV_NAME &quot;ft5x0x_ts&quot;</span>
+</span><span class="line"><span class="cp">#endif</span>
+</span><span class="line"><span class="cp">#ifndef DEFAULT_DEV_ADAP</span>
+</span><span class="line"><span class="cp">#define DEFAULT_DEV_ADAP 255</span>
+</span><span class="line"><span class="cp">#endif</span>
+</span><span class="line"><span class="cp">#ifndef DEFAULT_DEV_ADDR</span>
+</span><span class="line"><span class="cp">#define DEFAULT_DEV_ADDR 0x38</span>
+</span><span class="line"><span class="cp">#endif</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#define pr_module(debug_level_mask, args...)                    \</span>
+</span><span class="line"><span class="cp">    do {                                                        \</span>
+</span><span class="line"><span class="cp">        if (debug_mask &amp; module_PRINT_##debug_level_mask) {     \</span>
+</span><span class="line"><span class="cp">            printk(KERN_##debug_level_mask &quot;[module_driver] &quot;args);    \</span>
+</span><span class="line"><span class="cp">        }                                                       \</span>
+</span><span class="line"><span class="cp">    } while (0)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="kt">int</span> <span class="n">debug_mask</span> <span class="o">=</span> <span class="n">module_PRINT_ERR</span> <span class="o">|</span> \
+</span><span class="line">    <span class="n">module_PRINT_INFO</span>  <span class="o">|</span> \
+</span><span class="line">    <span class="n">module_PRINT_WARNING</span>  <span class="o">|</span> <span class="n">module_PRINT_DEBUG</span> <span class="p">;</span>
+</span><span class="line"><span class="n">module_param_named</span><span class="p">(</span><span class="n">debug_mask</span><span class="p">,</span> <span class="n">debug_mask</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="n">S_IRUGO</span> <span class="o">|</span> <span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">S_IWGRP</span><span class="p">);</span>
+</span><span class="line"><span class="k">static</span> <span class="n">u8</span> <span class="n">local_device_adap</span> <span class="o">=</span> <span class="n">DEFAULT_DEV_ADAP</span><span class="p">;</span>
+</span><span class="line"><span class="n">module_param_named</span><span class="p">(</span><span class="n">adap</span><span class="p">,</span> <span class="n">local_device_adap</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">S_IRUGO</span> <span class="o">|</span> <span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">S_IWGRP</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">adap</span><span class="p">,</span> <span class="s">&quot;Set the i2c adapter of device.&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">static</span> <span class="n">u8</span> <span class="n">local_device_addr</span> <span class="o">=</span> <span class="n">DEFAULT_DEV_ADDR</span><span class="p">;</span>
+</span><span class="line"><span class="n">module_param_named</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">local_device_addr</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">S_IRUGO</span> <span class="o">|</span> <span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">S_IWGRP</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="s">&quot;Set the address of device.&quot;</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">MODULE_DRIVER_INFO</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">struct</span> <span class="n">i2c_board_info</span> <span class="o">*</span><span class="n">this_device_info</span><span class="p">;</span>
+</span><span class="line">    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">prepare_func</span><span class="p">)(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span> <span class="n">module_driver_info</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">    <span class="p">.</span><span class="n">this_device_info</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ft5x0x_device_info</span><span class="p">,</span>
+</span><span class="line">    <span class="p">.</span><span class="n">prepare_func</span> <span class="o">=</span> <span class="n">ft5x06_touchpad_setup</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_driver_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="cm">/* int rc; */</span>
+</span><span class="line">    <span class="k">struct</span> <span class="n">i2c_adapter</span> <span class="o">*</span><span class="n">i2c_adap</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">pr_module</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span><span class="s">&quot;Enter in %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="cm">/* Init GPIOs */</span>
+</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="n">module_driver_info</span><span class="p">.</span><span class="n">prepare_func</span><span class="p">)</span>
+</span><span class="line">        <span class="p">(</span><span class="o">*</span><span class="n">module_driver_info</span><span class="p">.</span><span class="n">prepare_func</span><span class="p">)();</span>
+</span><span class="line">
+</span><span class="line">    <span class="cm">/* Add device driver. */</span>
+</span><span class="line">    <span class="n">init_wrapper</span><span class="p">();</span>
+</span><span class="line">    <span class="n">module_driver_info</span><span class="p">.</span><span class="n">this_device_info</span><span class="o">-&gt;</span><span class="n">addr</span> <span class="o">=</span> <span class="n">local_device_addr</span><span class="p">;</span>
+</span><span class="line">    <span class="cm">/* Add i2c device to platform */</span>
+</span><span class="line">    <span class="n">i2c_adap</span> <span class="o">=</span> <span class="n">i2c_get_adapter</span><span class="p">(</span><span class="n">local_device_adap</span><span class="p">);</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="nb">NULL</span> <span class="o">==</span> <span class="n">i2c_adap</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">pr_module</span><span class="p">(</span><span class="n">ERR</span><span class="p">,</span> <span class="s">&quot;%s: i2c_get_adapter for %d failed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span> <span class="n">local_device_adap</span><span class="p">);</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">error_adapter</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="n">this_client</span> <span class="o">=</span> <span class="n">i2c_new_device</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">,</span> <span class="n">module_driver_info</span><span class="p">.</span><span class="n">this_device_info</span><span class="p">);</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="nb">NULL</span> <span class="o">==</span> <span class="n">this_client</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">pr_module</span><span class="p">(</span><span class="n">ERR</span><span class="p">,</span> <span class="s">&quot;%s: i2c_new_device for %s failed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span> <span class="n">module_driver_info</span><span class="p">.</span><span class="n">this_device_info</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">);</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">error_device</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="n">pr_module</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span> <span class="s">&quot;%s: this_client:%p, addr:%#x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span> <span class="n">this_client</span><span class="p">,</span> <span class="n">this_client</span><span class="o">-&gt;</span><span class="n">addr</span><span class="p">);</span>
+</span><span class="line">    <span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
+</span><span class="line">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">  <span class="nl">error_device:</span>
+</span><span class="line">    <span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
+</span><span class="line">  <span class="nl">error_adapter:</span>
+</span><span class="line">    <span class="n">exit_wrapper</span><span class="p">();</span>
+</span><span class="line">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="n">pr_module</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span><span class="s">&quot;Enter in %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+</span><span class="line">    <span class="n">exit_wrapper</span><span class="p">();</span>
+</span><span class="line">    <span class="n">i2c_unregister_device</span><span class="p">(</span><span class="n">this_client</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="n">module_init</span><span class="p">(</span><span class="n">module_driver_init</span><span class="p">);</span>
+</span><span class="line"><span class="n">module_exit</span><span class="p">(</span><span class="n">module_driver_exit</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="n">MODULE_AUTHOR</span><span class="p">(</span><span class="s">&quot;zhiqiang.xu&lt;zhiqiang.xu@phicomm.com.cn&gt;&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_DESCRIPTION</span><span class="p">(</span><span class="s">&quot;i2c device module driver&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_LICENSE</span><span class="p">(</span><span class="s">&quot;GPL v2&quot;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+以上为部分内容， 其中需要实现板级设备信息 <code>ft5x0x_device_info</code> 和设备初始化函数 <code>ft5x06_touchpad_setup</code> 。其实也就是将板级文件中的相应信息拷贝过来即可。
+</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>原驱动文件的修改  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="cp">#if defined(MODULE)</span>
+</span><span class="line"><span class="kt">int</span> <span class="nf">init_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">ft5x0x_ts_init</span><span class="p">();</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">init_wrapper</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="kt">void</span> <span class="nf">exit_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="n">ft5x0x_ts_exit</span><span class="p">();</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">exit_wrapper</span><span class="p">);</span>
+</span><span class="line"><span class="cp">#else</span>
+</span><span class="line"><span class="n">module_init</span><span class="p">(</span><span class="n">ft5x0x_ts_init</span><span class="p">);</span>
+</span><span class="line"><span class="n">module_exit</span><span class="p">(</span><span class="n">ft5x0x_ts_exit</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="n">MODULE_AUTHOR</span><span class="p">(</span><span class="s">&quot;&lt;luowj&gt;&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_DESCRIPTION</span><span class="p">(</span><span class="s">&quot;FocalTech ft5x0x TouchScreen driver&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_LICENSE</span><span class="p">(</span><span class="s">&quot;GPL&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="cp">#endif</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>
+由于内核模块中只能存在一对 <code>module_init</code> 和 <code>module_exit</code> ，所以在原驱动文件中使用模块宏 <code>MODULE</code> 将这部分排除，同时使用统一的包装函数名称将驱动初始化函数和退出函数包装起来，并导出符号。
+</p>
+<p>
+最后，参照上篇文章内容编写 <code>Makefile</code> 文件，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="c"># Author: zhiqiang.xu</span>
+</span><span class="line"><span class="c"># EMail : xeonxu@gmail.com</span>
+</span><span class="line"><span class="c"># Date  : 2012-12-11</span>
+</span><span class="line"><span class="nv">CROSS_ARCH</span><span class="o">:=</span><span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;$(ARM_EABI_TOOLCHAIN)/arm-eabi-&quot;</span>
+</span><span class="line">KDIR:<span class="o">=</span><span class="k">$(</span>ANDROID_PRODUCT_OUT<span class="k">)</span>/obj/KERNEL_OBJ/
+</span><span class="line">PWD:<span class="o">=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
+</span><span class="line">
+</span><span class="line">test_driver-objs :<span class="o">=</span> module_driver.o ft5x06_ts.o focaltech_ctl.o  ft5x06_ex_fun.o
+</span><span class="line">obj-m:<span class="o">=</span> test_driver.o
+</span><span class="line">.PHONY: modules package clean
+</span><span class="line">all:package
+</span><span class="line">modules:
+</span><span class="line">    @if <span class="o">[</span> <span class="s2">&quot;$(ANDROID_BUILD_TOP)&quot;</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;You have to run \&quot;. build/envsetup.sh\&quot; to init enviroment first. \nAnd then you have to run</span>
+</span><span class="line"><span class="s2">\&quot;choosecombo\&quot; to setup the project.&quot;</span><span class="o">&amp;&amp;</span><span class="nb">exit </span>1; <span class="k">fi</span>
+</span><span class="line">    @if <span class="o">[</span> ! -d <span class="k">$(</span>KDIR<span class="k">)</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;Build kernel first.&quot;</span><span class="o">&amp;&amp;</span><span class="nb">cd</span> <span class="k">$(</span>ANDROID_BUILD_TOP<span class="k">)</span><span class="o">&amp;&amp;</span>make -j4 bootimage&amp;&amp;cd -; <span class="k">fi</span>
+</span><span class="line">    <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>CROSS_ARCH<span class="k">)</span> -C <span class="k">$(</span>KDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span><span class="line">
+</span><span class="line">package:modules
+</span><span class="line">    @mkdir -p ./package
+</span><span class="line">    @cp *.bat ./package
+</span><span class="line">    @cp <span class="k">$(</span>obj-m:.o<span class="o">=</span>.ko<span class="k">)</span> ./package
+</span><span class="line">    @tar --transform<span class="o">=</span><span class="s1">&#39;s,package,test_driver,&#39;</span> -jcf test_driver.tar.bz2 ./package/
+</span><span class="line">
+</span><span class="line">clean:
+</span><span class="line">    rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers package test_driver.tar.bz2
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+修改后的驱动文件使用make即可直接编译出模块驱动，同时该驱动中也包含了设备注册的相关处理，所以相对来说更加独立。完整的驱动文件如下：
+<a href="https://docs.google.com/open?id=0B5GJiOxO7LkWVDVQMy0tcDBoejg"> <code>test_driver.tar.bz2</code> </a>
+</p>
+
+		 <p class='post-footer'>
+  <h1>License</h1>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
+  Original link:
+  <a href='http://blog.xeonxu.info/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia/'>http://blog.xeonxu.info/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia/</a><br/>
+  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
+  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
+</p>
+
+	]]>
+      </description>
+      <title><![CDATA[嵌入式系统内核驱动模块化转换的简单框架]]></title>
+      <link>http://blog.xeonxu.info/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia/</link>
+      <pubDate>2012-12-15T15:57:00+08:00</pubDate>
+      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia</guid>
+
+      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
+      <author>
+	<name><![CDATA[Xeon Xu]]></name>
+	
+      </author>
+    </item>
     
     <item>
       <description>
@@ -3614,43 +3988,6 @@ sys     1m20.240s
       <link>http://blog.xeonxu.info/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/</link>
       <pubDate>2012-08-30T23:46:00+08:00</pubDate>
       <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong</guid>
-
-      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
-      <author>
-	<name><![CDATA[Xeon Xu]]></name>
-	
-      </author>
-    </item>
-    
-    <item>
-      <description>
-	<![CDATA[
-		 <h1 id="blog">关于本Blog</h1>
-<p>自己是一个很懒散的人，从接触电脑开始到现在不下14个年头，但要说自己做过什么，一时间还真难以回答。零星的积累都随我那善变的爱好一去不返了，让人有种虚度光阴的感觉。自己也不是没有做过尝试，开玩网络之初就在MyOpera上建立了自己的Blog，当然内容以个人日记流水账为主，那时真是快乐的单身年代。可是用了一段MyOpera后总觉得界面和功能不禁人意，而此时的Google正如火如荼，于是便赶了潮流在Blogspot上搭建了人生第二个Blog。可惜好景不长，Blogspot在国内越来越难以访问，原因大家懂的。慢慢的，也就淡了。然而随之时间的流逝，也许是老了，总觉得不记录些什么有愧于人生，从而有了再建立一个Blog的想法。当然，建立本Blog还有以下几个原因:</p>
-
-<ol>
-  <li>之前两个博客太过生活化，流水账没有重点。虽说这也是记录博客的一种方式，但是自己想做点改变。</li>
-  <li>想把自己工作中的一些经验和生活中的感悟，都点点滴滴的记录下来，希望到老了的时候看到时，不会后悔曾经浪费了生命。</li>
-  <li>作为程序员和Emacs追随者，没有不用github和org-mode的理由。加之Emacs又有可以将org-file很好地转换为Octopress Markdown格式的插件，没理由拒绝。</li>
-</ol>
-
-<p>最后以一个程序员最惯用的开场白来向各位打个招呼:Hello World!</p>
-
-		 <p class='post-footer'>
-  <h1>License</h1>
-  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
-  Original link:
-  <a href='http://blog.xeonxu.info/blog/2012/08/26/hello-world/'>http://blog.xeonxu.info/blog/2012/08/26/hello-world/</a><br/>
-  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
-  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
-</p>
-
-	]]>
-      </description>
-      <title><![CDATA[Hello World]]></title>
-      <link>http://blog.xeonxu.info/blog/2012/08/26/hello-world/</link>
-      <pubDate>2012-08-26T20:56:00+08:00</pubDate>
-      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/08/26/hello-world</guid>
 
       <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
       <author>
