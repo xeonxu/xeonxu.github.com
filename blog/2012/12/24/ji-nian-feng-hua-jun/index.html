@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>高通编译环境一键安装包 - 不停地疯</title>
+  <title>纪念冯华君 - 不停地疯</title>
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="之前一直都在Marvell平台上开发Android，Marvell平台的CP只Release二进制文件，所以开发过程中一般只需要修改并编译AP端的代码就可以了。最近一个月，由于项目需要，开始转到开发高通平台的Android。初步接触下来，高通平台和Marvell平台有很大不同。最显著一点就是， &hellip;">
+  <meta name="description" content="这几天听到的最令人震惊也是最让人遗憾的消息就是，年轻的31岁程序开发者冯华君去世了。当我刚在twitter上看到这个消息的时候，我都不相信自己的眼睛。我与冯华君并未谋过面，只在几年前和他在MSN上简单聊过几句。那时他正在开发Mac上的FIT输入法，而我联系他是跟他反馈几个关于输入法的改进建议。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/">
+  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/12/24/ji-nian-feng-hua-jun/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -89,7 +89,7 @@
   <header>
     
       
-        <h1 class="entry-title">高通编译环境一键安装包</h1>
+        <h1 class="entry-title">纪念冯华君</h1>
       
     
     
@@ -106,7 +106,7 @@
   
 
 
-<time datetime="2012-09-09T14:22:00+08:00" pubdate data-updated="true">2012年09月09日</time>
+<time datetime="2012-12-24T21:39:00+08:00" pubdate data-updated="true">2012年12月24日</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -116,49 +116,11 @@
 
 
 <div class="entry-content"><p>
-之前一直都在Marvell平台上开发Android，Marvell平台的CP只Release二进制文件，所以开发过程中一般只需要修改并编译AP端的代码就可以了。最近一个月，由于项目需要，开始转到开发高通平台的Android。初步接触下来，高通平台和Marvell平台有很大不同。最显著一点就是，Marvell平台中是AP启动起来后再挂CP跑；而高通平台则是先启动CP<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，然后CP初始化AP并加载程序运行。另一方面，高通的CP相比AP有更大的控制权限，像对GPIO，PMIC的控制等都是CP进行控制，AP端如果需要对这些资源进行操作，则必须先由CP程序分配相应权限给AP才可以。AP和CP的交互则使用共享内存的方式进行同步。
+这几天听到的最令人震惊也是最让人遗憾的消息就是，年轻的31岁程序开发者冯华君去世了。当我刚在twitter上看到这个消息的时候，我都不相信自己的眼睛。我与冯华君并未谋过面，只在几年前和他在MSN上简单聊过几句。那时他正在开发Mac上的FIT输入法，而我联系他是跟他反馈几个关于输入法的改进建议。从那次简单的交流中，我所认识到的冯华君是一位有想法，有理想抱负的年轻人。当他得知我也是一名程序员时，也曾鼓励我去为FIT做贡献。可惜，我的懒惰和拖延症使得这一切成为遗憾，这是唯一一次可以和华君一起工作的机会。此后我们在网上接触的机会少了，再后来出现了twitter和微博，我关注了他。但在微博上我们基本没有怎么互动过，因为那时的我变得更加懒惰，只是彼此价值观接近，我时常转发一些他的帖子。然而现如今，斯人已然离去。
 </p>
 <p>
-高通这种架构特点注定了OEM商需要同时修改AP和CP的代码，所以高通的软件包在Release的时候是分为AP包和MP<sup><a class="footref" name="fnr.1.2" href="#fn.1">1</a></sup>包的。AP包中包括Android，Kernel，AP端的bootloader lk等；而MP包中则包括AMSS，qcsbl，oemsbl等。AP包的编译环境一般都架设在Linux下，使用Android的官方搭建方法就可以搞定。而MP包属于高通的特有产物，需要按照高通的搭建文档来进行，使用RVCT编译器，python以及perl环境。实际搭建下来，MP包的编译环境极为繁琐，从头摸索搭建，没有3、4天是不可能完成的。即便有人之前搭建过，文档工具都准备好的情况下，搭建一个可用的环境也至少需要4个小时。为了方便以后开发人员更加方便快捷的搭建开发环境，我花了2个周末的时间，搭建调试并打包制作了高通编译环境的一键安装包。
+今天，在为冯华君惋惜的同时，我也感到无比地懊恼和惭愧。只愿这位年轻人在世界地另一个地方能过得好吧。
 </p>
-<p>
-该一键安装包分为Windows版和Linux版。是的，你没有看错，还有Linux版本的编译环境！用过的人都懂的，Linux版的编译环境比Windows编译环境的效率高的不是一点两点<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>。不过有一点需要强调： <b>我制作的编译包中，RVCT的版本不是高通官方建议的版本</b> 。高通官方文档中说，编译环境需要RVCT 2.2 593版本。而我制作的编译包中RVCT版本分别是Windows 2.2 616，Linux 2.2 686版本。修正版本号比高通官方建议的高，但是高通官方对于高版本的编译环境是否可用没有明确的答复，只是说没有测试过<sup><a class="footref" name="fnr.3" href="#fn.3">3</a></sup>。我个人简单测试过，分别使用593版本的RVCT，616版本RVCT和686版本RVCT编译同一套代码，对编译出来的bin文件进行比较，发现除了日期和签名部分有不同外，其余部分都是相同的。另外，这三种编译器编译出来的文件分别刷到手机上，也都可以正常运行。但是， <b>即便如此我也还是不能保证编译环境是完全没有问题的</b> 。所以，对于要求比较高的朋友，可以在研发中使用我的环境，正式发布版本的时候使用高通官方建议的593版本进行编译。
-</p>
-<p>
-最后放出下载地址（由于CSDN只有60M的上传权限，所以只有Linux环境了，并且需要5个资源分。国外下载地址没有任何限制）：
-</p>
-<p>
-国内下载：
-</p>
-<p>
-<a href="http://download.csdn.net/detail/noexu/4558455">Linux编译环境</a>
-</p>
-<p>
-国外下载：
-</p>
-<p>
-<a href="https://docs.google.com/open?id=0B5GJiOxO7LkWT0F3cDhyTG5ZR2s">Linux编译环境</a>
-<a href="https://docs.google.com/open?id=0B5GJiOxO7LkWUkp6N0RCbHF2SWc">Windows编译环境</a>
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 高通平台中将CP称为MP，本质是一样的。
-</p>
-
-
-<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 相同配置的机器至少有5:1的效率，windows上编译需要50分钟的代码，Linux上只需要10分钟。
-</p>
-
-
-<p class="footnote"><sup><a class="footnum" name="fn.3" href="#fnr.3">3</a></sup> 根据高通文档的编写时间点以及国企一贯保守的工作习惯上来推断，我猜测高版本应该是没有问题的，因为文档写作之初RVCT 616版本的补丁还没有发布，只是高通方面没人更新。所以，流传到现在就是只能使用593版本的RVCT了。当然这只是我本人的推断。
-</p>
-
-
-
-
-</div>
-</div>
 </div>
 
 
@@ -181,12 +143,12 @@
   
 
 
-<time datetime="2012-09-09T14:22:00+08:00" pubdate data-updated="true">2012年09月09日</time>
+<time datetime="2012-12-24T21:39:00+08:00" pubdate data-updated="true">2012年12月24日</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/Android/'>Android</a>, <a class='category' href='/blog/categories/Linux/'>Linux</a>, <a class='category' href='/blog/categories/Qualcomm/'>Qualcomm</a>, <a class='category' href='/blog/categories/开发/'>开发</a>
+    <a class='category' href='/blog/categories/杂谈/'>杂谈</a>, <a class='category' href='/blog/categories/随笔/'>随笔</a>
   
 </span>
 
@@ -220,7 +182,7 @@
   
 
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/12/24/ji-nian-feng-hua-jun/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/12/24/ji-nian-feng-hua-jun/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -234,10 +196,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left articlenav" href="/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/" title="Previous Post: 优化使用Orgmode发布Octopress的方法">&laquo; 优化使用Orgmode发布Octopress的方法</a>
+        <a class="basic-alignment left articlenav" href="/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia/" title="Previous Post: 嵌入式系统内核驱动模块化转换的简单框架">&laquo; 嵌入式系统内核驱动模块化转换的简单框架</a>
       
-      
-        <a class="basic-alignment right articlenav" href="/blog/2012/09/22/vim-de-jian-dan-pei-zhi/" title="Next Post: Vim的简单配置">Vim的简单配置 &raquo;</a>
       
     </p>
   </footer>
@@ -378,8 +338,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/';
-        var disqus_url = 'http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/';
+        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/12/24/ji-nian-feng-hua-jun/';
+        var disqus_url = 'http://blog.xeonxu.info/blog/2012/12/24/ji-nian-feng-hua-jun/';
         var disqus_script = 'embed.js';
       
     (function () {

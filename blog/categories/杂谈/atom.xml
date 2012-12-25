@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 杂谈 | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/杂谈/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2012-12-22T22:26:44+08:00</updated>
+  <updated>2012-12-25T23:36:42+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,20 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[纪念冯华君]]></title>
+    <link href="http://blog.xeonxu.info/blog/2012/12/24/ji-nian-feng-hua-jun/"/>
+    <updated>2012-12-24T21:39:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2012/12/24/ji-nian-feng-hua-jun</id>
+    <content type="html"><![CDATA[<p>
+这几天听到的最令人震惊也是最让人遗憾的消息就是，年轻的31岁程序开发者冯华君去世了。当我刚在twitter上看到这个消息的时候，我都不相信自己的眼睛。我与冯华君并未谋过面，只在几年前和他在MSN上简单聊过几句。那时他正在开发Mac上的FIT输入法，而我联系他是跟他反馈几个关于输入法的改进建议。从那次简单的交流中，我所认识到的冯华君是一位有想法，有理想抱负的年轻人。当他得知我也是一名程序员时，也曾鼓励我去为FIT做贡献。可惜，我的懒惰和拖延症使得这一切成为遗憾，这是唯一一次可以和华君一起工作的机会。此后我们在网上接触的机会少了，再后来出现了twitter和微博，我关注了他。但在微博上我们基本没有怎么互动过，因为那时的我变得更加懒惰，只是彼此价值观接近，我时常转发一些他的帖子。然而现如今，斯人已然离去。
+</p>
+<p>
+今天，在为冯华君惋惜的同时，我也感到无比地懊恼和惭愧。只愿这位年轻人在世界地另一个地方能过得好吧。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[近期的烦恼]]></title>
@@ -215,24 +229,6 @@ Vitamin-R运行起来的界面非常简单，运行时会在菜单栏上出来�
 <p>
 好了，就介绍到这里。还是那句话，软件本身使用很简单，设置项也不多，至于值不值20刀的价格就见仁见智了，不过2刀是绝对值了:)
 </p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hello World]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/08/26/hello-world/"/>
-    <updated>2012-08-26T20:56:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/08/26/hello-world</id>
-    <content type="html"><![CDATA[<h1 id="blog">关于本Blog</h1>
-<p>自己是一个很懒散的人，从接触电脑开始到现在不下14个年头，但要说自己做过什么，一时间还真难以回答。零星的积累都随我那善变的爱好一去不返了，让人有种虚度光阴的感觉。自己也不是没有做过尝试，开玩网络之初就在MyOpera上建立了自己的Blog，当然内容以个人日记流水账为主，那时真是快乐的单身年代。可是用了一段MyOpera后总觉得界面和功能不禁人意，而此时的Google正如火如荼，于是便赶了潮流在Blogspot上搭建了人生第二个Blog。可惜好景不长，Blogspot在国内越来越难以访问，原因大家懂的。慢慢的，也就淡了。然而随之时间的流逝，也许是老了，总觉得不记录些什么有愧于人生，从而有了再建立一个Blog的想法。当然，建立本Blog还有以下几个原因:</p>
-
-<ol>
-  <li>之前两个博客太过生活化，流水账没有重点。虽说这也是记录博客的一种方式，但是自己想做点改变。</li>
-  <li>想把自己工作中的一些经验和生活中的感悟，都点点滴滴的记录下来，希望到老了的时候看到时，不会后悔曾经浪费了生命。</li>
-  <li>作为程序员和Emacs追随者，没有不用github和org-mode的理由。加之Emacs又有可以将org-file很好地转换为Octopress Markdown格式的插件，没理由拒绝。</li>
-</ol>
-
-<p>最后以一个程序员最惯用的开场白来向各位打个招呼:Hello World!</p>
 ]]></content>
   </entry>
   
