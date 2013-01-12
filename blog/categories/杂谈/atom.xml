@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 杂谈 | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/杂谈/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2012-12-25T23:36:42+08:00</updated>
+  <updated>2013-01-13T00:50:29+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,23 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[当爸爸了]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/01/12/dang-ba-ba-liao/"/>
+    <updated>2013-01-12T22:13:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/01/12/dang-ba-ba-liao</id>
+    <content type="html"><![CDATA[<p>
+不经意间，9个月过去了，宝宝也赶在13年前夕，提前预产期一个月降临人世。由于早产，被医院隔离监护了2天，第3天才将小孩从保暖房里接出来。第一次看到自己小孩娇小的模样，真是又兴奋，又担心。开始当爸爸后，各种工作也就接踵而至。首先是喂奶，由于是初期，母乳还没有多少，只能泡奶粉。但是我这个毛手爸爸除了能喂饱自己以外，小孩奶粉还真不会泡。看了奶粉说明，试了水温，冲了奶粉，结果小孩还是不爱吃。后来我才知道，那是因为之前调的奶粉温度太低了。好在到了第2天，母乳已经很多了，可以直接母乳喂养，才算将我从冲泡奶粉的差事中解放出来。除了喂奶，换尿布也是重头戏。小孩2小时吃一次奶换一次尿布，初为父母的我们，第一天为此真是忙得手忙脚乱。还好有“尿不湿”的存在，否则光是换洗尿布，就够我受了。
+</p>
+<p>
+现在，从小孩出生，已经过去了半个月，小孩也从之前的5斤长到如今的7斤。看着他一天天长大，心中充满了欣慰。真心希望他能越来越好，健健康康。
+</p>
+<p>
+加油，小子！
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[纪念冯华君]]></title>
@@ -180,55 +197,6 @@
 这样，即便是在Android原生环境中，也可以正确无误的运行。这样就能将该脚本发给测试，利用它对release版本进行bug验证了。
 </p></div>
 </div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[推荐使用Vitamin-R]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/"/>
-    <updated>2012-10-14T21:24:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/10/14/tui-jian-shi-yong-vitamin-r</id>
-    <content type="html"><![CDATA[<p>
-记得之前Twitter上的@justin7974介绍过Vitamin-R这个软件，是一款个人时间管理类的软件，据说可以和<a href="http://www.omnigroup.com/products/omnifocus/">Omnifocus</a> 或者Things配合起来用，看起来不错的样子。只是它20刀的价钱相对它的功能来说，我觉得还是贵了点，所以一直以来都没有下手。前段时间浏览Twitter，突然看见一条新闻，说Vitamin-R在<a href="https://itunes.apple.com/us/app/vitamin-r/id402438916?mt=12">AppStore</a> 上1折优惠只要2刀。于是，毫不犹豫的下单买了它。
-</p>
-<p>
-Vitamin-R运行起来的界面非常简单，运行时会在菜单栏上出来一个"R"图标。点击这个图标就会出现如下界面：
-</p>
-<p>
-<img src="http://blog.xeonxu.info/./images/blog/./79722mqA.png" alt="./images/blog/./79722mqA.png" />
-</p>
-
-<p>
-截图中是我自己设置的一个”写博客“的工作目标，时长设置为20分钟。设置了目标后，自己就可以和时间赛跑开始干活了。软件默认会在一定时间过后用声音提示用户，以注意所消耗的时间。等倒计时结束，他会以用户设定的方式提醒用户设定的时间已到，并要求用户对自己这段时间的工作情况进行评价和记录。如此，用户便可以对自己完成一个任务所消耗的时间以及投入程度有一个了解，以便未来更高效的工作和制定计划。
-</p>
-<p>
-说到Vitamin-R最让我关注的一个功能，那就是和Omnifocus的整合了。使用也非常简单，直接将Omnifocus中的任务条目用鼠标拖进Vitamin-R的时间片描述中，然后设置任务时间开始即可。任务时间到期后会出现如下这个界面：
-</p>
-
-<p>
-<img src="http://blog.xeonxu.info/./images/blog/./79722NJT.png" alt="./images/blog/./79722NJT.png" />
-</p>
-
-<p>
-将下面两个复选框选中，点继续，然后完成。如此这样，你会发现Omnifocus中的任务也会相应的被标记为完成状态。
-</p>
-<p>
-此外，Vitamin支持丰富的快捷键，比如使用CMD-OPT-N，可以打开一个类似便签的界面，用来记录当前任务的一些随笔想法：
-</p>
-
-<p>
-<img src="http://blog.xeonxu.info/./images/blog/./79722ndf.png" alt="./images/blog/./79722ndf.png" />
-</p>
-
-<p>
-如截图中所示，除了记录当前任务，还能记录一些其它内容。而这些功能都可以通过快捷键来很方便的调用。
-</p>
-<p>
-当然，Vitamin-R还有一些很有用的功能，比如噪声发生器(Noise Machine)。可以让用户在安静的工作环境中设置一些噪音，模拟自然界的声音，以让用户更关注工作的内容。
-</p>
-<p>
-好了，就介绍到这里。还是那句话，软件本身使用很简单，设置项也不多，至于值不值20刀的价格就见仁见智了，不过2刀是绝对值了:)
-</p>
 ]]></content>
   </entry>
   
