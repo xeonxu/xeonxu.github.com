@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 杂谈 | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/杂谈/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-01-13T00:50:29+08:00</updated>
+  <updated>2013-01-26T23:44:25+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,73 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[入手HHKB Pro2]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/01/26/ru-shou-hhkb/"/>
+    <updated>2013-01-26T16:57:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/01/26/ru-shou-hhkb</id>
+    <content type="html"><![CDATA[<p>
+入手HHKB的想法在心中已经埋藏了快三年了，但一直没有付诸行动。原因主要是价钱有点太那啥了，一个键盘要卖1700，对任何一个苦穷程序员来说用这么个价钱买个键盘都是过于昂贵的。所幸去年年底之前在公司完成了3份专利，总共能拿到6k的奖金（申请前期只能拿到一半，也就是只能拿到3k），于是心中的小恶魔又开始骚动了。入手的奖金中有1k已经花去用来购买kindle paperwhite，还剩下不到2k的奖金正好可以购买一个HHKB（老婆旁白：最烦买东西前找个理由的人了）:p
+</p>
+<p>
+既然决定入手HHKB，于是到网上查了下购买渠道。由于HHKB并未正式引入国内，所以只能通过淘宝或者海外代购来购买了。淘宝上找到的HHKB卖家对HHKB Pro2的要价普遍为16xx，1700不到的样子；而在日本Amazon网站上，HHKB Pro2英文键盘的报价只有17,834日元，合计约人民币1,222，便宜了500多。即便加上300多的代购费用，也要比国内淘宝购买便宜200多人刀。所以，我最后选择通过<a href="http://www.030buy.com">萌购</a> 的代购服务直接从日本亚马逊购买HHKB。由于萌购的购买汇率比银行牌价稍微高一点，实体价格换为人民币为1323元，加上所有代购手续费用和邮费155元，总共为1478元。下单后一般会在两周内收到，实际上，从我下单到收到货只经历了大概一周多一点的时间，总体来说还是蛮便捷的。
+</p>
+<p>
+收到的键盘包装如下，相当朴素简陋，从外观上看根本看不出这货能卖到1k+。打开包装，里面更是简陋的用一只塑料袋包装键盘，外加两张纸做简要说明就什么都没有了。当然，入HHKB的肯定不单单是看上他的外表，更重要的是看上它轻巧的键盘手感以及键位设置。
+<img src="http://blog.xeonxu.info/./images/blog/hhkb_case.jpg" alt="./images/blog/hhkb_case.jpg" />
+</p>
+<p>
+由于HHKB支持在多个平台供不同习惯的使用者使用，它提供了6个DIP开关用来配置键盘的功能。
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption />
+<colgroup><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">SW1</th><th scope="col" class="left">SW2</th><th scope="col" class="left">設定モード</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">OFF</td><td class="left">OFF</td><td class="left">HHKモード（PC）</td></tr>
+<tr><td class="left">ON</td><td class="left">OFF</td><td class="left">Lite拡張モード（PC）</td></tr>
+<tr><td class="left">OFF</td><td class="left">ON</td><td class="left">Macintoshモード</td></tr>
+<tr><td class="left">ON</td><td class="left">ON</td><td class="left">設定禁止</td></tr>
+</tbody>
+</table>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption />
+<colgroup><col class="left" /><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">DIP SW</th><th scope="col" class="left">機能</th><th scope="col" class="left" /><th scope="col" class="left" /></tr>
+<tr><th scope="col" class="left" /><th scope="col" class="left">状態</th><th scope="col" class="left">キー</th><th scope="col" class="left">機能</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">3</td><td class="left">OFF</td><td class="left">Delete</td><td class="left">Delete</td></tr>
+<tr><td class="left" /><td class="left">ON</td><td class="left">Delete</td><td class="left">BS（BackSpace）</td></tr>
+<tr><td class="left">4</td><td class="left">OFF</td><td class="left">左◇</td><td class="left">左◇</td></tr>
+<tr><td class="left" /><td class="left">ON</td><td class="left">左◇</td><td class="left">Fn</td></tr>
+<tr><td class="left">5</td><td class="left">OFF</td><td class="left">Alt</td><td class="left">Alt</td></tr>
+<tr><td class="left" /><td class="left" /><td class="left">◇</td><td class="left">◇</td></tr>
+<tr><td class="left" /><td class="left">ON</td><td class="left">Alt</td><td class="left">◇</td></tr>
+<tr><td class="left" /><td class="left" /><td class="left">◇</td><td class="left">Alt</td></tr>
+<tr><td class="left">6</td><td class="left">OFF</td><td class="left">Wake Up 無効</td><td class="left" /></tr>
+<tr><td class="left" /><td class="left">ON</td><td class="left">Wake Up 有効</td><td class="left" /></tr>
+</tbody>
+</table>
+
+<p>我平时使用iMac，所以我HHKB的配置是：011100。也就是Mac键盘模式，Delete键为退格键，同时左Cmd键设置为Fn键。之所以将左Cmd键设置为Fn键，是因为Pro2的英文键盘配置上只有一个Fn键，而且在键盘的最右边，即便使用右手掌去按也不是很方便，于是退其次将左右上常用的Cmd按键配置为了Fn键。说到这点，我有点后悔入手英文键盘了，因为日文键盘上有左右两个Fn键，而且有指针键，而且还有三个日文输入法中常用的转换键。这么配置下来，由于失去了之前常用的左手Cmd按键，某些操作必须配合右手来使用，有点小小的不适应，目前还在进一步熟悉中。当然，HHKB在Emacs下使用是非常清脆干爽舒适的。
+关于HHKB按键布置以及DIP配置可以参见：<a href="http://www.pfu.fujitsu.com/hhkeyboard/leaflet/hairetu.html">HHKB按键布置</a> 和 <a href="http://www.pfu.fujitsu.com/hhkeyboard/leaflet/hhkb_backview.html">HHKB DIP配置</a></p>
+
+<p>
+最后，来张我的HHKB和iMac的合影，看起来还是蛮搭的。
+</p>
+<p>
+<img src="http://blog.xeonxu.info/./images/blog/hhkb_imac.jpg" alt="./images/blog/hhkb_imac.jpg" />
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[当爸爸了]]></title>
@@ -112,90 +179,6 @@
 
 
 </div>
-</div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[小脚本帮大忙]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/"/>
-    <updated>2012-10-21T23:38:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/10/21/xiao-jiao-ben-bang-da-mang</id>
-    <content type="html"><![CDATA[<p>
-前两天单位的在做项目中发现一个Bug：手机在启动后触摸屏有一定几率无法使用。这个Bug非常恼人，因为重现几率非常低，而且只会出现在重启过程中。这意味着不论是调查原因还是验证对策，都将是非常耗时且繁琐的。因为对策问题之前，首先需要重现问题，如此才好分析问题的原因。而这个Bug必须要反复重启手机才能重现，人为操作的话太浪费时间效率低下。
-好在这个Bug的行为比较稳定，重现后触屏肯定不能使用。通过adb对比调查正常手机和问题手机的设备节点，发现在出问题的手机中，触屏设备没有注册成功。看来是设备注册失败，导致的触屏异常。于是，我们考虑使用脚本对该Bug进行再现分析。思路如下：
-</p>
-<ol>
-<li>写一个脚本判断触屏驱动的设备节点是否注册成功，如果成功则复位重启；否则保留现场等待分析。
-</li>
-<li>将该脚本添加到 <code>init.rc</code> 中成为一个服务，在启动时调用。
-</li>
-<li>脚本运行时将相应的运行信息输出到外部文件中，从而可以计算出再现率。
-</li>
-</ol>
-
-<p>基于以上想法，写出了以下脚本代码：
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>check_tp.sh  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/system/bin/sh</span>
-</span><span class='line'><span class="nv">tp_name</span><span class="o">=</span><span class="s2">&quot;xxxx&quot;</span> <span class="c"># xxxx为注册的tp名称</span>
-</span><span class='line'><span class="nv">input_name</span><span class="o">=</span><span class="sb">`</span>cat /sys/class/input/input0/name<span class="sb">`</span>
-</span><span class='line'><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;x_$tp_name&quot;</span> <span class="o">=</span> <span class="s2">&quot;x_$input_name&quot;</span> <span class="o">]</span>; <span class="k">then</span>
-</span><span class='line'><span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is OK.&quot;</span> &amp;gt;&amp;gt; /data/check_tp.log
-</span><span class='line'>    reboot
-</span><span class='line'><span class="k">else</span>
-</span><span class='line'><span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is not OK.&quot;</span> &amp;gt;&amp;gt; /data/check_tp.log
-</span><span class='line'><span class="k">fi</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-同时，修改 <code>init.rc</code> 文件，在其中加入：
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>service check_tp /system/bin/sh /system/bin/check_tp.sh
-</span><span class='line'>    class main
-</span><span class='line'>    oneshot
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-然后重新编译bootimage并刷机。最后使用 <code>adb remount&amp;&amp;adb push check_tp.sh /system/bin/&amp;&amp;adb shell chmod 755 /system/bin/check_tp.sh</code> ，将刚才新写的脚本推送到手机上。重启手机，之后就会看到手机不断的上电然后复位重启。
-在运行该脚本不断重启手机8小时之后，手机正常进入了系统。此时操作手机进行验证，发现触屏已经无效。分析 <code>/data/check_tp.log</code> 文件，算出手机共重启了1000多次，从而得出该问题的再现率大概为千分之一。利用该脚本，验证bug方便了好多，大大提高了工作效率。
-</p>
-
-<div id="outline-container-1" class="outline-2">
-<h2 id="sec-1">后记</h2>
-<div class="outline-text-2" id="text-1">
-
-<p>由于以上写的脚本使用到了 <code>if</code> 关键字，而Android系统默认不支持该关键字，必须依赖busybox环境才行。之前我有移植过busybox，但是只在工程模式下生效，所以该脚本在release版本中是不能正常运行的。为了不依赖运行环境，我又将该脚本换了一种写法，改为：
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>check_tp2.sh  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/system/bin/sh</span>
-</span><span class='line'><span class="nv">tp_name</span><span class="o">=</span><span class="s2">&quot;xxxx&quot;</span> <span class="c"># xxxx为注册的tp名称</span>
-</span><span class='line'><span class="nv">input_name</span><span class="o">=</span><span class="sb">`</span>cat /sys/class/input/input0/name<span class="sb">`</span>
-</span><span class='line'><span class="k">case</span> <span class="nv">$input_name</span> in
-</span><span class='line'>    <span class="nv">$tp_name</span><span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is OK.&quot;</span> &amp;gt;&amp;gt; /data/check_tp.log
-</span><span class='line'>              reboot
-</span><span class='line'>             ;;
-</span><span class='line'>    *<span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is not OK.&quot;</span> &amp;gt;&amp;gt; /data/check_tp.log
-</span><span class='line'>            ;;
-</span><span class='line'><span class="k">esac</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-这样，即便是在Android原生环境中，也可以正确无误的运行。这样就能将该脚本发给测试，利用它对release版本进行bug验证了。
-</p></div>
 </div>
 ]]></content>
   </entry>

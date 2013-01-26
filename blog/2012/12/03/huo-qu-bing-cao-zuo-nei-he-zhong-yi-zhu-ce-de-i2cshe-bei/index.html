@@ -197,7 +197,7 @@
 </span><span class="line">
 </span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
 </span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
-</span><span class="line">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span><span class="line">
 </span><span class="line">  <span class="nl">device_error_exit:</span>
 </span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
@@ -351,8 +351,8 @@
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
 <li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
 <li class='category'><a href='/blog/categories/开发/'>开发 (10)</a></li>
-<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (7)</a></li>
-<li class='category'><a href='/blog/categories/生活/'>生活 (4)</a></li>
+<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (8)</a></li>
+<li class='category'><a href='/blog/categories/生活/'>生活 (5)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
 <li class='category'><a href='/blog/categories/随笔/'>随笔 (5)</a></li>
 
@@ -361,6 +361,10 @@
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/01/26/ru-shou-hhkb/">入手HHKB Pro2</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/01/12/dang-ba-ba-liao/">当爸爸了</a>
@@ -376,10 +380,6 @@
     
       <li class="post">
         <a href="/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/">在高通平台Android环境下编译内核模块</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/">获取并操作内核中已注册的I2C设备</a>
       </li>
     
   </ul>

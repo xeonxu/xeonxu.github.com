@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 开发 | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/开发/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-01-13T00:50:29+08:00</updated>
+  <updated>2013-01-26T23:44:25+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -160,7 +160,7 @@
 </span><span class='line'>
 </span><span class='line'>    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
 </span><span class='line'>    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="nl">device_error_exit:</span>
 </span><span class='line'>    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>

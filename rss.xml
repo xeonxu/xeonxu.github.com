@@ -4,8 +4,94 @@
     <description><![CDATA[不停地疯]]></description>
     <title><![CDATA[不停地疯]]></title>
     <link>http://blog.xeonxu.info/</link>
-    <pubDate>2013-01-13T00:50:29+08:00</pubDate>
+    <pubDate>2013-01-26T23:44:25+08:00</pubDate>
 
+    
+    <item>
+      <description>
+	<![CDATA[
+		 <p>
+入手HHKB的想法在心中已经埋藏了快三年了，但一直没有付诸行动。原因主要是价钱有点太那啥了，一个键盘要卖1700，对任何一个苦穷程序员来说用这么个价钱买个键盘都是过于昂贵的。所幸去年年底之前在公司完成了3份专利，总共能拿到6k的奖金（申请前期只能拿到一半，也就是只能拿到3k），于是心中的小恶魔又开始骚动了。入手的奖金中有1k已经花去用来购买kindle paperwhite，还剩下不到2k的奖金正好可以购买一个HHKB（老婆旁白：最烦买东西前找个理由的人了）:p
+</p>
+<p>
+既然决定入手HHKB，于是到网上查了下购买渠道。由于HHKB并未正式引入国内，所以只能通过淘宝或者海外代购来购买了。淘宝上找到的HHKB卖家对HHKB Pro2的要价普遍为16xx，1700不到的样子；而在日本Amazon网站上，HHKB Pro2英文键盘的报价只有17,834日元，合计约人民币1,222，便宜了500多。即便加上300多的代购费用，也要比国内淘宝购买便宜200多人刀。所以，我最后选择通过<a href="http://www.030buy.com">萌购</a> 的代购服务直接从日本亚马逊购买HHKB。由于萌购的购买汇率比银行牌价稍微高一点，实体价格换为人民币为1323元，加上所有代购手续费用和邮费155元，总共为1478元。下单后一般会在两周内收到，实际上，从我下单到收到货只经历了大概一周多一点的时间，总体来说还是蛮便捷的。
+</p>
+<p>
+收到的键盘包装如下，相当朴素简陋，从外观上看根本看不出这货能卖到1k+。打开包装，里面更是简陋的用一只塑料袋包装键盘，外加两张纸做简要说明就什么都没有了。当然，入HHKB的肯定不单单是看上他的外表，更重要的是看上它轻巧的键盘手感以及键位设置。
+<img src="http://blog.xeonxu.info/./images/blog/hhkb_case.jpg" alt="./images/blog/hhkb_case.jpg" />
+</p>
+<p>
+由于HHKB支持在多个平台供不同习惯的使用者使用，它提供了6个DIP开关用来配置键盘的功能。
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption />
+<colgroup><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">SW1</th><th scope="col" class="left">SW2</th><th scope="col" class="left">設定モード</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">OFF</td><td class="left">OFF</td><td class="left">HHKモード（PC）</td></tr>
+<tr><td class="left">ON</td><td class="left">OFF</td><td class="left">Lite拡張モード（PC）</td></tr>
+<tr><td class="left">OFF</td><td class="left">ON</td><td class="left">Macintoshモード</td></tr>
+<tr><td class="left">ON</td><td class="left">ON</td><td class="left">設定禁止</td></tr>
+</tbody>
+</table>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption />
+<colgroup><col class="left" /><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">DIP SW</th><th scope="col" class="left">機能</th><th scope="col" class="left" /><th scope="col" class="left" /></tr>
+<tr><th scope="col" class="left" /><th scope="col" class="left">状態</th><th scope="col" class="left">キー</th><th scope="col" class="left">機能</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">3</td><td class="left">OFF</td><td class="left">Delete</td><td class="left">Delete</td></tr>
+<tr><td class="left" /><td class="left">ON</td><td class="left">Delete</td><td class="left">BS（BackSpace）</td></tr>
+<tr><td class="left">4</td><td class="left">OFF</td><td class="left">左◇</td><td class="left">左◇</td></tr>
+<tr><td class="left" /><td class="left">ON</td><td class="left">左◇</td><td class="left">Fn</td></tr>
+<tr><td class="left">5</td><td class="left">OFF</td><td class="left">Alt</td><td class="left">Alt</td></tr>
+<tr><td class="left" /><td class="left" /><td class="left">◇</td><td class="left">◇</td></tr>
+<tr><td class="left" /><td class="left">ON</td><td class="left">Alt</td><td class="left">◇</td></tr>
+<tr><td class="left" /><td class="left" /><td class="left">◇</td><td class="left">Alt</td></tr>
+<tr><td class="left">6</td><td class="left">OFF</td><td class="left">Wake Up 無効</td><td class="left" /></tr>
+<tr><td class="left" /><td class="left">ON</td><td class="left">Wake Up 有効</td><td class="left" /></tr>
+</tbody>
+</table>
+
+<p>我平时使用iMac，所以我HHKB的配置是：011100。也就是Mac键盘模式，Delete键为退格键，同时左Cmd键设置为Fn键。之所以将左Cmd键设置为Fn键，是因为Pro2的英文键盘配置上只有一个Fn键，而且在键盘的最右边，即便使用右手掌去按也不是很方便，于是退其次将左右上常用的Cmd按键配置为了Fn键。说到这点，我有点后悔入手英文键盘了，因为日文键盘上有左右两个Fn键，而且有指针键，而且还有三个日文输入法中常用的转换键。这么配置下来，由于失去了之前常用的左手Cmd按键，某些操作必须配合右手来使用，有点小小的不适应，目前还在进一步熟悉中。当然，HHKB在Emacs下使用是非常清脆干爽舒适的。
+关于HHKB按键布置以及DIP配置可以参见：<a href="http://www.pfu.fujitsu.com/hhkeyboard/leaflet/hairetu.html">HHKB按键布置</a> 和 <a href="http://www.pfu.fujitsu.com/hhkeyboard/leaflet/hhkb_backview.html">HHKB DIP配置</a></p>
+
+<p>
+最后，来张我的HHKB和iMac的合影，看起来还是蛮搭的。
+</p>
+<p>
+<img src="http://blog.xeonxu.info/./images/blog/hhkb_imac.jpg" alt="./images/blog/hhkb_imac.jpg" />
+</p>
+
+		 <p class='post-footer'>
+  <h1>License</h1>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
+  Original link:
+  <a href='http://blog.xeonxu.info/blog/2013/01/26/ru-shou-hhkb/'>http://blog.xeonxu.info/blog/2013/01/26/ru-shou-hhkb/</a><br/>
+  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
+  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
+</p>
+
+	]]>
+      </description>
+      <title><![CDATA[入手HHKB Pro2]]></title>
+      <link>http://blog.xeonxu.info/blog/2013/01/26/ru-shou-hhkb/</link>
+      <pubDate>2013-01-26T16:57:00+08:00</pubDate>
+      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2013/01/26/ru-shou-hhkb</guid>
+
+      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
+      <author>
+	<name><![CDATA[Xeon Xu]]></name>
+	
+      </author>
+    </item>
     
     <item>
       <description>
@@ -617,7 +703,7 @@
 </span><span class="line">
 </span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
 </span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
-</span><span class="line">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span><span class="line">
 </span><span class="line">  <span class="nl">device_error_exit:</span>
 </span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
@@ -3022,236 +3108,6 @@ OK，如此配置后，查看代码编辑代码舒服多了。
       <link>http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao/</link>
       <pubDate>2012-09-09T14:22:00+08:00</pubDate>
       <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/09/09/gao-tong-bian-yi-huan-jing-yi-jian-an-zhuang-bao</guid>
-
-      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
-      <author>
-	<name><![CDATA[Xeon Xu]]></name>
-	
-      </author>
-    </item>
-    
-    <item>
-      <description>
-	<![CDATA[
-		 <p>
-前几天翻译了一篇来自Tom Alexander的<a href="http://blog.xeonxu.info/blog/2012/09/03/shi-yong-org-modelai-fa-bu-bo-ke/">文章</a> ，文中介绍了如何通过修改Rakefile文件以及添加相应的Emacs设置，来使通过Org-mode发布Octopress博客成为可能。该方法很好用，特别是使用作者自己修改的el脚本可以非常方便的将Org文件输出为octopress的文章。但是，原文作者的方法也有一点缺憾，那就是必须手动移动新建的Org文件到相应的目录下；而且在使用 <code>rake new_post[""]</code> 命令新建文档后必须手动编辑新建的文件，少了那么一点点便捷。为此，我又通过网络查找了一些资料，最后找到了<a href="http://imwuyu.me/blog/configuring-octopress.html/">这里</a> 。 受到这篇文章的启发，我尝试修改了工程中的 <code>Rakefile</code> 文件，最后成功地让一切都自动化起来。具体方法如下：
-</p>
-<ul>
-<li>修改Rakefile中关于org文档目录以及新建post文件的扩展名。同时新增一个编辑器的变量
-</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Rakefile  </span><a href="https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad">Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-</pre></td><td class="code"><pre><code class="makefile"><span class="line"> <span class="nv">deploy_dir</span>      <span class="o">=</span> <span class="s2">&quot;_deploy&quot;</span>   <span class="c"># deploy directory (for Github pages deployment)</span>
-</span><span class="line"> <span class="nv">stash_dir</span>       <span class="o">=</span> <span class="s2">&quot;_stash&quot;</span>    <span class="c"># directory to stash posts for speedy generation</span>
-</span><span class="line"> <span class="nv">posts_dir</span>       <span class="o">=</span> <span class="s2">&quot;_posts&quot;</span>    <span class="c"># directory for blog files</span>
-</span><span class="line"> <span class="nv">org_posts_dir</span>   <span class="o">=</span> <span class="s2">&quot;org_posts&quot;</span>
-</span><span class="line"> <span class="nv">themes_dir</span>      <span class="o">=</span> <span class="s2">&quot;.themes&quot;</span>   <span class="c"># directory for blog files</span>
-</span><span class="line"> <span class="nv">new_post_ext</span>    <span class="o">=</span> <span class="s2">&quot;org&quot;</span>  <span class="c"># default new post file extension when using the new_post task</span>
-</span><span class="line"> <span class="nv">new_page_ext</span>    <span class="o">=</span> <span class="s2">&quot;markdown&quot;</span>  <span class="c"># default new page file extension when using the new_page task</span>
-</span><span class="line"> <span class="nv">server_port</span>     <span class="o">=</span> <span class="s2">&quot;4000&quot;</span>      <span class="c"># port for preview server eg. localhost:4000</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># open ,使用系统默认编辑器</span>
-</span><span class="line"><span class="c"># open -a Mou，使用Mou打开</span>
-</span><span class="line"><span class="c"># open -a Byword，使用Byword打开</span>
-</span><span class="line"><span class="c"># subl, 使用Sublime Text2打开</span>
-</span><span class="line"><span class="nv">editor</span> <span class="o">=</span><span class="s2">&quot;~/bin/em&quot;</span> <span class="c"># Emacs wrapper</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>
-我使用我自己编写的emacs wrapper来调用Emacs，为的是让Emacs的启动更快一点（通过server方式）。em的内容如下：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>em  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#!/bin/bash</span>
-</span><span class="line">/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n -a <span class="s2">&quot;/Applications/Emacs.app/Contents/MacOS/Emacs&quot;</span> <span class="nv">$1</span> &gt; /dev/null 2&gt;&amp;1 &amp;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-如果你也想通过emacsclient来加速Emacs的启动速度，你可能需要在你的 <code>.emacs</code> 文件中添加以下语句：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>.emacs  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">(</span>require <span class="err">&#39;</span>edit-server<span class="o">)</span>
-</span><span class="line"><span class="o">(</span>edit-server-start<span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-当然，你也可以指定 <code>editor</code> 变量为任何你喜欢的编辑器，不过既然都用Org文件发博客了，有什么理由不用Emacs呢？
-</p>
-<ul>
-<li>添加新建 <code>org_posts_dir</code> 目录及相应org文件的语句
-</li>
-</ul>
-
-<p>在 <code>task :install, :theme do |t, args|</code> 语句之下，添加新建 <code>org_posts_dir</code> 的语句：
-</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Rakefile  </span><a href="https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad">Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="ruby"><span class="line">  <span class="n">theme</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">theme</span> <span class="o">||</span> <span class="s1">&#39;classic&#39;</span>
-</span><span class="line">  <span class="nb">puts</span> <span class="s2">&quot;## Copying &quot;</span><span class="o">+</span><span class="n">theme</span><span class="o">+</span><span class="s2">&quot; theme into ./</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2"> and ./sass&quot;</span>
-</span><span class="line">  <span class="n">mkdir_p</span> <span class="n">source_dir</span>
-</span><span class="line">  <span class="n">cp_r</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">themes_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">theme</span><span class="si">}</span><span class="s2">/source/.&quot;</span><span class="p">,</span> <span class="n">source_dir</span>
-</span><span class="line">  <span class="n">mkdir_p</span> <span class="s2">&quot;sass&quot;</span>
-</span><span class="line">  <span class="n">cp_r</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">themes_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">theme</span><span class="si">}</span><span class="s2">/sass/.&quot;</span><span class="p">,</span> <span class="s2">&quot;sass&quot;</span>
-</span><span class="line">  <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">  <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">org_posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">  <span class="n">mkdir_p</span> <span class="n">public_dir</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>
-在 <code>task :new_post, :title do |t, args|</code> 语句之下，添加新建文档目录和新建文章的语句：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Rakefile  </span><a href="https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad">Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-</pre></td><td class="code"><pre><code class="ruby"><span class="line"> <span class="n">task</span> <span class="ss">:new_post</span><span class="p">,</span> <span class="ss">:title</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
-</span><span class="line">   <span class="k">raise</span> <span class="s2">&quot;### You haven&#39;t set anything up yet. First run `rake install` to set up an Octopress theme.&quot;</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
-</span><span class="line">   <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">   <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">org_posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">   <span class="n">args</span><span class="o">.</span><span class="n">with_defaults</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-post&#39;</span><span class="p">)</span>
-</span><span class="line">   <span class="n">title</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">title</span>
-</span><span class="line">   <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">org_posts_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">to_url</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">new_post_ext</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">   <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-</span><span class="line">     <span class="nb">abort</span><span class="p">(</span><span class="s2">&quot;rake aborted!&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">ask</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> already exists. Do you want to overwrite?&quot;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span>
-</span><span class="line">   <span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-</p>
-<ul>
-<li>为了在新建文件之后能够立即编辑，我还在 <code>new_post</code> 命令中加入了相应的编辑语句：
-</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Rakefile  </span><a href="https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad">Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">desc</span> <span class="s2">&quot;Begin a new post in </span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">org_posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line"><span class="n">task</span> <span class="ss">:new_post</span><span class="p">,</span> <span class="ss">:title</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
-</span><span class="line">  <span class="k">raise</span> <span class="s2">&quot;### You haven&#39;t set anything up yet. First run `rake install` to set up an Octopress theme.&quot;</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
-</span><span class="line">  <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">  <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">org_posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">  <span class="n">args</span><span class="o">.</span><span class="n">with_defaults</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-post&#39;</span><span class="p">)</span>
-</span><span class="line">  <span class="n">title</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">title</span>
-</span><span class="line">  <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">org_posts_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">to_url</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">new_post_ext</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">  <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-</span><span class="line">    <span class="nb">abort</span><span class="p">(</span><span class="s2">&quot;rake aborted!&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">ask</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> already exists. Do you want to overwrite?&quot;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span>
-</span><span class="line">  <span class="k">end</span>
-</span><span class="line">  <span class="nb">puts</span> <span class="s2">&quot;Creating new post: </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">  <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
-</span><span class="line">    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;#+BEGIN_HTML&quot;</span>
-</span><span class="line">    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;---&quot;</span>
-</span><span class="line">    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;layout: post&quot;</span>
-</span><span class="line">    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;title: </span><span class="se">\&quot;</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/&amp;/</span><span class="p">,</span><span class="s1">&#39;&amp;amp;&#39;</span><span class="p">)</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
-</span><span class="line">    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;date: </span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d %H:%M&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;comments: true&quot;</span>
-</span><span class="line">    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;categories: &quot;</span>
-</span><span class="line">    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;---&quot;</span>
-</span><span class="line">    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;#+END_HTML&quot;</span>
-</span><span class="line">  <span class="k">end</span>
-</span><span class="line">  <span class="k">if</span> <span class="c1">#{editor}</span>
-</span><span class="line">    <span class="nb">system</span> <span class="s2">&quot;sleep 1; </span><span class="si">#{</span><span class="n">editor</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">  <span class="k">end</span>
-</span><span class="line"><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>
-在 <code>new_page</code> 中也添加相同的语句，不过注意，最后 <code>editor</code> 那一段中文件名称变量需要使用 <code>#{file}</code> ，如下：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Rakefile  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="ruby"><span class="line">  <span class="k">if</span> <span class="c1">#{editor}</span>
-</span><span class="line">    <span class="nb">system</span> <span class="s2">&quot;sleep 1; </span><span class="si">#{</span><span class="n">editor</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class="line">  <span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-</p>
-<ul>
-<li>最后，为了预览更加方便，在 <code>preview</code> 命令最后添加下面的语句：
-</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Rakefile  </span><a href="https://github.com/xeonxu/xeonxu.github.com/commit/d0ebcf9c09d2141fa50e4e0fcba7d18720a5f9ad">Source </a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="ruby"><span class="line">   <span class="nb">system</span> <span class="s2">&quot;sleep 2; open http://localhost:</span><span class="si">#{</span><span class="n">server_port</span><span class="si">}</span><span class="s2">/&quot;</span>
-</span><span class="line">   <span class="o">[</span><span class="n">jekyllPid</span><span class="p">,</span> <span class="n">compassPid</span><span class="p">,</span> <span class="n">rackupPid</span><span class="o">].</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">pid</span><span class="o">|</span> <span class="no">Process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>
-好了，现在我们只需要在控制台上执行 <code>rake new_post["something"]</code> 就会自动在我们设定的 <code>org_posts_dir</code> 目录下新建一份org文档，并且使用我们指定的编辑器打开它。然后随便编辑一点什么，保存并执行 <code>C-c C-e F</code> 或者直接调用Tom Alexander文章中所说的 <code>M-x save-then-publish</code> 命令。最后再在控制台上执行 <code>rake generate&amp;&amp;rake preview</code> 。 Booooom，自动弹出的浏览器上是不是显示出了你刚才编写的文章？非常方便吧？赶快试试！
-</p>
-
-		 <p class='post-footer'>
-  <h1>License</h1>
-  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
-  Original link:
-  <a href='http://blog.xeonxu.info/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/'>http://blog.xeonxu.info/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/</a><br/>
-  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
-  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
-</p>
-
-	]]>
-      </description>
-      <title><![CDATA[优化使用Orgmode发布Octopress的方法]]></title>
-      <link>http://blog.xeonxu.info/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa/</link>
-      <pubDate>2012-09-05T07:59:00+08:00</pubDate>
-      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/09/05/you-hua-shi-yong-orgmodefa-bu-octopressde-fang-fa</guid>
 
       <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
       <author>
