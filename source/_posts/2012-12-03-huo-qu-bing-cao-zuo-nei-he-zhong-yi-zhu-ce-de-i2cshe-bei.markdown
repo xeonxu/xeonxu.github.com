@@ -48,7 +48,7 @@ static int __init module_driver_init(void)
 
     memcpy(this_client->name, NEW_DRIVER_NAME, I2C_NAME_SIZE);
     rc = device_reprobe(ts_dev);
-    return 0;
+        return 0;
 
   device_error_exit:
     i2c_del_driver(&my_driver);
