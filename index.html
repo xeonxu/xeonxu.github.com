@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="入手HHKB的想法在心中已经埋藏了快三年了，但一直没有付诸行动。原因主要是价钱有点太那啥了，一个键盘要卖1700，对任何一个苦穷程序员来说用这么个价钱买个键盘都是过于昂贵的。所幸去年年底之前在公司完成了3份专利，总共能拿到6k的奖金（申请前期只能拿到一半，也就是只能拿到3k）， &hellip;">
+  <meta name="description" content="今天是中国农历新年的大年初一，在此，简单总结一下去年的收获与成就。 去年，最大的收获应该要说是我的宝贝儿子出生了。小家伙为了赶在2013年之前出生，竟然提前一个月来到人世。这让作父母的我们真是又兴奋又小心，对他的照顾也更加细致体贴。如今，小宝宝已经出生将近一个半月，这期间多少个不眠夜， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,63 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2013/02/10/xin-nian-xin-qi-xiang/">新年新气象</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-10T16:49:00+08:00" pubdate data-updated="true">2013年02月10日</time>
+        
+         | <a href="/blog/2013/02/10/xin-nian-xin-qi-xiang/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+今天是中国农历新年的大年初一，在此，简单总结一下去年的收获与成就。
+</p>
+<p>
+去年，最大的收获应该要说是我的宝贝儿子出生了。小家伙为了赶在2013年之前出生，竟然提前一个月来到人世。这让作父母的我们真是又兴奋又小心，对他的照顾也更加细致体贴。如今，小宝宝已经出生将近一个半月，这期间多少个不眠夜，多少次喂奶换尿布，让我对做父母的责任也有了较深刻的体会，真心不容易。看到小孩一天天长大，体重也增加了不少，由最初的五斤张到现在的将近九斤，也算是给我们作父母的最大安慰吧。
+</p>
+<p>
+去年是本人以驱动工程师的身份工作在工作岗位上的第一年，这一年中有坎坷，有迷茫，也有收获。但是最大的收获可能是我对于工作，人际等等的重新思考和审视吧。曾经的各种自以为是在经历了去年的一些事情之后，都有了新的认识。工作期间也结识了了一些新朋友，都是些很热心的家伙们，大家有共同的话题，希望以后都能长久保持联系。
+</p>
+<p>
+另外，在去年中因为工作而结识了优秀软件tmux，自学了lisp语言，算是比较过得去的主要收获。哦，还有一件重要的收获，那就是我终于摆脱了三年的契约，扔掉了手中的烂黑莓，重新换上了iPhone：)。同时还收获到了HHKB。
+</p>
+<p>
+说到成就，去年一年中似乎没有达成什么耀目的成就。总体来讲，对Linux内核驱动开发算是入了个门；看完十本书（十本书说实在算不上什么成就，人家一个月读的都比我这多，但是聊胜于无吧）；工作中搞定了一键搭建高通编译环境的软件；提了三篇专利；搭建了这个博客。然后，好像没有了……
+</p>
+<p>
+在新的一年里，我希望宝宝可以健健康康，我可以多看几本书，系统学习及掌握Omnifocus，继续学习驱动开发技术，学习Lua和Ruby，多参加几个开源项目。要求不多，一步步来。
+</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1395,388 +1452,6 @@ OK，大功告成。退出远程机，使用 <code>ssh user@server</code> 命令
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan/">使用tmux改进终端体验</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-04T23:59:00+08:00" pubdate data-updated="true">2012年11月04日</time>
-        
-         | <a href="/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-之前一直使用GNU Screen作为我的终端管理软件，但是发现它和我使用的Emacs编辑器不兼容，其表现是画面会被无规律的撕裂，经常造成无法正常显示和编辑文件。虽然也尝试过不少配置方法，但是都没有效果。这迫使我去寻找GNU Screen的替代品，直到后来遇到<a href="http://tmux.sourceforge.net">tmux</a> ，才将我从混乱的画面中拯救出来。tmux和Emacs的兼容非常好，没有任何问题，这点让我非常满意。同时，tmux拥有强大的自定义能力，只需简单的配置，就可以使工作环境舒适度显著提高。
-</p>
-<p>
-首先，先简单了解一下tmux。tmux顾名思义，取terminal multiplexer之意，及终端复用器，其源代码基于BSD协议进行开源和分发。使用上来说，tmux和GNU Screen大同小异，都是使用命令引导键来进行操作，不过tmux的默认引导键由Screen的 <code>C-a</code> 变更为了 <code>C-b</code> 。另外，常用命令也和Gnu Screen一样可以通过 <code>引导键 ?</code> 来查看。操作方法的近似，促使我下决心从GNU Screen转换到tmux下。考虑到tmux作为GNU Screen的改进实现，功能要高级许多，仅仅用来替代GNU Screen有点大材小用的感觉。所以为了更好的学习tmux，我从<a href="http://pragprog.com/book/bhtmux/tmux">The Pragmatic Bookshelf</a>购买了名叫 <b>tmux: Productive Mouse-Free Development</b> 的书，并花了3天时间将这本书读完，感到受益匪浅。之后，按照书中的建议配置了工作环境中的tmux，感觉非常好，极大提升了终端工作的效率。下面来看看我的配置：
-</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>.tmux.conf配置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-<span class="line-number">41</span>
-<span class="line-number">42</span>
-<span class="line-number">43</span>
-<span class="line-number">44</span>
-<span class="line-number">45</span>
-<span class="line-number">46</span>
-<span class="line-number">47</span>
-<span class="line-number">48</span>
-<span class="line-number">49</span>
-<span class="line-number">50</span>
-<span class="line-number">51</span>
-<span class="line-number">52</span>
-<span class="line-number">53</span>
-<span class="line-number">54</span>
-<span class="line-number">55</span>
-<span class="line-number">56</span>
-<span class="line-number">57</span>
-<span class="line-number">58</span>
-<span class="line-number">59</span>
-<span class="line-number">60</span>
-<span class="line-number">61</span>
-<span class="line-number">62</span>
-<span class="line-number">63</span>
-<span class="line-number">64</span>
-<span class="line-number">65</span>
-<span class="line-number">66</span>
-<span class="line-number">67</span>
-<span class="line-number">68</span>
-<span class="line-number">69</span>
-<span class="line-number">70</span>
-<span class="line-number">71</span>
-<span class="line-number">72</span>
-<span class="line-number">73</span>
-<span class="line-number">74</span>
-<span class="line-number">75</span>
-<span class="line-number">76</span>
-<span class="line-number">77</span>
-<span class="line-number">78</span>
-<span class="line-number">79</span>
-<span class="line-number">80</span>
-<span class="line-number">81</span>
-<span class="line-number">82</span>
-<span class="line-number">83</span>
-<span class="line-number">84</span>
-<span class="line-number">85</span>
-<span class="line-number">86</span>
-<span class="line-number">87</span>
-<span class="line-number">88</span>
-<span class="line-number">89</span>
-<span class="line-number">90</span>
-<span class="line-number">91</span>
-<span class="line-number">92</span>
-<span class="line-number">93</span>
-<span class="line-number">94</span>
-<span class="line-number">95</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c"># 配置使用和GNU Screen相同的C-a作为命令引导键</span>
-</span><span class="line"><span class="nb">set</span> -g prefix C-a
-</span><span class="line"><span class="c"># 设置终端类型为256色</span>
-</span><span class="line"><span class="nb">set</span> -g default-terminal <span class="s2">&quot;screen-256color&quot;</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># 设置状态栏前景及背景色</span>
-</span><span class="line"><span class="nb">set</span> -g status-bg colour23
-</span><span class="line"><span class="nb">set</span> -g status-fg colour238
-</span><span class="line">
-</span><span class="line"><span class="c"># 设置窗口标签的前景及背景色</span>
-</span><span class="line">setw -g window-status-fg colour232
-</span><span class="line">setw -g window-status-bg default
-</span><span class="line">setw -g window-status-attr dim
-</span><span class="line">
-</span><span class="line"><span class="c"># 设置当前窗口标签的前景及背景色</span>
-</span><span class="line">setw -g window-status-current-fg colour88
-</span><span class="line">setw -g window-status-current-bg colour130
-</span><span class="line">setw -g window-status-current-attr bright
-</span><span class="line">
-</span><span class="line"><span class="c"># 设置窗口分割的边框颜色</span>
-</span><span class="line"><span class="nb">set</span> -g pane-border-fg colour189
-</span><span class="line"><span class="nb">set</span> -g pane-border-bg black
-</span><span class="line">
-</span><span class="line"><span class="c"># 设置当前窗口分割的边框颜色</span>
-</span><span class="line"><span class="nb">set</span> -g pane-active-border-fg white
-</span><span class="line"><span class="nb">set</span> -g pane-active-border-bg colour208
-</span><span class="line">
-</span><span class="line"><span class="c"># 设置提示信息的前景及背景色</span>
-</span><span class="line"><span class="nb">set</span> -g message-fg colour232
-</span><span class="line"><span class="nb">set</span> -g message-bg colour23
-</span><span class="line"><span class="nb">set</span> -g message-attr bright
-</span><span class="line">
-</span><span class="line"><span class="c"># 设置状态栏左部宽度</span>
-</span><span class="line"><span class="nb">set</span> -g status-left-length 40
-</span><span class="line"><span class="c"># 设置状态栏显示内容和内容颜色。这里配置从左边开始显示，使用绿色显示session名称，黄色显示窗口号，蓝色显示窗口分割号</span>
-</span><span class="line"><span class="nb">set</span> -g status-left <span class="s2">&quot;#[fg=colour52]#S #[fg=yellow]#I #[fg=cyan]#P&quot;</span>
-</span><span class="line"><span class="c"># 设置状态栏右部宽度</span>
-</span><span class="line"><span class="nb">set</span> -g status-right-length 80
-</span><span class="line"><span class="c"># 设置状态栏右边内容，这里设置为时间信息</span>
-</span><span class="line"><span class="nb">set</span> -g status-right <span class="s2">&quot;#[fg=colour106]#(~/bin/system_info.sh) #[fg=colour208]|%d %b %R&quot;</span>
-</span><span class="line"><span class="c"># 窗口信息居中显示</span>
-</span><span class="line"><span class="nb">set</span> -g status-justify centre
-</span><span class="line">
-</span><span class="line"><span class="c"># 监视窗口信息，如有内容变动，进行提示</span>
-</span><span class="line">setw -g monitor-activity on
-</span><span class="line"><span class="nb">set</span> -g visual-activity on
-</span><span class="line"><span class="nb">set</span> -g status-utf8 on
-</span><span class="line">
-</span><span class="line"><span class="c"># 窗口号和窗口分割号都以1开始（默认从0开始）</span>
-</span><span class="line"><span class="nb">set</span> -g base-index 1
-</span><span class="line">setw -g pane-base-index 1
-</span><span class="line">
-</span><span class="line"><span class="c"># 支持鼠标选择窗口，调节窗口大小</span>
-</span><span class="line">setw -g mode-mouse on
-</span><span class="line"><span class="nb">set</span> -g mouse-select-pane on
-</span><span class="line"><span class="nb">set</span> -g mouse-resize-pane on
-</span><span class="line"><span class="nb">set</span> -g mouse-select-window on
-</span><span class="line"><span class="nb">set</span> -s escape-time 1
-</span><span class="line">
-</span><span class="line"><span class="c"># 设置C-a a为发送C-a键</span>
-</span><span class="line"><span class="nb">bind </span>a send-prefix
-</span><span class="line"><span class="c"># 加载tmux配置文件的快捷键</span>
-</span><span class="line"><span class="nb">bind </span>r <span class="nb">source</span>-file ~/.tmux.conf<span class="se">\;</span> display <span class="s2">&quot;Reloaded!&quot;</span>
-</span><span class="line"><span class="c"># 快捷键查看man</span>
-</span><span class="line"><span class="nb">bind</span> / <span class="nb">command</span>-prompt <span class="s2">&quot;split-window &#39;exec man %%&#39;&quot;</span>
-</span><span class="line">unbind <span class="s2">&quot;%&quot;</span>
-</span><span class="line">unbind <span class="s2">&quot;\&quot;&quot;</span>
-</span><span class="line"><span class="c"># 修改默认的窗口分割快捷键，使用更直观的符号</span>
-</span><span class="line"><span class="nb">bind</span> | split-window -h
-</span><span class="line"><span class="nb">bind</span> - split-window -v
-</span><span class="line"><span class="c"># 选择窗口功能修改为和Screen一样的C-a &quot;</span>
-</span><span class="line"><span class="nb">bind</span> <span class="s2">&quot;\&quot;&quot;</span> choose-window
-</span><span class="line">
-</span><span class="line"><span class="c"># 选择窗口分割快捷键</span>
-</span><span class="line"><span class="nb">bind </span>h <span class="k">select</span>-pane -L
-</span><span class="line"><span class="nb">bind </span>j <span class="k">select</span>-pane -D
-</span><span class="line"><span class="nb">bind </span>k <span class="k">select</span>-pane -U
-</span><span class="line"><span class="nb">bind </span>l <span class="k">select</span>-pane -R
-</span><span class="line"><span class="c"># 选择窗口快捷键</span>
-</span><span class="line"><span class="nb">bind</span> -r C-h <span class="k">select</span>-window -t :-
-</span><span class="line"><span class="nb">bind</span> -r C-l <span class="k">select</span>-window -t :+
-</span><span class="line"><span class="c"># 调节窗口大小快捷键</span>
-</span><span class="line"><span class="nb">bind</span> -r H resize-pane -L 5
-</span><span class="line"><span class="nb">bind</span> -r J resize-pane -D 5
-</span><span class="line"><span class="nb">bind</span> -r K resize-pane -U 5
-</span><span class="line"><span class="nb">bind</span> -r L resize-pane -R 5
-</span><span class="line">
-</span><span class="line"><span class="c"># 快捷调整窗口分割到全屏</span>
-</span><span class="line">unbind Up
-</span><span class="line"><span class="nb">bind </span>Up new-window -d -n tmp <span class="se">\;</span> swap-pane -s tmp.1 <span class="se">\;</span> <span class="k">select</span>-window -t tmp
-</span><span class="line">unbind Down
-</span><span class="line"><span class="nb">bind </span>Down last-window <span class="se">\;</span> swap-pane -s tmp.1 <span class="se">\;</span> <span class="nb">kill</span>-window -t tmp
-</span><span class="line">
-</span><span class="line"><span class="c"># 快捷记录窗口内的内容到文件中</span>
-</span><span class="line"><span class="nb">bind </span>P pipe-pane -o <span class="s2">&quot;cat &gt;&gt;~/#W.log&quot;</span> <span class="se">\;</span> display <span class="s2">&quot;Toggled logging to ~/#W.log&quot;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>
-以上配置只需要复制保存到 <code>~/.tmux.conf</code> 文件中，下次执行tmux时就生效了。
-</p>
-<p>
-当然，tmux的高级不止在于配置功能的强大，它还支持在命令行中对指定session进行设置。利用这个特性，便可以将繁琐的工作环境初始化用脚本完成了。比如我写了如下脚本对我的工作电脑进行初始化：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>init_tmux.sh  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-<span class="line-number">41</span>
-<span class="line-number">42</span>
-<span class="line-number">43</span>
-<span class="line-number">44</span>
-<span class="line-number">45</span>
-<span class="line-number">46</span>
-<span class="line-number">47</span>
-<span class="line-number">48</span>
-<span class="line-number">49</span>
-<span class="line-number">50</span>
-<span class="line-number">51</span>
-<span class="line-number">52</span>
-<span class="line-number">53</span>
-<span class="line-number">54</span>
-<span class="line-number">55</span>
-<span class="line-number">56</span>
-<span class="line-number">57</span>
-<span class="line-number">58</span>
-<span class="line-number">59</span>
-<span class="line-number">60</span>
-<span class="line-number">61</span>
-<span class="line-number">62</span>
-<span class="line-number">63</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#! /bin/bash</span>
-</span><span class="line"><span class="nb">export </span><span class="nv">AP_7x27_PROJECT</span><span class="o">=</span><span class="s2">&quot;~/Developer/MSM7x27A-ICS-AP&quot;</span>
-</span><span class="line"><span class="nb">export </span><span class="nv">MP_7x27_PROJECT</span><span class="o">=</span><span class="s2">&quot;~/Developer/MSM7x27A-ICS-MP&quot;</span>
-</span><span class="line">
-</span><span class="line"><span class="nb">export </span><span class="nv">AP_8x25_PROJECT</span><span class="o">=</span><span class="s2">&quot;~/Developer/MSM8x25-ICS-AP&quot;</span>
-</span><span class="line"><span class="nb">export </span><span class="nv">MP_8x25_PROJECT</span><span class="o">=</span><span class="s2">&quot;~/Developer/MSM8x25-ICS-MP&quot;</span>
-</span><span class="line">
-</span><span class="line"><span class="k">if</span> <span class="o">[</span> -z <span class="s2">&quot;$TMUX&quot;</span> <span class="o">]</span>; <span class="k">then</span>
-</span><span class="line"><span class="k">    </span>tmux has-session -t development7x27
-</span><span class="line">    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> !<span class="o">=</span> 0 <span class="o">]</span>; <span class="k">then</span>
-</span><span class="line">        <span class="c"># init 7x27 AP</span>
-</span><span class="line">        tmux new-session -s development7x27 -n AP_7x27 -d
-</span><span class="line">        tmux send-keys -t development7x27 <span class="s2">&quot;cd $AP_7x27_PROJECT&amp;&amp;. ./build/envsetup.sh&amp;&amp;choosecombo 1 13 1&quot;</span> C-m
-</span><span class="line">        tmux split-window -h -p 40 -t development7x27:1
-</span><span class="line">        tmux send-keys -t development7x27 <span class="s2">&quot;cd $AP_7x27_PROJECT&amp;&amp;. ./build/envsetup.sh&amp;&amp;choosecombo 1 13 1&quot;</span> C-m
-</span><span class="line">        tmux split-window -v -t development7x27:1.2
-</span><span class="line">        tmux send-keys -t development7x27 <span class="s2">&quot;cd $AP_7x27_PROJECT&amp;&amp;. ./build/envsetup.sh&amp;&amp;choosecombo 1 13 1&quot;</span> C-m
-</span><span class="line">
-</span><span class="line">        <span class="c"># init 7x27 MP</span>
-</span><span class="line">        tmux new-window -n MP_7x27 -t development7x27
-</span><span class="line">
-</span><span class="line">        tmux send-keys -t development7x27:2 <span class="s2">&quot;cd $MP_7x27_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class="line">        tmux split-window -h -p 40 -t development7x27:2
-</span><span class="line">        tmux send-keys -t development7x27:2 <span class="s2">&quot;cd $MP_7x27_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class="line">        tmux split-window -v -t development7x27:2.2
-</span><span class="line">        tmux send-keys -t development7x27 <span class="s2">&quot;cd $MP_7x27_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class="line">
-</span><span class="line">        tmux <span class="k">select</span>-window -t development7x27:1
-</span><span class="line">        tmux <span class="k">select</span>-pane -t development7x27:1 -L
-</span><span class="line">    <span class="k">fi</span>
-</span><span class="line">
-</span><span class="line"><span class="k">        </span>tmux send-keys -t development7x27:1.3 <span class="s2">&quot;export DISPLAY=$DISPLAY&quot;</span> C-m
-</span><span class="line">        tmux send-keys -t development7x27:2.3 <span class="s2">&quot;export DISPLAY=$DISPLAY&quot;</span> C-m
-</span><span class="line">
-</span><span class="line">    tmux has-session -t development8x25
-</span><span class="line">    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> !<span class="o">=</span> 0 <span class="o">]</span>; <span class="k">then</span>
-</span><span class="line">        <span class="c"># init 8x25 AP</span>
-</span><span class="line">        tmux new-session -s development8x25 -n AP_8x25 -d
-</span><span class="line">        tmux send-keys -t development8x25 <span class="s2">&quot;cd $AP_8x25_PROJECT&amp;&amp;. ./build/envsetup.sh&amp;&amp;choosecombo 1 17 3&quot;</span> C-m
-</span><span class="line">        tmux split-window -h -p 40 -t development8x25:1
-</span><span class="line">        tmux send-keys -t development8x25 <span class="s2">&quot;cd $AP_8x25_PROJECT&amp;&amp;. ./build/envsetup.sh&amp;&amp;choosecombo 1 17 3&quot;</span> C-m
-</span><span class="line">        tmux send-keys -t development8x25 <span class="s1">&#39;top&#39;</span> C-m
-</span><span class="line">        tmux split-window -v -t development8x25:1.2
-</span><span class="line">        tmux send-keys -t development8x25 <span class="s2">&quot;cd $AP_8x25_PROJECT&amp;&amp;. ./build/envsetup.sh&amp;&amp;choosecombo 1 17 3&quot;</span> C-m
-</span><span class="line">
-</span><span class="line">        <span class="c"># init 8x25 MP</span>
-</span><span class="line">        tmux new-window -n MP_8x25 -t development8x25
-</span><span class="line">
-</span><span class="line">        tmux send-keys -t development8x25:2 <span class="s2">&quot;cd $MP_8x25_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class="line">        tmux split-window -h -p 40 -t development8x25:2
-</span><span class="line">        tmux send-keys -t development8x25:2 <span class="s2">&quot;cd $MP_8x25_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class="line">        tmux split-window -v -t development8x25:2.2
-</span><span class="line">        tmux send-keys -t development8x25 <span class="s2">&quot;cd $MP_8x25_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class="line">
-</span><span class="line">        tmux <span class="k">select</span>-window -t development8x25:1
-</span><span class="line">        tmux <span class="k">select</span>-pane -t development8x25:1 -L
-</span><span class="line">    <span class="k">fi</span>
-</span><span class="line">
-</span><span class="line"><span class="k">        </span>tmux send-keys -t development8x25:1.3 <span class="s2">&quot;export DISPLAY=$DISPLAY&quot;</span> C-m
-</span><span class="line">        tmux send-keys -t development8x25:2.3 <span class="s2">&quot;export DISPLAY=$DISPLAY&quot;</span> C-m
-</span><span class="line">
-</span><span class="line">    tmux attach -t development7x27
-</span><span class="line"><span class="k">fi</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-脚本主体思想为每次运行时判断相应的tmux session是否存在，如果存在则设置Xwindow的变量后attach；如果不存在相应session，则新建相应session并初始化session中相应窗口和窗口分割，同时在每个窗口分割中运行每次都要运行的环境初始化命令。最后设置Xwindow环境变量后attach。我的脚本中分别初始化了高通7x27 AP和MP的编译环境以及8x25 AP和MP的编译环境。
-</p>
-<p>
-使用时，将以上内容存为文件，并在 <code>~/.bashrc</code> 中调用就可以了。这样，不论是ssh到该主机还是新开一个终端窗口，都会直接进入指定的tmux session中，继续之前的工作。加上Xwindow的设置，tmux中也可以直接运行X程序。工作中，我就是在windows上使用putty+Xming来运行使用X程序的，非常方便高效。简单的配置让工作环境大幅改进，让我觉得之前6刀买到那本书真是超值了。
-</p>
-<p>
-说了这么多好，tmux其实也是有缺点的。最明显的一个缺点就是不支持windows，而GNU Screen却支持是windows的，这不免让人有点遗憾。所以如果有在Windows下使用类似软件的话（真的有需要吗？），只能考虑其它如GNU Screen之类的软件了。
-</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1812,15 +1487,19 @@ OK，大功告成。退出远程机，使用 <code>ssh user@server</code> 命令
 <li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
 <li class='category'><a href='/blog/categories/开发/'>开发 (10)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (8)</a></li>
-<li class='category'><a href='/blog/categories/生活/'>生活 (5)</a></li>
+<li class='category'><a href='/blog/categories/生活/'>生活 (6)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
-<li class='category'><a href='/blog/categories/随笔/'>随笔 (5)</a></li>
+<li class='category'><a href='/blog/categories/随笔/'>随笔 (6)</a></li>
 
  </ul>
 </section>
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/02/10/xin-nian-xin-qi-xiang/">新年新气象</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/01/26/ru-shou-hhkb/">入手HHKB Pro2</a>
@@ -1836,10 +1515,6 @@ OK，大功告成。退出远程机，使用 <code>ssh user@server</code> 命令
     
       <li class="post">
         <a href="/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia/">嵌入式系统内核驱动模块化转换的简单框架</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/">在高通平台Android环境下编译内核模块</a>
       </li>
     
   </ul>
