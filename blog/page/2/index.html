@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="之前一直使用GNU Screen作为我的终端管理软件，但是发现它和我使用的Emacs编辑器不兼容，其表现是画面会被无规律的撕裂，经常造成无法正常显示和编辑文件。虽然也尝试过不少配置方法，但是都没有效果。这迫使我去寻找GNU Screen的替代品，直到后来遇到tmux ， &hellip;">
+  <meta name="description" content="算下来两周没有在这里写博客了，其中一大原因在于天气渐凉，不高兴一人在电脑旁受冻-_-!!! 咳咳咳，其实天气有一定影响，不过更主要的问题在于最近遇到的事情繁杂，虽然没有什么难不可为，但自己也确实花了些心思。 首先是工作上的两个任务。近期项目正好有点空挡， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,63 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/11/18/jin-qi-de-fan-nao/">近期的烦恼</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-18T23:01:00+08:00" pubdate data-updated="true">2012年11月18日</time>
+        
+         | <a href="/blog/2012/11/18/jin-qi-de-fan-nao/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+算下来两周没有在这里写博客了，其中一大原因在于天气渐凉，不高兴一人在电脑旁受冻-_-!!!  咳咳咳，其实天气有一定影响，不过更主要的问题在于最近遇到的事情繁杂，虽然没有什么难不可为，但自己也确实花了些心思。
+</p>
+<p>
+首先是工作上的两个任务。近期项目正好有点空挡，于是自己决定将高通平台的电量管理从MP端移植至AP端内核里，同时添加一些判断逻辑，以使统计的电量结果不至于像原版那样生硬怪异。只可惜高通平台好多处理需要依赖远程调用，而自己手里却没有一份关于远程调用的官方文档。最后通过高通的support搞定了内核中对PMIC的一些操作，但又发现无法正常取得相应中断状态。总之，这个看起来简单地任务搞了2周还没有实质性突破。另外一个任务是协助同事完成一个用户层接口，方便在用户层升级器件的firmware。这个任务进展倒是蛮快，3个小时就写好框架和功能调试。可惜最后发现buffer有4k限制，现在还在找对策方法，这两天就在考虑这个问题。
+</p>
+<p>
+其次，周末在家各种收拾打扫，洗衣做饭。连续两周了，除了干家务和觅食以外，其它什么都没干。想来自己效率低是一个问题，着实应该改进一下。哦，今天物业还过来处理家里渗水的墙面，也算拖了大半年之久的工程开始了第一步。
+</p>
+<p>
+再者，为了维护简历，将简历移植到moderncv上并使用git来管理。后来又想更统一使用orgmode来写简历，但是苦于找不到好的解决方案，现在琢磨着是不是要自己搞一个。
+</p>
+<p>
+最后，算是小成就。前几日知道了支持kindle3的kindlepdfviewer这个越狱软件，抽空搞了一下，发现对扫描版pdf的支持好到不可思议。于是kindle上瞬间多了很多扫描版的图书。首当其冲就是一直想看但一直没有看的《emacs lisp编程入门》和《GEB》。前者已经看了一半以上，作为emacs爱好者，到现在才较为系统的了解学习lisp是有点晚，不过至少我开始入门了:)
+</p>
+<p>
+今日纯属碎碎念，希望下周工作上任务都能快速完成，个人的几个安排都能顺利进行。另，下篇文章没差错的话应该是功夫网专题，否则又要被人数落跳票了。
+</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1821,228 +1878,6 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/09/22/vim-de-jian-dan-pei-zhi/">Vim的简单配置</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-22T21:49:00+08:00" pubdate data-updated="true">2012年09月22日</time>
-        
-         | <a href="/blog/2012/09/22/vim-de-jian-dan-pei-zhi/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-自己平时喜欢使用<a href="http://www.gnu.org/software/emacs/">GNU Emacs</a>，但是单位工作环境的限制，使我不得不在<a href="http://www.gnu.org/software/screen/">GNU Screen</a>下运行GNU Emacs。但是貌似Screen和Emacs有点小的兼容性问题，至少我没能调整到完全正常。使用中，Emacs经常会上移一行从而造成画面错乱，让人用的很不爽。为此，我决定在工作环境中暂时使用别的编辑器来替代Emacs。之后，我尝试过使用<a href="http://www.emacswiki.org/emacs/MicroEmacs">Micro Emacs</a>，包括Linus最喜欢用的<a href="http://git.kernel.org/?p=editors/uemacs/uemacs.git;a=tree">uEmacs PK</a>，可惜这玩意儿和GNU Emacs差异有点大，加之所有MicroEmacs对多字节语系支持地都不是很好，而自己又是个懒人也不是特别Geek，就没继续用下去。于是我重新将目光放到了<a href="http://www.vim.org">VIM</a> 上。
-好在工作中对编辑器的要求不是特别高，VIM也不是特别难使，自己又磕磕碰碰地在网上找了些配置添加到自己的Vim上。用起来还不错，可以交叉索引跳转，可以Outline，对我来说，这就够了。
-下面简单列举一下Vim的配置方法，算个存档记录。
-</p>
-<ul>
-<li>Cscope安装配置
-<ol>
-<li>安装Cscope
-     去<a href="http://cscope.sourceforge.net">http://cscope.sourceforge.net</a> 下载cscope源码，然后编译安装。
-</li>
-<li>在个人目录下的 <code>.vimrc</code> 文件中添加如下配置
-</li>
-</ol>
-
-</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>cscope配置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-<span class="line-number">41</span>
-<span class="line-number">42</span>
-<span class="line-number">43</span>
-<span class="line-number">44</span>
-<span class="line-number">45</span>
-<span class="line-number">46</span>
-<span class="line-number">47</span>
-<span class="line-number">48</span>
-<span class="line-number">49</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="s2">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span>
-</span><span class="line"><span class="s2">&quot;</span> cscope setting
-</span><span class="line"><span class="s2">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span>
-</span><span class="line"><span class="s2">&quot;</span> <span class="k">if </span>has<span class="o">(</span><span class="s2">&quot;cscope&quot;</span><span class="o">)</span>
-</span><span class="line"><span class="s2">&quot;   set csprg=/usr/local/bin/cscope</span>
-</span><span class="line"><span class="s2">&quot;</span>   <span class="nb">set </span><span class="nv">csto</span><span class="o">=</span>1
-</span><span class="line"><span class="s2">&quot;   set cst</span>
-</span><span class="line"><span class="s2">&quot;</span>   <span class="nb">set </span>nocsverb
-</span><span class="line"><span class="s2">&quot;   &quot;</span> add any database in current directory
-</span><span class="line"><span class="s2">&quot;   if filereadable(&quot;</span>cscope.out<span class="s2">&quot;)</span>
-</span><span class="line"><span class="s2">&quot;</span>       cs add cscope.out
-</span><span class="line"><span class="s2">&quot;   endif</span>
-</span><span class="line"><span class="s2">&quot;</span>   <span class="nb">set </span>csverb
-</span><span class="line"><span class="s2">&quot; endif</span>
-</span><span class="line"><span class="s2">&quot;</span>
-</span><span class="line"><span class="s2">&quot; nmap &lt;C-@&gt;s :cs find s &lt;C-R&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;CR&gt;&lt;CR&gt;</span>
-</span><span class="line"><span class="s2">&quot;</span> nmap &lt;C-@&gt;g :cs find g &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line"><span class="s2">&quot; nmap &lt;C-@&gt;c :cs find c &lt;C-R&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;CR&gt;&lt;CR&gt;</span>
-</span><span class="line"><span class="s2">&quot;</span> nmap &lt;C-@&gt;t :cs find t &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line"><span class="s2">&quot; nmap &lt;C-@&gt;e :cs find e &lt;C-R&gt;=expand(&quot;</span>&lt;cword&gt;<span class="s2">&quot;)&lt;CR&gt;&lt;CR&gt;</span>
-</span><span class="line"><span class="s2">&quot;</span> nmap &lt;C-@&gt;f :cs find f &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cfile&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line"><span class="s2">&quot; nmap &lt;C-@&gt;i :cs find i ^&lt;C-R&gt;=expand(&quot;</span>&lt;cfile&gt;<span class="s2">&quot;)&lt;CR&gt;$&lt;CR&gt;</span>
-</span><span class="line"><span class="s2">&quot;</span> nmap &lt;C-@&gt;d :cs find d &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line"><span class="k">function</span>! LoadCscope<span class="o">()</span>
-</span><span class="line"><span class="nb">let </span><span class="nv">db</span> <span class="o">=</span> findfile<span class="o">(</span><span class="s2">&quot;cscope.out&quot;</span>, <span class="s2">&quot;.;&quot;</span><span class="o">)</span>
-</span><span class="line"><span class="k">if</span> <span class="o">(</span>!empty<span class="o">(</span>db<span class="o">))</span>
-</span><span class="line">  <span class="nb">let </span><span class="nv">path</span> <span class="o">=</span> strpart<span class="o">(</span>db, 0, match<span class="o">(</span>db, <span class="s2">&quot;/cscope.out$&quot;</span><span class="o">))</span>
-</span><span class="line">  <span class="nb">set </span>nocsverb <span class="s2">&quot; suppress &#39;duplicate connection&#39; error</span>
-</span><span class="line"><span class="s2">  set csto=0</span>
-</span><span class="line"><span class="s2">  set cst</span>
-</span><span class="line"><span class="s2">  &quot;</span> add any database in current directory
-</span><span class="line">  <span class="k">if </span>filereadable<span class="o">(</span>db<span class="o">)</span>
-</span><span class="line">     exe <span class="s2">&quot;cs add &quot;</span> . db . <span class="s2">&quot; &quot;</span> . path
-</span><span class="line">     nmap &lt;C-c&gt;s :cs find s &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line">     nmap &lt;C-c&gt;g :cs find g &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line">     nmap &lt;C-c&gt;c :cs find c &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line">     nmap &lt;C-c&gt;t :cs find t &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line">     nmap &lt;C-c&gt;e :cs find e &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line">     nmap &lt;C-c&gt;f :cs find f &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cfile&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line">     nmap &lt;C-c&gt;i :cs find i ^&lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cfile&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;<span class="nv">$&lt;</span>CR&gt;
-</span><span class="line">     nmap &lt;C-c&gt;d :cs find d &lt;C-R&gt;<span class="o">=</span>expand<span class="o">(</span><span class="s2">&quot;&lt;cword&gt;&quot;</span><span class="o">)</span>&lt;CR&gt;&lt;CR&gt;
-</span><span class="line">  <span class="s2">&quot; else add database pointed to by environment</span>
-</span><span class="line"><span class="s2">  elseif $CSCOPE_DB != &quot;</span><span class="err">&quot;</span>
-</span><span class="line">     cs add <span class="nv">$CSCOPE_DB</span>
-</span><span class="line">  endif
-</span><span class="line">  <span class="nb">set </span>csverb
-</span><span class="line">endif
-</span><span class="line">endfunction
-</span><span class="line">au BufEnter /* call LoadCscope<span class="o">()</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<ol>
-<li>使用时先去要查看的代码目录，然后执行cscope -bqR。完成之后，直接 <code>vi filename</code> 。在需要查找的符号上使用 <code>C-c s/g/c/t/e/f/i/d</code> 即可调用相应的功能。原来cscope插件使用 <code>C-@</code> 做命令引导键，我为了和Emacs同步，将其改为了 <code>C-c</code> 。
-</li>
-<li>添加Outline显示
-</li>
-</ol>
-
-<p>  Outline显示由Taglist来实现：
-</p>
-<ol>
-<li>去<a href="http://www.vim.org/scripts/script.php?script_id=273">http://www.vim.org/scripts/script.php?script_id=273</a> 下载Taglist。
-</li>
-<li>解压后将 <code>taglist.vim</code> 文件放在个人目录下的 <code>.vim/plugin/</code> 目录中。同时，将解压后的 <code>taglist.txt</code> 文件放在个人目录下的 <code>.vim/doc/</code> 目录中。
-</li>
-<li>最后，添加以下配置到个人目录下的 <code>.vimrc</code> 文件中：
-</li>
-</ol>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>taglist配置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="err">&quot;</span> use F8 to toggle taglist
-</span><span class="line">nnoremap &lt;silent&gt; &lt;F8&gt; :TlistToggle&lt;CR&gt;
-</span><span class="line"><span class="nb">let </span><span class="nv">Tlist_GainFocus_On_ToggleOpen</span><span class="o">=</span>1
-</span><span class="line"><span class="nb">let </span><span class="nv">Tlist_Close_On_Select</span><span class="o">=</span>1
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>
-  如此便可方便的通过F8按键打开当前文件的Outline，并将光标置于Outline中，选择条目后自动关闭。
-</p>
-<ul>
-<li>设置高亮搜索，自动缩进以及语法高亮
-  将以下配置添加到个人目录下的 <code>.vimrc</code> 文件中：
-</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>高亮缩进配置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">set </span>nu
-</span><span class="line"><span class="nb">set </span>hlsearch
-</span><span class="line">syntax <span class="nb">enable</span>
-</span><span class="line"><span class="nb">set </span>showmatch
-</span><span class="line"><span class="nb">set </span><span class="nv">ts</span><span class="o">=</span>4
-</span><span class="line"><span class="nb">set </span><span class="nv">softtabstop</span><span class="o">=</span>4
-</span><span class="line"><span class="nb">set </span><span class="nv">shiftwidth</span><span class="o">=</span>4
-</span><span class="line"><span class="nb">set </span>expandtab
-</span><span class="line"><span class="nb">set </span>autoindent
-</span><span class="line"><span class="nb">set </span>cindent
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>
-OK，如此配置后，查看代码编辑代码舒服多了。
-</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -2077,18 +1912,23 @@ OK，如此配置后，查看代码编辑代码舒服多了。
 <li class='category'><a href='/blog/categories/RaspberryPi/'>RaspberryPi (2)</a></li>
 <li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
+<li class='category'><a href='/blog/categories/iOS/'>iOS (1)</a></li>
 <li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
 <li class='category'><a href='/blog/categories/开发/'>开发 (10)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (8)</a></li>
-<li class='category'><a href='/blog/categories/生活/'>生活 (6)</a></li>
+<li class='category'><a href='/blog/categories/生活/'>生活 (7)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
-<li class='category'><a href='/blog/categories/随笔/'>随笔 (6)</a></li>
+<li class='category'><a href='/blog/categories/随笔/'>随笔 (7)</a></li>
 
  </ul>
 </section>
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/02/11/iphonezhong-yu-huan-shi-bei-wo-yue-yu-liao/">iPhone终于还是被我越狱了</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/02/10/xin-nian-xin-qi-xiang/">新年新气象</a>
@@ -2104,10 +1944,6 @@ OK，如此配置后，查看代码编辑代码舒服多了。
     
       <li class="post">
         <a href="/blog/2012/12/24/ji-nian-feng-hua-jun/">纪念冯华君</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia/">嵌入式系统内核驱动模块化转换的简单框架</a>
       </li>
     
   </ul>
