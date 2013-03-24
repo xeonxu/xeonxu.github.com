@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="算下来两周没有在这里写博客了，其中一大原因在于天气渐凉，不高兴一人在电脑旁受冻-_-!!! 咳咳咳，其实天气有一定影响，不过更主要的问题在于最近遇到的事情繁杂，虽然没有什么难不可为，但自己也确实花了些心思。 首先是工作上的两个任务。近期项目正好有点空挡， &hellip;">
+  <meta name="description" content="这是一篇 功夫网 系列文章，本篇作为该系列文章的第一篇，一直拖了好久才真正开始动笔。这篇文章中，我将要介绍的是如何在Raspberry Pi上搭建基于SSH连接的Socks代理服务器。关于我为什么使用Raspberry Pi，是因为我觉得这玩意小巧，携带方便，而且买了它不用也是闲着。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,430 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/12/02/raspberry-pishang-da-jian-zi-dong-sshdai-li/">Raspberry Pi上搭建自动ssh代理</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-02T00:00:00+08:00" pubdate data-updated="true">2012年12月02日</time>
+        
+         | <a href="/blog/2012/12/02/raspberry-pishang-da-jian-zi-dong-sshdai-li/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+这是一篇 <span style="text-decoration:underline;">功夫网</span> 系列文章，本篇作为该系列文章的第一篇，一直拖了好久才真正开始动笔。这篇文章中，我将要介绍的是如何在Raspberry Pi上搭建基于SSH连接的Socks代理服务器。关于我为什么使用Raspberry Pi，是因为我觉得这玩意小巧，携带方便，而且买了它不用也是闲着。至于为什么搭建Socks服务器，知者自知，不知者我也不想过多解释。总之这是该系列文章第一篇，所以内容上相对来说都是比较简单和基础的，大家往下看就是了。另外需要说明的是，我所使用的Raspberry Pi是B型板，操作系统为Arm版的Slackware系统ArmedSlack。如果使用的是其它发行版，可能需要相应修改以下的命令。
+</p>
+<p>
+本片文章主要实现三个目的：
+</p>
+<ol>
+<li>实现ssh免密码自动连接远程服务器，并建立Socks代理
+</li>
+<li>开机时自动通过ssh与远程服务器建立安全通道
+</li>
+<li>设置守护进程，使得ssh连接异常断开后可以自动进行重新连接
+</li>
+</ol>
+
+<p>
+操作之前，首先使用终端软件通过ssh方式连接到Raspberry Pi上。
+</p>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 ssh免密码自动连接远程服务器</a>
+<ul>
+<li><a href="#sec-1-1">1.1 生成密钥</a></li>
+<li><a href="#sec-1-2">1.2 上传密钥</a></li>
+<li><a href="#sec-1-3">1.3 建立socks服务</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 开机时自动建立连接</a></li>
+<li><a href="#sec-3">3 设置守护进程防止断线</a>
+<ul>
+<li><a href="#sec-3-1">3.1 安装autossh</a></li>
+<li><a href="#sec-3-2">3.2 初始化脚本</a></li>
+<li><a href="#sec-3-3">3.3 守护进程</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">ssh免密码自动连接远程服务器</h2>
+<div class="outline-text-2" id="text-1">
+
+<p>为了ssh可以在无人干预的情况下自动连接远程服务器，普遍的做法是使用公钥认证方式进行连接。同样，我们也使用公钥认证的方法进行自动连接。为了实现公钥认证连接，首先需要生成密钥对。
+</p>
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1">生成密钥</h3>
+<div class="outline-text-3" id="text-1-1">
+
+<p>生成密钥时可以使用以下 <code>ssh-keygen</code> 命令进行。
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">ssh-keygen -t rsa
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+命令执行中会出现一些提示，大致是一些关于密钥存放路径以及密钥主密码设定之类的。基本上一路回车就可以了，同时注意不要去设置密钥主密码，否则每次访问密钥时都会提示输入，这样就达不到自动认证连接的目的了。由于 <code>ssh-keygen</code> 包含在openssh软件包中，所以如果linux中曾经安装过openssh的话，应该直接就能使用。反之如果提示找不到该命令，可以通过类似下面的命令来安装slackware的n包中的openssh来获取。
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">installpkg /slackware/n/openssh-6.0p1-arm-1.tgz
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+生成好的密钥对默认会保存在 <code>~/.ssh/</code> 目录下，如果生成的时rsa密钥，则密钥文件分别为 <code>id_rsa</code> 和 <code>id_rsa.pub</code> 。其中没有 <code>.pub</code> 扩展名的文件为私钥，另外一个为公钥。现在我们需要将我们刚才生成的公钥文件上传到我们的远程服务器的相应目录中。
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-2" class="outline-3">
+<h3 id="sec-1-2">上传密钥</h3>
+<div class="outline-text-3" id="text-1-2">
+
+<p>上传密钥可以使用通用的scp命令，也可以使用ssh工具中的 <code>ssh-copy-id</code> 命令。 <code>ssh-copy-id</code> 命令比较简单，指定密钥文件和远程机即可，该命令会自动添加公钥内容到远程机的授权文件中。但要注意该命令不会改变远程机相应文件的属性，所以如果是第一次操作的话，建议使用scp命令比较靠谱。下面我们使用scp命令
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">scp ~/.ssh/id_rsa.pub user@server:/home/user <span class="c">#user和server需要根据实际内容更改，可能需要输入远程机密码</span>
+</span><span class="line">ssh user@server <span class="c">#连接至远程服务器，可能需要输入远程机密码。user和server需要根据实际内容更改</span>
+</span><span class="line"><span class="nb">cd</span>
+</span><span class="line">cat id_rsa.pub &gt;&gt; .ssh/authorized_keys <span class="c">#将刚拷贝过来的公钥文件内容添加到.ssh/authorized_keys文件中</span>
+</span><span class="line">chmod 600 .ssh/authorized_keys <span class="c">#必须确保.ssh/authorized_keys文件的属性为600，及他人不可读写，否则公钥认证将会失败</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+OK，大功告成。退出远程机，使用 <code>ssh user@server</code> 命令重新连接远程机，此时会提示加密指纹认证的提示，回答 <code>yes</code> 即可。此后再次连接远程机时就会直接登录进入，而不会出现任何提示了。
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-3" class="outline-3">
+<h3 id="sec-1-3">建立socks服务</h3>
+<div class="outline-text-3" id="text-1-3">
+
+<p>ssh软件自带功能可以生成socks代理服务器，并通过ssh连接的远程机进行网络访问。使用相当简单，只需要在执行ssh命令连接远程机时使用 <code>-D</code> 参数指定相应端口即可，如
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">ssh -D 9090 user@server
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+以上例子将ssh连接生成端口号为9090的socks代理。该代理可以通过Firefox等浏览器直接使用，每次需要使用socks代理时只需执行以上的命令即可。但是现实情况是，我们希望RaspberryPi在每次开机后即可自动运行ssh连接远程机并建立相应的代理端口。
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">开机时自动建立连接</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>开机后立即进行ssh连接有很多实现方法，最省事的办法就是修改 <code>rc.local</code> 或者 <code>inittab</code> 文件来实现。方法非常简单，添加相应语句到 <code>rc.local</code> 中即可。以下，我通过新建一个连接脚本，然后在 <code>rc.local</code> 文件中进行调用来实现开机自动连接ssh：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">mkdir -p ~/bin
+</span><span class="line"><span class="nb">echo </span>ssh -D 9090 user@server &gt;&gt; ~/bin/socks_proxy.sh
+</span><span class="line">chmod a+x ~/bin/socks_proxy.sh
+</span><span class="line"><span class="nb">echo</span> ~/bin/socks_proxy.sh &gt;&gt; /etc/rc.d/rc.local
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+如果想做的更正式一点，可以参考 <code>/etc/rc.d/</code> 目录下的脚本文件，新建一个rc风格的服务脚本文件，然后修改 <code>rc.M</code> 文件，添加相应的服务启动代码即可。不过接下来马上要做防止断线的处理，需要用到其它工具，所以这一步暂时跳过也没关系。
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">设置守护进程防止断线</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>目前为止我们设置了ssh的免密码登录以及开机自动登录，要求不高的话也差不多可以凑合使用。但是网络这东西有很多不稳定因素，如果碰到ssh服务器出状况或者线路不稳定时，ssh的连接就可能会被中断，这时必须自己手动再连接一次才能继续使用，这显然不是我们希望的。为了防止这类情况的发生，我们需要借助autossh软件来实现断线自动连接。autossh的功能就像它的名称一样直接简单，它可以监测ssh的连接状态，并在有需要的时候自动重新连接ssh。接下来，我来讲解如何安装配置autossh。
+</p>
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1">安装autossh</h3>
+<div class="outline-text-3" id="text-3-1">
+
+<p>由于slackware官方没有提供autossh的安装包，所以需要自己从源码编译。首先从autossh<a href="http://www.harding.motd.ca/autossh/">官网</a> 下载最新的源代码包 <code>autossh-1.4c.tgz</code> ，然后执行以下命令进行编译安装：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">gunzip -c autossh-1.4c.tgz | tar xvf -
+</span><span class="line"><span class="nb">cd </span>autossh-1.4c
+</span><span class="line">./configure --prefix<span class="o">=</span>/usr --sysconfdir<span class="o">=</span>/etc
+</span><span class="line">make
+</span><span class="line">sudo make install
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+整个过程没有什么难度，标准的从源代码安装软件的方法，除了RPi的编译速度有点慢以外。为了方便，我这里也用slackbuild编译了一份适用于RPi使用的二进制软件包： <a href="./downloads/autossh-1.4c-arm-1_SBo.tgz">autossh-1.4c-arm.tgz</a> ,只需要执行 <code>sudo installpkg autossh-1.4c-arm-1_SBo.tgz</code> 即可。
+</p></div>
+
+</div>
+
+<div id="outline-container-3-2" class="outline-3">
+<h3 id="sec-3-2">初始化脚本</h3>
+<div class="outline-text-3" id="text-3-2">
+
+<p>autossh安装好后不需要特别的设置，只需要使用它改写之前的ssh连接脚本即可。修改 <code>~/bin/socks_proxy.sh</code> 如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#!/bin/bash</span>
+</span><span class="line"><span class="c">#</span>
+</span><span class="line"><span class="c"># autossh:  Connect remote with ssh automatically.</span>
+</span><span class="line"><span class="c">#</span>
+</span><span class="line"><span class="c"># processname: autossh</span>
+</span><span class="line"><span class="c"># pidfile: /var/run/autossh.pid</span>
+</span><span class="line"><span class="c">#                       --Zhiqiang Xu &lt;xeonxu@gmail.com&gt;</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="nb">export </span><span class="nv">AUTOSSH_PIDFILE</span><span class="o">=</span><span class="s2">&quot;/var/run/autossh.pid&quot;</span>
+</span><span class="line"><span class="nv">PIDFILE</span><span class="o">=</span><span class="nv">$AUTOSSH_PIDFILE</span>
+</span><span class="line"><span class="nv">SSH_SERVER</span><span class="o">=</span>user@server
+</span><span class="line">
+</span><span class="line"><span class="k">if</span> <span class="o">[</span> -e <span class="nv">$AUTOSSH_PIDFILE</span> <span class="o">]</span>; <span class="k">then</span>
+</span><span class="line"><span class="k">        </span><span class="nb">exit </span>0
+</span><span class="line"><span class="k">elif</span> <span class="o">[</span> -x /usr/bin/autossh -a -x /usr/bin/ssh <span class="o">]</span>; <span class="k">then</span>
+</span><span class="line"><span class="k">        </span><span class="nb">echo</span> <span class="s2">&quot;Starting autossh...&quot;</span>
+</span><span class="line">        autossh -M 40000 <span class="nv">$SSH_SERVER</span> -f -q -C -g -N -D 9090
+</span><span class="line"><span class="k">fi</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+如果之前还没有修改过 <code>/etc/rc.d/rc.local</code> 文件，记得在该文件最后加上一句 <code>~/bin/socks_proxy.sh</code> 。如此便可在每次开机后自动使用autossh来进行ssh连接，同时再也不用担心该ssh会发生断线问题了。
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3-3" class="outline-3">
+<h3 id="sec-3-3">守护进程</h3>
+<div class="outline-text-3" id="text-3-3">
+
+<p>说实在，通过之前的那些操作基本可以保证我们拥有一个可以自动监护连接，并能稳定提供socks代理的功能了。以下操作可以不必进行，不过如果你纠结于更稳定的保全的连接，可以继续看下去。这一步操作主要是将autossh加入守护进程，从而防止autossh的异常退出（还记得autossh是干什么的来着？如果autossh异常退出会发生什么事？Yes, 这就是我们要防止的）。
+</p>
+<p>
+将autossh脚本以守护进程方式运行的方法很多，最简单的就是修改 <code>inittab</code> 文件。如果之前修改过 <code>/etc/rc.local</code> 文件，记得将其中关于运行autossh的语句删掉或者注释掉，否则和守护进程的设置会重复。
+打开 <code>inittab</code> 文件，参考其它项目的写法添加一行就搞定，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">AUTOSSH:12345:respawn:sh /home/user/bin/socks_proxy.sh
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+另外，使用守护进程方式运行autossh时要注意一点，运行的脚本必须不是daemon方式的。所以还需要将前面的连接语句：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">autossh -M 40000 <span class="nv">$SSH_SERVER</span> -f -q -C -g -N -D 9090
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+修改为：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">autossh -M 40000 <span class="nv">$SSH_SERVER</span> -q -C -g -N -D 9090
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+也即是去掉其中的 <code>-f</code> 选项，否则，init会不断尝试重新运行autossh命令，导致服务不稳定。
+</p>
+<p>
+守护进程还可以通过第三方工具来配置，比如daemontools，monit等等之类，功能相对来说更强大一点，但是所提供的基本功能都是一样的，所以这里也就不再详细介绍了，有兴趣的自己看文档编译配置一份就能用。
+</p>
+<p>
+这个就是我配了壳后的Raspberry Pi， 运行起来还是很稳定的:
+</p>
+
+<div class="figure">
+<p><img src="/./images/blog/RPi_shell.jpg" alt="./images/blog/RPi_shell.jpg" /></p>
+<p>配了壳的RPi</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">在Linux内核模块中操作I2C设备</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-25T00:02:00+08:00" pubdate data-updated="true">2012年11月25日</time>
+        
+         | <a href="/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+近期公司项目较为空闲，抽空做了一些学习性质的研发内容，其中涉及到在Linux内核模块中使用I2C对外部器件进行控制的操作。虽然在Linux中操作使用I2C设备并不复杂，但本人接触Linux内核驱动开发时间并不算长，此次学习中也算较为系统的了解了Linux中对I2C设备的操控方式，谨在此做下记录。
+</p>
+<p>
+通过Linux内核文档中关于操作I2C设备的文章后不难看出Linux中注册使用I2C设备一般通过四种方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>：
+</p>
+<ol>
+<li>通过总线号声明设备
+</li>
+<li>立即探测设备
+</li>
+<li>通过Probe探测相应设备
+</li>
+<li>在用户空间立即探测
+</li>
+</ol>
+
+<p>
+简单来说，第一种方式一般应用在嵌入式设备中。因为对于嵌入式设备来说，外围器件基本都是固定的，只需提供有限几款器件的支持即可。使用这种方式的时候，需要在板级配置文件中定义并设置 <code>i2c_board_info</code> 这个结构体的内容。其中需要配置设备名称和设备地址，此外设备中断和私有数据结构也可以选择设置。然后使用 <code>i2c_register_board_info</code> 这个接口对设置的设备进行注册使用。需要注意的是这种方法注册的设备是在注册I2C总线驱动时进行驱动适配的。
+</p>
+<p>
+第二种方法可以通过给定的I2C适配器以及相应的I2C板级结构体，自行通过 <code>i2c_new_device</code> 接口进行添加注册所需的设备。这种方法灵活性要较第一种方法大，可以很方便的在模块中使用。
+</p>
+<p>
+第三种方法是 <code>2.6</code> 内核之前的做法，使用 <code>detect</code> 方法去探测总线上的设备驱动。因为探测机制的原因，会导致一些副作用的发生，所以不建议使用，除非真的没有别的办法。
+</p>
+<p>
+第四种方法是在Linux的控制台上，在用户空间通过sysfs，使用 <code>/sys/bus/i2c/devices/i2c-3/new_device</code> 节点进行设备的添加注册。
+</p>
+<p>
+从上面可以看出，如果需要在Linux内核中以模块的方式对I2C设备进行驱动控制的话，第二种方法是比较推荐的。通过测试，在module的init中使用
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_adapter</span> <span class="o">*</span><span class="n">i2c_adap</span><span class="p">;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
+</span><span class="line"><span class="n">i2c_adap</span> <span class="o">=</span> <span class="n">i2c_get_adapter</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class="line"><span class="n">i2c_client</span> <span class="o">=</span> <span class="n">i2c_new_device</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">i2c_device</span><span class="p">);</span>
+</span><span class="line"><span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+即可成功注册I2C设备。其中:
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_board_info</span> <span class="n">ft5306_i2c_device</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">    <span class="n">I2C_BOARD_INFO</span><span class="p">(</span><span class="s">&quot;test_i2c&quot;</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">),</span>
+</span><span class="line"><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+以上，对于如何在模块中注册使用I2C设备简单做了描述。那么如何在另外的模块中对已经注册的I2C设备进行反注册呢？由于内核中操作I2C设备都是通过 <code>i2c_client</code> 结构进行，所以问题可以抽象为如何在内核中获取指定设备的 <code>i2c_client</code> 结构指针。通过查阅内核API，也找到了一个方法可以达到这样的目的，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">i2c_dev</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="n">i2c_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">if</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">)</span>
+</span><span class="line">    <span class="n">i2c_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
+</span><span class="line"><span class="k">if</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">)</span>
+</span><span class="line">    <span class="n">i2c_unregister_device</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+该反注册例子的内容就是对前面注册的 <code>0x11</code> 地址的设备进行反注册。注意 <code>bus_find_device_by_name</code> 函数中第三项参数，该参数是需要查找的设备在总线上注册的名称。&#8221;1&#8221;代表着1号适配器，&#8221;0011&#8221;是16位的I2C地址。如此便可方便的在内核模块中对I2C设备进行挂载和解挂了。
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 参考Linux内核目录下的Documentation/i2c/instantiating-devices
+</p>
+
+
+
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1422,462 +1846,6 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/">调节Android拨号键盘的震动效果</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-24T21:48:00+08:00" pubdate data-updated="true">2012年09月24日</time>
-        
-         | <a href="/blog/2012/09/24/diao-jie-androidbo-hao-jian-pan-de-zhen-dong-xiao-guo/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-最近在做高通Android项目时遇到一个问题，测试报告说拨号键盘中按键震感偏弱，问题首先提到了我这里。于是，我首先去内核驱动里检查了一下振子的配置，发现给振子的供电已经调到最高值了，看来只能从别的方向下手解决这个问题。震感强烈与否取决于两个因素，一个是驱动电流/驱动电压，而另一个是驱动时长。由于这个项目中给振子的供电是个LDO，只能调节驱动电压，而同时驱动电压已经最大，所以需要想办法加长驱动时间。
-</p>
-<p>
-在和应用一块分析了Android拨号键盘应用的代码后，按键震动的实现在 <code>packages/apps/Contacts/src/com/android/contacts/dialpad/DialpadFragment.java</code> 文件中。该文件中实现了拨号键盘按钮 <code>onClick</code> 事件的监听，其中：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>DialpadFragment.java  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="nd">@Override</span>
-</span><span class="line"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">    <span class="k">switch</span> <span class="o">(</span><span class="n">view</span><span class="o">.</span><span class="na">getId</span><span class="o">())</span> <span class="o">{</span>
-</span><span class="line">        <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">one</span><span class="o">:</span> <span class="o">{</span>
-</span><span class="line">            <span class="n">playTone</span><span class="o">(</span><span class="n">ToneGenerator</span><span class="o">.</span><span class="na">TONE_DTMF_1</span><span class="o">);</span>
-</span><span class="line">            <span class="n">keyPressed</span><span class="o">(</span><span class="n">KeyEvent</span><span class="o">.</span><span class="na">KEYCODE_1</span><span class="o">);</span>
-</span><span class="line">            <span class="k">return</span><span class="o">;</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line">        <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">two</span><span class="o">:</span> <span class="o">{</span>
-</span><span class="line">            <span class="n">playTone</span><span class="o">(</span><span class="n">ToneGenerator</span><span class="o">.</span><span class="na">TONE_DTMF_2</span><span class="o">);</span>
-</span><span class="line">            <span class="n">keyPressed</span><span class="o">(</span><span class="n">KeyEvent</span><span class="o">.</span><span class="na">KEYCODE_2</span><span class="o">);</span>
-</span><span class="line">            <span class="k">return</span><span class="o">;</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line">        <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">three</span><span class="o">:</span> <span class="o">{</span>
-</span><span class="line">            <span class="n">playTone</span><span class="o">(</span><span class="n">ToneGenerator</span><span class="o">.</span><span class="na">TONE_DTMF_3</span><span class="o">);</span>
-</span><span class="line">            <span class="n">keyPressed</span><span class="o">(</span><span class="n">KeyEvent</span><span class="o">.</span><span class="na">KEYCODE_3</span><span class="o">);</span>
-</span><span class="line">            <span class="k">return</span><span class="o">;</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line"><span class="c1">//以下省略</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-可以看到该监听事件中播放了按键音，同时调用了 <code>keyPressed</code> 这个方法。再来看 <code>keyPressed</code> 方法的实现：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>DialpadFragment.java  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">private</span> <span class="kt">void</span> <span class="nf">keyPressed</span><span class="p">(</span><span class="kt">int</span> <span class="n">keyCode</span><span class="p">)</span> <span class="p">{</span>
-</span><span class="line">    <span class="n">mHaptic</span><span class="p">.</span><span class="n">vibrate</span><span class="p">();</span>
-</span><span class="line">    <span class="n">KeyEvent</span> <span class="n">event</span> <span class="o">=</span> <span class="n">new</span> <span class="n">KeyEvent</span><span class="p">(</span><span class="n">KeyEvent</span><span class="p">.</span><span class="n">ACTION_DOWN</span><span class="p">,</span> <span class="n">keyCode</span><span class="p">);</span>
-</span><span class="line">    <span class="n">mDigits</span><span class="p">.</span><span class="n">onKeyDown</span><span class="p">(</span><span class="n">keyCode</span><span class="p">,</span> <span class="n">event</span><span class="p">);</span>
-</span><span class="line">
-</span><span class="line">    <span class="c1">// If the cursor is at the end of the text we hide it.</span>
-</span><span class="line">    <span class="n">final</span> <span class="kt">int</span> <span class="n">length</span> <span class="o">=</span> <span class="n">mDigits</span><span class="p">.</span><span class="n">length</span><span class="p">();</span>
-</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="n">length</span> <span class="o">==</span> <span class="n">mDigits</span><span class="p">.</span><span class="n">getSelectionStart</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">length</span> <span class="o">==</span> <span class="n">mDigits</span><span class="p">.</span><span class="n">getSelectionEnd</span><span class="p">())</span> <span class="p">{</span>
-</span><span class="line">        <span class="n">mDigits</span><span class="p">.</span><span class="n">setCursorVisible</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
-</span><span class="line">    <span class="p">}</span>
-</span><span class="line"><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-注意 <code>mHaptic.vibrate()</code> ，从方法名称上可以看出这个方法和震动相关，所以现在只要搞清楚该方法的具体实现即可。继续往下追，从该类变量的声明 <code>private HapticFeedback mHaptic = new HapticFeedback();</code> 可以看到，这个方法属于一个名叫 <code>HapticFeedback</code> 的类。而 <code>HapticFeedback</code> 类存在于 <code>packages/apps/Phone/src/com/android/phone/HapticFeedback.java</code> 文件中。顺利找到 <code>vibrate()</code> 的定义：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>HapticFeedback.java  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">vibrate</span><span class="o">()</span> <span class="o">{</span>
-</span><span class="line">    <span class="k">if</span> <span class="o">(!</span><span class="n">mEnabled</span> <span class="o">||</span> <span class="o">!</span><span class="n">mSettingEnabled</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">        <span class="k">return</span><span class="o">;</span>
-</span><span class="line">    <span class="o">}</span>
-</span><span class="line">    <span class="n">mVibrator</span><span class="o">.</span><span class="na">vibrate</span><span class="o">(</span><span class="n">mHapticPattern</span><span class="o">,</span> <span class="n">NO_REPEAT</span><span class="o">);</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-其中的判断无需关心，通过名称可以看出应该是和震动设定有关。之后调用了另一个类 <code>Vibrator</code> 的 <code>vibrate</code> 方法。该方法接受两个参数，同样通过名称看得出第一个参数有关模式，第二个参数有关是否重复。去 <code>Vibrator</code> 类里看看，该类存在于 <code>frameworks/base/core/java/android/os/Vibrator.java</code> 文件中，找到 <code>vibrate</code> 的实现<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>Vibrator.java  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="cm">/**</span>
-</span><span class="line"><span class="cm"> * Vibrate with a given pattern.</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> * &lt;p&gt;</span>
-</span><span class="line"><span class="cm"> * Pass in an array of ints that are the durations for which to turn on or off</span>
-</span><span class="line"><span class="cm"> * the vibrator in milliseconds.  The first value indicates the number of milliseconds</span>
-</span><span class="line"><span class="cm"> * to wait before turning the vibrator on.  The next value indicates the number of milliseconds</span>
-</span><span class="line"><span class="cm"> * for which to keep the vibrator on before turning it off.  Subsequent values alternate</span>
-</span><span class="line"><span class="cm"> * between durations in milliseconds to turn the vibrator off or to turn the vibrator on.</span>
-</span><span class="line"><span class="cm"> * &lt;/p&gt;&lt;p&gt;</span>
-</span><span class="line"><span class="cm"> * To cause the pattern to repeat, pass the index into the pattern array at which</span>
-</span><span class="line"><span class="cm"> * to start the repeat, or -1 to disable repeating.</span>
-</span><span class="line"><span class="cm"> * &lt;/p&gt;</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> * @param pattern an array of longs of times for which to turn the vibrator on or off.</span>
-</span><span class="line"><span class="cm"> * @param repeat the index into pattern at which to repeat, or -1 if</span>
-</span><span class="line"><span class="cm"> *        you don&#39;t want to repeat.</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">vibrate</span><span class="o">(</span><span class="kt">long</span><span class="o">[]</span> <span class="n">pattern</span><span class="o">,</span> <span class="kt">int</span> <span class="n">repeat</span><span class="o">)</span>
-</span><span class="line"><span class="o">{</span>
-</span><span class="line">    <span class="k">if</span> <span class="o">(</span><span class="n">mService</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">        <span class="n">Log</span><span class="o">.</span><span class="na">w</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;Failed to vibrate; no vibrator service.&quot;</span><span class="o">);</span>
-</span><span class="line">        <span class="k">return</span><span class="o">;</span>
-</span><span class="line">    <span class="o">}</span>
-</span><span class="line">    <span class="c1">// catch this here because the server will do nothing.  pattern may</span>
-</span><span class="line">    <span class="c1">// not be null, let that be checked, because the server will drop it</span>
-</span><span class="line">    <span class="c1">// anyway</span>
-</span><span class="line">    <span class="k">if</span> <span class="o">(</span><span class="n">repeat</span> <span class="o">&lt;</span> <span class="n">pattern</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">        <span class="k">try</span> <span class="o">{</span>
-</span><span class="line">            <span class="n">mService</span><span class="o">.</span><span class="na">vibratePattern</span><span class="o">(</span><span class="n">pattern</span><span class="o">,</span> <span class="n">repeat</span><span class="o">,</span> <span class="n">mToken</span><span class="o">);</span>
-</span><span class="line">        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">            <span class="n">Log</span><span class="o">.</span><span class="na">w</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;Failed to vibrate.&quot;</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line">    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class="line">        <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArrayIndexOutOfBoundsException</span><span class="o">();</span>
-</span><span class="line">    <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-从注释可以了解到该震动模式的意义，第一个值为等待开启震动的时间，第二个为开启震动后持续的时间，之后交替数字为关闭震动的时间以及开启震动的时间。有兴趣可以追到 <code>frameworks/base/services/java/com/android/server/VibratorService.java</code> 看看 <code>vibratePattern</code> 的实现。不过我们已经找到需要的一切了。OK，再次回到 <code>packages/apps/Phone/src/com/android/phone/HapticFeedback.java</code> 文件中查看传入的震动模式设置，很简单搜到以下处理：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>HapticFeedback.java  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">enabled</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">     <span class="n">mEnabled</span> <span class="o">=</span> <span class="n">enabled</span><span class="o">;</span>
-</span><span class="line">     <span class="k">if</span> <span class="o">(</span><span class="n">enabled</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">         <span class="n">mVibrator</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Vibrator</span><span class="o">();</span>
-</span><span class="line">         <span class="k">if</span> <span class="o">(!</span><span class="n">loadHapticSystemPattern</span><span class="o">(</span><span class="n">context</span><span class="o">.</span><span class="na">getResources</span><span class="o">()))</span> <span class="o">{</span>
-</span><span class="line">             <span class="n">mHapticPattern</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">long</span><span class="o">[]</span> <span class="o">{</span><span class="mi">0</span><span class="o">,</span> <span class="n">DURATION</span><span class="o">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">DURATION</span><span class="o">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">DURATION</span><span class="o">};</span>
-</span><span class="line">         <span class="o">}</span>
-</span><span class="line">         <span class="n">mSystemSettings</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Settings</span><span class="o">.</span><span class="na">System</span><span class="o">();</span>
-</span><span class="line">         <span class="n">mContentResolver</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getContentResolver</span><span class="o">();</span>
-</span><span class="line">     <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-首先尝试从系统设置里载入震动模式，否则使用默认的 <code>new long[] {0, DURATION, 2 * DURATION, 3 * DURATION};</code> 模式。其中 <code>DURATION</code> 等于10，所以默认的模式为等待0秒，震10毫秒，停20毫秒，之后震动30毫秒。注释掉 <code>if (!loadHapticSystemPattern(context.getResources()))</code> 判断，然后将默认震动模式改为 <code>{0, 6*DURATION, 1 * DURATION, 6 * DURATION};</code> 试试效果。执行：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>编译  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">mmm packages/apps/Contacts/&amp;&amp;mmm packages/apps/Phone/
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-然后将编译好的apk文件推到手机上，震感明显，说明修改正确<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>。现在只需要去xml文件中找到震动模式的设置部分，相应修改就可以了。最后找到 <code>frameworks/base/core/res/res/values/config.xml</code> 文件，其中有一部分为：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>设置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-</pre></td><td class="code"><pre><code class="xml"><span class="line"><span class="c">&lt;!-- Vibrator pattern for feedback about touching a virtual key --&gt;</span>
-</span><span class="line"><span class="nt">&lt;integer-array</span> <span class="na">name=</span><span class="s">&quot;config_virtualKeyVibePattern&quot;</span><span class="nt">&gt;</span>
-</span><span class="line">    <span class="nt">&lt;item&gt;</span>0<span class="nt">&lt;/item&gt;</span>
-</span><span class="line">    <span class="nt">&lt;item&gt;</span>10<span class="nt">&lt;/item&gt;</span>
-</span><span class="line">    <span class="nt">&lt;item&gt;</span>20<span class="nt">&lt;/item&gt;</span>
-</span><span class="line">    <span class="nt">&lt;item&gt;</span>30<span class="nt">&lt;/item&gt;</span>
-</span><span class="line"><span class="nt">&lt;/integer-array&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-是不是和之前看到的默认震动模式很像呢？最后，根据具体情况调了一个比较适中的值，任务完成。
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 还有另外一个 <code>vibrate</code> 的实现，但是该实现只接受一个参数，所以不是我们要找的目标。
-</p>
-
-
-<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 修改震动设置后，必须同时编译Contact和Phone，并同时更新到手机上才能生效，具体原因不明白，感觉很怪异。
-</p>
-
-
-
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/">关于在Org-Mode下方便插入截图的方法</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-23T23:58:00+08:00" pubdate data-updated="true">2012年09月23日</time>
-        
-         | <a href="/blog/2012/09/23/guan-yu-zai-org-modexia-fang-bian-cha-ru-jie-tu-de-fang-fa/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-本来使用 <code>Org-Mode</code> 来写博客就很舒服了， 插入图片也很容易，使用
-</p>
-
-<pre class="example">[[图片地址]]
-</pre>
-
-<p>
-的方法就可以。但是对于编写需要插入截图的文档来说，就得先截图，然后保存图片到相应位置，之后才能使用上面的方法来插入图片。
-</p>
-<p>
-有幸，前面搜索资料时发现了一篇文章<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，其中介绍了一种更加自动化的方式在 <code>Org-Mode</code> 中插入截图。试用后觉得非常方便，不过我又做了一些改动，以适应Mac OSX。同时为使用Octopress，重新设置了图片目录，如下：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>my-screenshot  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="nf">defun</span> <span class="nv">my-screenshot</span> <span class="p">()</span>
-</span><span class="line">  <span class="s">&quot;Take a screenshot into a unique-named file in the current buffer file</span>
-</span><span class="line"><span class="s">directory and insert a link to this file.&quot;</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">interactive</span><span class="p">)</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">setq</span> <span class="nv">filename</span>
-</span><span class="line">        <span class="p">(</span><span class="nf">concat</span> <span class="p">(</span><span class="nf">make-temp-name</span> <span class="s">&quot;./&quot;</span><span class="p">)</span> <span class="s">&quot;.png&quot;</span><span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">setq</span> <span class="nv">fullfilename</span>
-</span><span class="line">                 <span class="p">(</span><span class="nf">concat</span> <span class="p">(</span><span class="nf">file-name-directory</span> <span class="p">(</span><span class="nf">buffer-file-name</span><span class="p">))</span> <span class="s">&quot;images/blog/&quot;</span> <span class="nv">filename</span><span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nf">file-accessible-directory-p</span> <span class="p">(</span><span class="nf">concat</span> <span class="p">(</span><span class="nf">file-name-directory</span>
-</span><span class="line">                                            <span class="p">(</span><span class="nf">buffer-file-name</span><span class="p">))</span> <span class="s">&quot;images/blog/&quot;</span><span class="p">))</span>
-</span><span class="line">      <span class="nv">nil</span>
-</span><span class="line">    <span class="p">(</span><span class="nf">make-directory</span> <span class="s">&quot;images/blog/&quot;</span> <span class="nv">t</span><span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">call-process-shell-command</span> <span class="s">&quot;screencapture&quot;</span> <span class="nv">nil</span> <span class="nv">nil</span> <span class="nv">nil</span> <span class="nv">nil</span> <span class="s">&quot;-i&quot;</span> <span class="p">(</span><span class="nf">concat</span>
-</span><span class="line">                                                            <span class="s">&quot;\&quot;&quot;</span> <span class="nv">fullfilename</span> <span class="s">&quot;\&quot;&quot;</span> <span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&quot;[[./images/blog/&quot;</span> <span class="nv">filename</span> <span class="s">&quot;]]&quot;</span><span class="p">))</span>
-</span><span class="line">  <span class="p">(</span><span class="nf">org-display-inline-images</span><span class="p">)</span>
-</span><span class="line"><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-另外，还需要给 <code>org-octopress.el</code> 打个补丁，否则发布文档中图片的索引会有问题，造成某些页面下无法显示：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>org-octopress.el补丁  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/org-octopress.el b/org-octopress.el</span>
-</span><span class="line"><span class="gh">index 7f87742..36eed86 100644</span>
-</span><span class="line"><span class="gd">--- a/org-octopress.el</span>
-</span><span class="line"><span class="gi">+++ b/org-octopress.el</span>
-</span><span class="line"><span class="gu">@@ -961,7 +961,7 @@ OPT-PLIST is the export options list.&quot;</span>
-</span><span class="line">          (if (string-match &quot;^file:&quot; desc)
-</span><span class="line">              (setq desc (substring desc (match-end 0)))))
-</span><span class="line">        (setq desc (org-add-props
-</span><span class="line"><span class="gd">-                      (concat &quot;&lt;img src=\&quot;&quot; desc &quot;\&quot; alt=\&quot;&quot;</span>
-</span><span class="line"><span class="gi">+                      (concat &quot;&lt;img src=\&quot;/&quot; desc &quot;\&quot; alt=\&quot;/&quot;</span>
-</span><span class="line">                               (file-name-nondirectory desc) &quot;\&quot;/&gt;&quot;)
-</span><span class="line">                       &#39;(org-protected t))))
-</span><span class="line">       (cond
-</span><span class="line"><span class="gu">@@ -1960,7 +1960,7 @@ PUB-DIR is set, use this as the publishing directory.&quot;</span>
-</span><span class="line">   &quot;Create image tag with source and attributes.&quot;
-</span><span class="line">   (save-match-data
-</span><span class="line">     (if (string-match &quot;^ltxpng/&quot; src)
-</span><span class="line"><span class="gd">-       (format &quot;&lt;img src=\&quot;%s\&quot; alt=\&quot;%s\&quot;/&gt;&quot;</span>
-</span><span class="line"><span class="gi">+       (format &quot;&lt;img src=\&quot;/%s\&quot; alt=\&quot;/%s\&quot;/&gt;&quot;</span>
-</span><span class="line">                 src (org-find-text-property-in-string &#39;org-latex-src src))
-</span><span class="line">       (let* ((caption (org-find-text-property-in-string &#39;org-caption src))
-</span><span class="line">             (attr (org-find-text-property-in-string &#39;org-attributes src))
-</span><span class="line"><span class="gu">@@ -1972,7 +1972,7 @@ PUB-DIR is set, use this as the publishing directory.&quot;</span>
-</span><span class="line"> &lt;p&gt;&quot;
-</span><span class="line">                    (if org-par-open &quot;&lt;/p&gt;\n&quot; &quot;&quot;)
-</span><span class="line">                    (if label (format &quot;id=\&quot;%s\&quot; &quot; (org-solidify-link-text label)) &quot;&quot;)))
-</span><span class="line"><span class="gd">-       (format &quot;&lt;img src=\&quot;%s\&quot;%s /&gt;&quot;</span>
-</span><span class="line"><span class="gi">+       (format &quot;&lt;img src=\&quot;/%s\&quot;%s /&gt;&quot;</span>
-</span><span class="line">                src
-</span><span class="line">                (if (string-match &quot;\\&lt;alt=&quot; (or attr &quot;&quot;))
-</span><span class="line">                    (concat &quot; &quot; attr )
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-修改完成以后，就可以在编写Org文档的时候执行 <code>M-x my-screenshot</code> 进行抓屏了，抓好的图片存放在当前目录的 <code>./image/blog/</code> 下，命名使用随机命名方式。最后，这个脚本还会开启Emacs <code>Org-Mode</code> 的内嵌图片显示，达到图文并茂的效果。如果不需要该功能，可以使用快捷键 <code>C-c C-x C-v</code> 来关闭。
-</p>
-<p>
-截个之前<a href="#fig-Vim">配置好的Vim</a>，看看效果吧!
-</p>
-
-<div id="fig-Vim" class="figure">
-<p><img src="/./images/blog/./90530rcx.png" alt="./images/blog/./90530rcx.png" /></p>
-<p>Vim with taglist</p>
-</div>
-
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://dreamrunner.org/wiki/public_html/Emacs/org-mode.html">http://dreamrunner.org/wiki/public_html/Emacs/org-mode.html</a>
-</p>
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1902,19 +1870,19 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
 <section>
  <h1>Categories</h1>
  <ul id="categories">
- <li class='category'><a href='/blog/categories/Android/'>Android (9)</a></li>
+ <li class='category'><a href='/blog/categories/Android/'>Android (11)</a></li>
 <li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
 <li class='category'><a href='/blog/categories/GTD/'>GTD (1)</a></li>
-<li class='category'><a href='/blog/categories/Linux/'>Linux (13)</a></li>
+<li class='category'><a href='/blog/categories/Linux/'>Linux (15)</a></li>
 <li class='category'><a href='/blog/categories/Octopress/'>Octopress (4)</a></li>
 <li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
-<li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (1)</a></li>
+<li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (3)</a></li>
 <li class='category'><a href='/blog/categories/RaspberryPi/'>RaspberryPi (2)</a></li>
 <li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (1)</a></li>
 <li class='category'><a href='/blog/categories/iOS/'>iOS (1)</a></li>
 <li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
-<li class='category'><a href='/blog/categories/开发/'>开发 (10)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (11)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (8)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (7)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
@@ -1927,6 +1895,14 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan/">使用Make系统自动生成手机驱动光盘</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/06/shi-yong-ccacheyou-hua-androidde-bian-yi-shi-jian/">使用ccache优化Android的编译时间</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/02/11/iphonezhong-yu-huan-shi-bei-wo-yue-yu-liao/">iPhone终于还是被我越狱了</a>
       </li>
     
@@ -1936,14 +1912,6 @@ Tomato默认并不支持添加账户，即便通过optware安装了adduser后也
     
       <li class="post">
         <a href="/blog/2013/01/26/ru-shou-hhkb/">入手HHKB Pro2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/01/12/dang-ba-ba-liao/">当爸爸了</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/12/24/ji-nian-feng-hua-jun/">纪念冯华君</a>
       </li>
     
   </ul>

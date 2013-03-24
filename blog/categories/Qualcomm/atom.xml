@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Qualcomm | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/Qualcomm/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-02-18T00:38:44+08:00</updated>
+  <updated>2013-03-24T23:53:20+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,316 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[使用Make系统自动生成手机驱动光盘]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan/"/>
+    <updated>2013-03-24T21:36:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan</id>
+    <content type="html"><![CDATA[<p>
+蔽厂为了方便用户在拿到手机后能够顺利安装手机的电脑驱动，将相应的驱动文件打包成一个iso，然后借助Linux Usb Gadget的支持，在手机连接到电脑后会虚拟出一个驱动光盘来。实际效果蛮不错，但是问题在于，将驱动文件打包为iso的过程基本都靠人工手动完成。这于我这样喜爱偷懒的人来说，是极不科学的。于是我考虑将打包iso文件的操作自动化起来，实现步骤考虑是这样的，首先写下制作iso文件的Makefile，然后通过Android的编译系统调用改Makefile，这样在每次编译生成Android系统镜像的时候，就会自动生成相应iso文件了。
+</p>
+<p>
+为了命令行中生成iso文件，首先需要找到相应的命令行程序。这点对于linux系统来说一点不难，现成的mkisofs就可搞定。接下来，需要制定生成相应iso的命令参数。这点也不难，通过查看mkisofs的man帮助即可快速找到所需要的各种参数。最后我决定使用的命令为： <code>mkisofs -input-charset utf-8 -V "Android Driver" -J -r -l -v -o cdrom.iso cdrom_fs/</code> 。这其中，我指定使用utf-8的编码作为输入编码，使用Android Driver作为光盘的卷标，添加joliet格式和rock ridge支持，冗余输出，将 <code>cdrom_fs/</code> 目录下的所有内容生成为cdrom.iso文件。
+</p>
+<p>
+有了基础命令行，就可以写Makefile了。我写好的Makefile如下，其中还添加了光驱icon的支持：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>makefile生成iso  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class='line'><span class="c"># Version: 1.1</span>
+</span><span class='line'><span class="c"># Date: 2013.03.22</span>
+</span><span class='line'><span class="c"># makefile to generate cdrom iso file. Only generate iso file without icon in default.</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">CDROM_FS</span>            <span class="o">?=</span> ./CDROM_OBJ
+</span><span class='line'>TARGET_CDROM        ?<span class="o">=</span> ./cdrom_install.iso
+</span><span class='line'>PRODUCT_DRIVERNAME  ?<span class="o">=</span> Phicomm
+</span><span class='line'>CDROM_ROOT          ?<span class="o">=</span> ./
+</span><span class='line'>
+</span><span class='line'>ICON_NAME       :<span class="o">=</span> <span class="s2">&quot;$(PRODUCT_DRIVERNAME).ico&quot;</span>
+</span><span class='line'>ICON_PATH       :<span class="o">=</span>
+</span><span class='line'>ORIGIN_ICON     :<span class="o">=</span> <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/custom/<span class="k">$(</span>ICON_NAME<span class="k">)</span>
+</span><span class='line'>AUTORUN_FILE    :<span class="o">=</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/autorun.inf
+</span><span class='line'>
+</span><span class='line'>all:<span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>        mkisofs -input-charset utf-8 -V <span class="s2">&quot;$(PRODUCT_DRIVERNAME) Driver&quot;</span> -J -r -l -v -o <span class="k">$(</span>TARGET_CDROM<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>clean:
+</span><span class='line'>        @rm -f <span class="k">$(</span>TARGET_CDROM<span class="k">)</span>
+</span><span class='line'>        @rm -rf <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>cdrom_new:clean
+</span><span class='line'>        @mkdir -p <span class="k">$(</span>CDROM_FS<span class="k">)</span>/<span class="k">$(</span>ICON_PATH<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>:cdrom_new
+</span><span class='line'>        @if <span class="o">[</span> -e <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class='line'>        cp -f <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/<span class="k">$(</span>ICON_PATH<span class="k">)</span>/; <span class="se">\</span>
+</span><span class='line'>        <span class="nb">echo</span> <span class="s2">&quot;[autorun]\r&quot;</span> &amp;gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class='line'>        <span class="nb">echo</span> <span class="s2">&quot;icon=\&quot;$(ICON_PATH)\\$(ICON_NAME)\&quot;\r&quot;</span> &amp;gt;&amp;gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class='line'>        <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">$(</span>CDROM_FS<span class="k">)</span>: <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>
+</span><span class='line'>        @cp -rf <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/driver/* <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+我在这个makefile中定义了几个默认变量，目的就是为了在没有定义这些变量的时候，能有一个默认值。同时假定用来生成iso的文件都存放在driver目录下，以及需要使用的光盘图标文件都存放在当前目录的custom目录下。如果发现有和 <code>$(PRODUCT_DRIVERNAME)</code> 同名的图标文件，则在光盘根目录中生成相应的autorun.inf文件，以显示相应的光盘图标。写好了makefile，直接执行make就可以生成相应的iso文件。不过我的目的是和Android编译系统联动，所以还需要再做些工作。
+</p>
+<p>
+参考Android中kernel的编译方法，我编写了AndroidCdrom.mk文件，如下：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AndroidCdrom.mk  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class='line'><span class="c"># Version: 1.1</span>
+</span><span class='line'><span class="c"># Date: 2013.03.22</span>
+</span><span class='line'><span class="c"># Android makefile to generate cdrom iso file</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># cdrom variant output</span>
+</span><span class='line'><span class="c"># Set Default name to Phicomm</span>
+</span><span class='line'><span class="nv">PRODUCT_DRIVERNAME</span>      <span class="o">?=</span> Phicomm
+</span><span class='line'>PHICOMM_TARGET_CDROM    :<span class="o">=</span> <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/etc/cdrom_install.iso
+</span><span class='line'>PHICOMM_CDROM_ROOT      :<span class="o">=</span> device/qcom/msm7627a/cdrom/
+</span><span class='line'>PHICOMM_CDROM_FS        :<span class="o">=</span> <span class="k">$(</span>TARGET_OUT_INTERMEDIATES<span class="k">)</span>/CDROM_OBJ/
+</span><span class='line'>
+</span><span class='line'><span class="k">$(</span>PHICOMM_TARGET_CDROM<span class="k">)</span>:
+</span><span class='line'>        <span class="k">$(</span>MAKE<span class="k">)</span> -C <span class="k">$(</span>abspath <span class="k">$(</span>PHICOMM_CDROM_ROOT<span class="k">))</span> <span class="nv">CDROM_FS</span><span class="o">=</span><span class="k">$(</span>abspath <span class="k">$(</span>PHICOMM_CDROM_FS<span class="k">))</span> <span class="nv">TARGET_CDROM</span><span class="o">=</span><span class="k">$(</span>abspath <span class="k">$(</span>PHICOMM_TARGET_CDROM<span class="k">))</span> <span class="nv">PRODUCT_DRIVERNAME</span><span class="o">=</span><span class="s2">&quot;$(PRODUCT_DRIVERNAME)&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+内容相当简单，其实就是将Android编译系统中的一些环境变量和目录信息传递给刚才写的makefile中，传入的路径都转换为绝对路径，防止Android编译路径的变换造成文件生成失败。
+</p>
+<p>
+最后一步，将该AndroidCdrom.mk文件添加到android的编译环境中。同样参照kernel的编译方法，在AndroidBoard.mk文件中添加如下两行：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AndroidBoard.mk  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># 2013.3.20 zhiqiang.xu Add for generate cdrom iso</span>
+</span><span class='line'><span class="cp">include device/qcom/msm7627a/cdrom/AndroidCdrom.mk</span>
+</span><span class='line'>
+</span><span class='line'><span class="nf">droidcore</span><span class="o">:</span> <span class="m">$(PHICOMM_TARGET_CDROM)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+这其中的意思是将 <code>$(PHICOMM_TARGET_CDROM)</code> 这个目标依赖到droidcore目标上，而droidcore是生成android核心的标签，于是每次编译android时都会首先编译 <code>$(PHICOMM_TARGET_CDROM)</code> 目标，从而自动生成相应的iso文件。实际测试下来，效果非常好，每次修改了光盘中相应文件后，都不需要再自己手动生成iso文件了，编译Android时从头到尾一气呵成。
+</p>
+<p>
+搞定！
+</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[使用ccache优化Android的编译时间]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/03/06/shi-yong-ccacheyou-hua-androidde-bian-yi-shi-jian/"/>
+    <updated>2013-03-06T23:17:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/03/06/shi-yong-ccacheyou-hua-androidde-bian-yi-shi-jian</id>
+    <content type="html"><![CDATA[<p>
+最近在Android编译过程中发现，使用ccache也能很好的提升C/C++编译感受，虽然比不上分布式编译所带来的成倍编译速度的体验，但是减少一半编译时间还是绰绰有余的。其实在Android的编译系统中已经自带了对ccache的支持，之前我那篇讲解如何使用distcc编译Android的<a href="http://blog.xeonxu.info/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/#sec-4">文章</a> 中其实就是在ccache的支持基础上进行修改的。但是Android编译系统中的ccache只对Android系统的库文件等进行优化，并不包括Kernel和LK的编译。没搞明白为什么原生的编译系统没有包含这两部分的ccache支持，为此我自己修改了Android编译系统中Kernel和LK的Makefile文件。使用修改后的Makefile文件编译Kernel和LK时，第二次可以节省3-4分钟的时间。看上去时间不长，但是考虑到原来编译Kernel和LK时需要用时8分钟左右，这点提升也是有意义的。
+</p>
+<p>
+修改非常简单，对于Kernel只需要修改
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AndroidKernel.mk  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gd">--- a/kernel/AndroidKernel.mk</span>
+</span><span class='line'><span class="gi">+++ b/kernel/AndroidKernel.mk</span>
+</span><span class='line'><span class="gu">@@ -62,30 +62,30 @@ $(KERNEL_OUT):</span>
+</span><span class='line'>        mkdir -p $(KERNEL_OUT)
+</span><span class='line'>
+</span><span class='line'> $(KERNEL_CONFIG): $(KERNEL_OUT)
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- $(KERNEL_DEFCONFIG)</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; $(KERNEL_DEFCONFIG)</span>
+</span><span class='line'>
+</span><span class='line'> $(KERNEL_OUT)/piggy : $(TARGET_PREBUILT_INT_KERNEL)
+</span><span class='line'>        $(hide) gunzip -c $(KERNEL_OUT)/arch/arm/boot/compressed/piggy.gzip &amp;gt; $(KERNEL_OUT)/piggy
+</span><span class='line'>
+</span><span class='line'> $(TARGET_PREBUILT_INT_KERNEL): $(KERNEL_OUT) $(KERNEL_CONFIG) $(KERNEL_HEADERS_INSTALL)
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- CONFIG_NO_ERROR_ON_MISMATCH=y</span>
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- modules</span>
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) INSTALL_MOD_PATH=../../$(KERNEL_MODULES_INSTALL) ARCH=arm CROSS_COMPILE=arm-eabi- modules_install</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; CONFIG_NO_ERROR_ON_MISMATCH=y</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; modules</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) INSTALL_MOD_PATH=../../$(KERNEL_MODULES_INSTALL) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; modules_install</span>
+</span><span class='line'>        $(mv-modules)
+</span><span class='line'>        $(clean-module-folder)
+</span><span class='line'>        $(append-dtb)
+</span><span class='line'>
+</span><span class='line'> $(KERNEL_HEADERS_INSTALL): $(KERNEL_OUT) $(KERNEL_CONFIG)
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- headers_install</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; headers_install</span>
+</span><span class='line'>
+</span><span class='line'> kerneltags: $(KERNEL_OUT) $(KERNEL_CONFIG)
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- tags</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; tags</span>
+</span><span class='line'>
+</span><span class='line'> kernelconfig: $(KERNEL_OUT) $(KERNEL_CONFIG)
+</span><span class='line'>        env KCONFIG_NOTIMESTAMP=true \
+</span><span class='line'><span class="gd">-            $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- menuconfig</span>
+</span><span class='line'><span class="gi">+            $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; menuconfig</span>
+</span><span class='line'>        env KCONFIG_NOTIMESTAMP=true \
+</span><span class='line'><span class="gd">-            $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- savedefconfig</span>
+</span><span class='line'><span class="gi">+            $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; savedefconfig</span>
+</span><span class='line'>        cp $(KERNEL_OUT)/defconfig kernel/arch/arm/configs/$(KERNEL_DEFCONFIG)
+</span><span class='line'>
+</span><span class='line'> endif
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+对于LK，修改文件AndroidBoot.mk
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AndroidBoot.mk  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gd">--- a/AndroidBoot.mk</span>
+</span><span class='line'><span class="gi">+++ b/AndroidBoot.mk</span>
+</span><span class='line'><span class="gu">@@ -23,6 +23,10 @@ else</span>
+</span><span class='line'>   USER_SYSTEM := USER_SYSTEM=0
+</span><span class='line'> endif
+</span><span class='line'>
+</span><span class='line'><span class="gi">+ifeq ($(USE_CCACHE), 1)</span>
+</span><span class='line'><span class="gi">+  CCACHE := CCACHE=$(ANDROID_BUILD_TOP)/prebuilts/misc/linux-x86/ccache/ccache</span>
+</span><span class='line'><span class="gi">+endif</span>
+</span><span class='line'><span class="gi">+</span>
+</span><span class='line'> # NAND variant output
+</span><span class='line'> TARGET_NAND_BOOTLOADER := $(PRODUCT_OUT)/appsboot.mbn
+</span><span class='line'> NAND_BOOTLOADER_OUT := $(TARGET_OUT_INTERMEDIATES)/NAND_BOOTLOADER_OBJ
+</span><span class='line'><span class="gu">@@ -50,11 +54,11 @@ $(EMMC_BOOTLOADER_OUT): emmc_appsbootldr_clean</span>
+</span><span class='line'>
+</span><span class='line'> # Top level for NAND variant targets
+</span><span class='line'> $(TARGET_NAND_BOOTLOADER): $(NAND_BOOTLOADER_OUT)
+</span><span class='line'><span class="gd">-       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(NAND_BOOTLOADER_OUT) $(BOOTLOADER_PLATFORM) $(SIGNED_KERNEL)</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(NAND_BOOTLOADER_OUT) $(BOOTLOADER_PLATFORM) $(SIGNED_KERNEL) $(CCACHE)</span>
+</span><span class='line'>
+</span><span class='line'> # Top level for eMMC variant targets
+</span><span class='line'> $(TARGET_EMMC_BOOTLOADER): $(EMMC_BOOTLOADER_OUT)
+</span><span class='line'><span class="gd">-       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(EMMC_BOOTLOADER_OUT) $(BOOTLOADER_PLATFORM) EMMC_BOOT=1 $(SIGNED_KERNEL)</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(EMMC_BOOTLOADER_OUT) $(BOOTLOADER_PLATFORM) EMMC_BOOT=1 $(SIGNED_KERNEL) $(CCACHE)</span>
+</span><span class='line'>
+</span><span class='line'> # Keep build NAND &amp;amp; eMMC as default for targets still using TARGET_BOOTLOADER
+</span><span class='line'> TARGET_BOOTLOADER := $(PRODUCT_OUT)/EMMCBOOT.MBN
+</span><span class='line'><span class="gu">@@ -77,4 +81,4 @@ $(NANDWRITE_OUT): nandwrite_clean</span>
+</span><span class='line'>
+</span><span class='line'> $(TARGET_NANDWRITE): $(NANDWRITE_OUT)
+</span><span class='line'>        @echo $(BOOTLOADER_PLATFORM)_nandwrite
+</span><span class='line'><span class="gd">-       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(NANDWRITE_OUT) $(BOOTLOADER_PLATFORM)_nandwrite BUILD_NANDWRITE=1</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(NANDWRITE_OUT) $(BOOTLOADER_PLATFORM)_nandwrite BUILD_NANDWRITE=1 $(CCACHE)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+使用时，和Android编译环境默认开启ccache支持一样，只需要在编译环境中定义 <code>USE_CCACHE=1</code> 即可。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[高通编译环境一键安装包]]></title>

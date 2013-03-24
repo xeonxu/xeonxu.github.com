@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>获取并操作内核中已注册的I2C设备 - 不停地疯</title>
+  <title>使用Make系统自动生成手机驱动光盘 - 不停地疯</title>
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的文章 ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是 &hellip;">
+  <meta name="description" content="蔽厂为了方便用户在拿到手机后能够顺利安装手机的电脑驱动，将相应的驱动文件打包成一个iso，然后借助Linux Usb Gadget的支持，在手机连接到电脑后会虚拟出一个驱动光盘来。实际效果蛮不错，但是问题在于，将驱动文件打包为iso的过程基本都靠人工手动完成。这于我这样喜爱偷懒的人来说， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/">
+  <link rel="canonical" href="http://blog.xeonxu.info/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -89,7 +89,7 @@
   <header>
     
       
-        <h1 class="entry-title">获取并操作内核中已注册的I2C设备</h1>
+        <h1 class="entry-title">使用Make系统自动生成手机驱动光盘</h1>
       
     
     
@@ -106,7 +106,7 @@
   
 
 
-<time datetime="2012-12-03T00:00:00+08:00" pubdate data-updated="true">2012年12月03日</time>
+<time datetime="2013-03-24T21:36:00+08:00" pubdate data-updated="true">2013年03月24日</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -116,15 +116,16 @@
 
 
 <div class="entry-content"><p>
-之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的<a href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">文章</a> ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是，当你将模块从内核中卸载后，系统将无法再次注册内核中原有的驱动，导致相应设备无法使用。今天补充的方法可以在挂载模块时使用模块内的设备驱动，而在卸载后恢复回系统原来的驱动。
+蔽厂为了方便用户在拿到手机后能够顺利安装手机的电脑驱动，将相应的驱动文件打包成一个iso，然后借助Linux Usb Gadget的支持，在手机连接到电脑后会虚拟出一个驱动光盘来。实际效果蛮不错，但是问题在于，将驱动文件打包为iso的过程基本都靠人工手动完成。这于我这样喜爱偷懒的人来说，是极不科学的。于是我考虑将打包iso文件的操作自动化起来，实现步骤考虑是这样的，首先写下制作iso文件的Makefile，然后通过Android的编译系统调用改Makefile，这样在每次编译生成Android系统镜像的时候，就会自动生成相应iso文件了。
 </p>
 <p>
-内容相当简单，上次我们已经可以通过内核提供的接口函数，找到相应I2C总线相应地址I2C设备的I2C client结构指针。而拥有该指针后，其实就可以做很多事了。比如调用 <code>i2c_master_send</code> 接口向该client指向的设备发送I2C命令。这样，如果需要扩展内核中原有的驱动程序，比如向procfs或sysfs中添加相应的用户空间接口等。一般可以在 <code>module_init</code> 中注册sysfs入口的操作函数，然后在操作函数中通过操作该client指针而实现一定的功能。这种方法可以沿用系统内核中原有的设备驱动，可以单纯添加一些系统驱动中没有的功能。
+为了命令行中生成iso文件，首先需要找到相应的命令行程序。这点对于linux系统来说一点不难，现成的mkisofs就可搞定。接下来，需要制定生成相应iso的命令参数。这点也不难，通过查看mkisofs的man帮助即可快速找到所需要的各种参数。最后我决定使用的命令为： <code>mkisofs -input-charset utf-8 -V "Android Driver" -J -r -l -v -o cdrom.iso cdrom_fs/</code> 。这其中，我指定使用utf-8的编码作为输入编码，使用Android Driver作为光盘的卷标，添加joliet格式和rock ridge支持，冗余输出，将 <code>cdrom_fs/</code> 目录下的所有内容生成为cdrom.iso文件。
 </p>
 <p>
-除此之外，还有一种替换内核中现有驱动的方法。通过查阅源代码，可以发现内核中还提供一个 <code>device_reprobe(dev)</code> 的API，该函数接受一个device结构体指针，实现重新匹配设备驱动的操作。同时，I2C client结构体中也有相应的device结构体。我们知道Linux内核匹配I2C设备驱动是通过名称来进行匹配的，所以，我们的方法就是用Hack的方式将系统中获取到的I2C Client结构体的名称改为我们需要的名称。一般修改为我们模块中新建的驱动的名称，这样，当调用 <code>device_reprobe</code> 接口后，系统会将原有驱动remove并重新为相应I2C设备适配一个驱动程序。当然，没有出错的话，它会适配到我们修改的名称指向的驱动。如此，我们便可以在内核模块中编写独立的设备驱动程序了。以下是简单示例框架:
+有了基础命令行，就可以写Makefile了。我写好的Makefile如下，其中还添加了光驱icon的支持：
 
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>makefile生成iso  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 <span class="line-number">2</span>
 <span class="line-number">3</span>
 <span class="line-number">4</span>
@@ -158,57 +159,50 @@
 <span class="line-number">32</span>
 <span class="line-number">33</span>
 <span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class="line"><span class="c"># Version: 1.1</span>
+</span><span class="line"><span class="c"># Date: 2013.03.22</span>
+</span><span class="line"><span class="c"># makefile to generate cdrom iso file. Only generate iso file without icon in default.</span>
 </span><span class="line">
-</span><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_driver</span> <span class="n">my_driver</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class="line">    <span class="p">.</span><span class="n">driver</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class="line">        <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span>
-</span><span class="line">        <span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">THIS_MODULE</span><span class="p">,</span>
-</span><span class="line">    <span class="p">},</span>
-</span><span class="line">    <span class="p">.</span><span class="n">probe</span> <span class="o">=</span> <span class="n">my_probe</span><span class="p">,</span>
-</span><span class="line">    <span class="p">.</span><span class="n">remove</span> <span class="o">=</span> <span class="n">my_remove</span><span class="p">,</span>
-</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="nv">CDROM_FS</span>            <span class="o">?=</span> ./CDROM_OBJ
+</span><span class="line">TARGET_CDROM        ?<span class="o">=</span> ./cdrom_install.iso
+</span><span class="line">PRODUCT_DRIVERNAME  ?<span class="o">=</span> Phicomm
+</span><span class="line">CDROM_ROOT          ?<span class="o">=</span> ./
 </span><span class="line">
-</span><span class="line"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_driver_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-</span><span class="line"><span class="p">{</span>
-</span><span class="line">    <span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">ts_dev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-</span><span class="line">    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+</span><span class="line">ICON_NAME       :<span class="o">=</span> <span class="s2">&quot;$(PRODUCT_DRIVERNAME).ico&quot;</span>
+</span><span class="line">ICON_PATH       :<span class="o">=</span>
+</span><span class="line">ORIGIN_ICON     :<span class="o">=</span> <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/custom/<span class="k">$(</span>ICON_NAME<span class="k">)</span>
+</span><span class="line">AUTORUN_FILE    :<span class="o">=</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/autorun.inf
 </span><span class="line">
-</span><span class="line">    <span class="n">i2c_add_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
+</span><span class="line">all:<span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class="line">        mkisofs -input-charset utf-8 -V <span class="s2">&quot;$(PRODUCT_DRIVERNAME) Driver&quot;</span> -J -r -l -v -o <span class="k">$(</span>TARGET_CDROM<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>
 </span><span class="line">
-</span><span class="line">    <span class="n">ts_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
-</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ts_dev</span><span class="p">)</span>
-</span><span class="line">    <span class="p">{</span>
-</span><span class="line">        <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Did not match the device name:1-0011!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-</span><span class="line">        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
-</span><span class="line">    <span class="p">}</span>
-</span><span class="line">    <span class="n">this_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
+</span><span class="line">clean:
+</span><span class="line">        @rm -f <span class="k">$(</span>TARGET_CDROM<span class="k">)</span>
+</span><span class="line">        @rm -rf <span class="k">$(</span>CDROM_FS<span class="k">)</span>
 </span><span class="line">
-</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">this_client</span><span class="p">)</span>
-</span><span class="line">    <span class="p">{</span>
-</span><span class="line">        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
-</span><span class="line">    <span class="p">}</span>
+</span><span class="line">cdrom_new:clean
+</span><span class="line">        @mkdir -p <span class="k">$(</span>CDROM_FS<span class="k">)</span>/<span class="k">$(</span>ICON_PATH<span class="k">)</span>
 </span><span class="line">
-</span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
-</span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
-</span><span class="line">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line"><span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>:cdrom_new
+</span><span class="line">        @if <span class="o">[</span> -e <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class="line">        cp -f <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/<span class="k">$(</span>ICON_PATH<span class="k">)</span>/; <span class="se">\</span>
+</span><span class="line">        <span class="nb">echo</span> <span class="s2">&quot;[autorun]\r&quot;</span> &gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class="line">        <span class="nb">echo</span> <span class="s2">&quot;icon=\&quot;$(ICON_PATH)\\$(ICON_NAME)\&quot;\r&quot;</span> &gt;&gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class="line">        <span class="k">fi</span>
 </span><span class="line">
-</span><span class="line">  <span class="nl">device_error_exit:</span>
-</span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
-</span><span class="line">    <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;ts i2c del driver&quot;</span><span class="p">);</span>
-</span><span class="line">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="k">$(</span>CDROM_FS<span class="k">)</span>: <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>
+</span><span class="line">        @cp -rf <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/driver/* <span class="k">$(</span>CDROM_FS<span class="k">)</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
-只需要实现其中的 <code>my_probe</code> , <code>my_remove</code> 等函数即可实现一个完整的驱动。需要注意的是一定要在调用 <code>device_reprobe</code> 接口之前将相应的设备驱动使用 <code>i2c_add_driver</code> 添加到系统中，否则重新适配中会找不到驱动。移除模块时，用同样的方法将I2C client的名称更改为系统中原有驱动的名称，并重新适配驱动，即可实现卸载模块后系统能够使用原有驱动的功能。示例如下：
 
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+我在这个makefile中定义了几个默认变量，目的就是为了在没有定义这些变量的时候，能有一个默认值。同时假定用来生成iso的文件都存放在driver目录下，以及需要使用的光盘图标文件都存放在当前目录的custom目录下。如果发现有和 <code>$(PRODUCT_DRIVERNAME)</code> 同名的图标文件，则在光盘根目录中生成相应的autorun.inf文件，以显示相应的光盘图标。写好了makefile，直接执行make就可以生成相应的iso文件。不过我的目的是和Android编译系统联动，所以还需要再做些工作。
+</p>
+<p>
+参考Android中kernel的编译方法，我编写了AndroidCdrom.mk文件，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>AndroidCdrom.mk  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 <span class="line-number">2</span>
 <span class="line-number">3</span>
 <span class="line-number">4</span>
@@ -218,20 +212,46 @@
 <span class="line-number">8</span>
 <span class="line-number">9</span>
 <span class="line-number">10</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-</span><span class="line"><span class="p">{</span>
-</span><span class="line">    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class="line"><span class="c"># Version: 1.1</span>
+</span><span class="line"><span class="c"># Date: 2013.03.22</span>
+</span><span class="line"><span class="c"># Android makefile to generate cdrom iso file</span>
 </span><span class="line">
-</span><span class="line">    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">,</span> <span class="n">ORIGIN_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
+</span><span class="line"><span class="c"># cdrom variant output</span>
+</span><span class="line"><span class="c"># Set Default name to Phicomm</span>
+</span><span class="line"><span class="nv">PRODUCT_DRIVERNAME</span>      <span class="o">?=</span> Phicomm
+</span><span class="line">PHICOMM_TARGET_CDROM    :<span class="o">=</span> <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/etc/cdrom_install.iso
+</span><span class="line">PHICOMM_CDROM_ROOT      :<span class="o">=</span> device/qcom/msm7627a/cdrom/
+</span><span class="line">PHICOMM_CDROM_FS        :<span class="o">=</span> <span class="k">$(</span>TARGET_OUT_INTERMEDIATES<span class="k">)</span>/CDROM_OBJ/
 </span><span class="line">
-</span><span class="line">    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="o">&amp;</span><span class="n">this_client</span><span class="o">-&gt;</span><span class="n">dev</span><span class="p">);</span>
-</span><span class="line">
-</span><span class="line">    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_driver</span><span class="p">);</span>
-</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="k">$(</span>PHICOMM_TARGET_CDROM<span class="k">)</span>:
+</span><span class="line">        <span class="k">$(</span>MAKE<span class="k">)</span> -C <span class="k">$(</span>abspath <span class="k">$(</span>PHICOMM_CDROM_ROOT<span class="k">))</span> <span class="nv">CDROM_FS</span><span class="o">=</span><span class="k">$(</span>abspath <span class="k">$(</span>PHICOMM_CDROM_FS<span class="k">))</span> <span class="nv">TARGET_CDROM</span><span class="o">=</span><span class="k">$(</span>abspath <span class="k">$(</span>PHICOMM_TARGET_CDROM<span class="k">))</span> <span class="nv">PRODUCT_DRIVERNAME</span><span class="o">=</span><span class="s2">&quot;$(PRODUCT_DRIVERNAME)&quot;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
+内容相当简单，其实就是将Android编译系统中的一些环境变量和目录信息传递给刚才写的makefile中，传入的路径都转换为绝对路径，防止Android编译路径的变换造成文件生成失败。
+</p>
+<p>
+最后一步，将该AndroidCdrom.mk文件添加到android的编译环境中。同样参照kernel的编译方法，在AndroidBoard.mk文件中添加如下两行：
 
-最后需要注意，文中方法皆为本人翻查文档自己琢磨搞出来的，所以不排除存在隐患的可能，但在自己测试环境下使用中没有发现任何问题。如果有疑问，也希望各位看官能提出自己的看法。
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>AndroidBoard.mk  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="c"># 2013.3.20 zhiqiang.xu Add for generate cdrom iso</span>
+</span><span class="line"><span class="cp">include device/qcom/msm7627a/cdrom/AndroidCdrom.mk</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">droidcore</span><span class="o">:</span> <span class="m">$(PHICOMM_TARGET_CDROM)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+这其中的意思是将 <code>$(PHICOMM_TARGET_CDROM)</code> 这个目标依赖到droidcore目标上，而droidcore是生成android核心的标签，于是每次编译android时都会首先编译 <code>$(PHICOMM_TARGET_CDROM)</code> 目标，从而自动生成相应的iso文件。实际测试下来，效果非常好，每次修改了光盘中相应文件后，都不需要再自己手动生成iso文件了，编译Android时从头到尾一气呵成。
+</p>
+<p>
+搞定！
 </p>
 </div>
 
@@ -255,12 +275,12 @@
   
 
 
-<time datetime="2012-12-03T00:00:00+08:00" pubdate data-updated="true">2012年12月03日</time>
+<time datetime="2013-03-24T21:36:00+08:00" pubdate data-updated="true">2013年03月24日</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/Android/'>Android</a>, <a class='category' href='/blog/categories/Linux/'>Linux</a>, <a class='category' href='/blog/categories/开发/'>开发</a>
+    <a class='category' href='/blog/categories/Android/'>Android</a>, <a class='category' href='/blog/categories/Linux/'>Linux</a>, <a class='category' href='/blog/categories/Qualcomm/'>Qualcomm</a>, <a class='category' href='/blog/categories/开发/'>开发</a>
   
 </span>
 
@@ -294,7 +314,7 @@
   
 
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -308,10 +328,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left articlenav" href="/blog/2012/12/02/raspberry-pishang-da-jian-zi-dong-sshdai-li/" title="Previous Post: Raspberry Pi上搭建自动ssh代理">&laquo; Raspberry Pi上搭建自动ssh代理</a>
+        <a class="basic-alignment left articlenav" href="/blog/2013/03/06/shi-yong-ccacheyou-hua-androidde-bian-yi-shi-jian/" title="Previous Post: 使用ccache优化Android的编译时间">&laquo; 使用ccache优化Android的编译时间</a>
       
-      
-        <a class="basic-alignment right articlenav" href="/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/" title="Next Post: 在高通平台Android环境下编译内核模块">在高通平台Android环境下编译内核模块 &raquo;</a>
       
     </p>
   </footer>
@@ -453,8 +471,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/';
-        var disqus_url = 'http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/';
+        var disqus_identifier = 'http://blog.xeonxu.info/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan/';
+        var disqus_url = 'http://blog.xeonxu.info/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan/';
         var disqus_script = 'embed.js';
       
     (function () {
