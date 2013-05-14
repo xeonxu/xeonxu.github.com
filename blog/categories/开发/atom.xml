@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 开发 | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/开发/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-03-24T23:53:20+08:00</updated>
+  <updated>2013-05-14T23:39:10+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,143 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[再谈自动生成ISO文件的客制化问题]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti/"/>
+    <updated>2013-05-13T22:37:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti</id>
+    <content type="html"><![CDATA[<p>
+由于最近项目中又有要求说要对手机自带的虚拟驱动光盘的内容做客户定制化，于是基于上篇文章中使用make系统动态构建ISO镜像文件的方法，我又加入了客制化脚本的支持。实现的方法很简单，思路是在make工程下规定一个目录专门做客制化目录，目录下包含以不同项目名称命名的子目录，而相应子目录下便是客户定制的具体内容；同时，每个项目子目录中还包含有一个客制化脚本，用于对光盘文件系统进行重命名或者删减的操作。
+</p>
+<p>
+由于之前已经有了自动生成ISO文件的make系统，基于以上的思路实现下来，加入的代码并不多。首先是改造主makefile：
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class='line'><span class="c"># Version: 1.2</span>
+</span><span class='line'><span class="c"># Date: 2013.05.09</span>
+</span><span class='line'><span class="c"># Change Log:</span>
+</span><span class='line'><span class="c"># 1.1 Makefile to generate cdrom iso file. Only generate iso file without icon in default.</span>
+</span><span class='line'><span class="c"># 1.2 Add script support to customize cdrom&#39;s contents.</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">CDROM_FS</span>            <span class="o">?=</span> ./CDROM_OBJ
+</span><span class='line'>TARGET_CDROM        ?<span class="o">=</span> ./cdrom_install.iso
+</span><span class='line'>PRODUCT_DRIVERNAME  ?<span class="o">=</span> Phicomm
+</span><span class='line'>CDROM_ROOT          ?<span class="o">=</span> ./
+</span><span class='line'>
+</span><span class='line'>ICON_NAME       :<span class="o">=</span> <span class="s2">&quot;$(PRODUCT_DRIVERNAME).ico&quot;</span>
+</span><span class='line'>ORIGIN_ICON     :<span class="o">=</span> <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/custom/<span class="k">$(</span>PRODUCT_DRIVERNAME<span class="k">)</span>/<span class="k">$(</span>ICON_NAME<span class="k">)</span>
+</span><span class='line'>CUSTOMIZE       :<span class="o">=</span> <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/custom/<span class="k">$(</span>PRODUCT_DRIVERNAME<span class="k">)</span>
+</span><span class='line'>CUSTOMIZE_SCRIPT :<span class="o">=</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/custom.sh
+</span><span class='line'>AUTORUN_FILE     :<span class="o">=</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/autorun.inf
+</span><span class='line'>
+</span><span class='line'>all:<span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>    mkisofs -input-charset utf-8 -V <span class="s2">&quot;$(PRODUCT_DRIVERNAME) Driver&quot;</span> -J -r -l -v -o <span class="k">$(</span>TARGET_CDROM<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>clean:
+</span><span class='line'>    @rm -f <span class="k">$(</span>TARGET_CDROM<span class="k">)</span>
+</span><span class='line'>    @rm -rf <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>cdrom_new:clean
+</span><span class='line'>    @mkdir -p <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>    @if <span class="o">[</span> -e <span class="k">$(</span>CUSTOMIZE<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class='line'>    cp -rf <span class="k">$(</span>CUSTOMIZE<span class="k">)</span>/* <span class="k">$(</span>CDROM_FS<span class="k">)</span>/; <span class="se">\</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>:cdrom_new
+</span><span class='line'>    @if <span class="o">[</span> -e <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class='line'>    cp -f <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/; <span class="se">\</span>
+</span><span class='line'>    <span class="nb">echo</span> <span class="s2">&quot;[autorun]\r&quot;</span> &amp;gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class='line'>    <span class="nb">echo</span> <span class="s2">&quot;icon=\&quot;\\$(ICON_NAME)\&quot;\r&quot;</span> &amp;gt;&amp;gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">$(</span>CDROM_FS<span class="k">)</span>:<span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>
+</span><span class='line'>    @cp -rf <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/driver/* <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>    @if <span class="o">[</span> -e <span class="k">$(</span>CUSTOMIZE_SCRIPT<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class='line'>        sh <span class="k">$(</span>CUSTOMIZE_SCRIPT<span class="k">)</span> <span class="s2">&quot;$(CDROM_FS)&quot;</span>; <span class="se">\</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+相较之前的版本，我在其中新增了两个变量 <code>CUSTOMIZE</code> 和 <code>CUSTOMIZE_SCRIPT</code> ，这两个变量分别用来指定不同项目所用的客制化目录和客制化脚本。注意， <code>ORIGIN_ICON</code> 变量的内容和原来相比也有变化，路径由原来的 <code>custom</code> 目录变为了相应的项目子目录，这样对于不同的项目来说也容易管理一些。另外，在 <code>cdrom_new</code> tag段，加入了拷贝客制化内容到iso文件系统的语句。对于主makefile最核心的修改实在最后一个tag段，也就是 <code>$(CDROM_FS)</code> 段的最后一句if判断，判断客制化脚本是否存在，如果存在，则以iso文件系统路径为参数执行该脚本。makefile的改动就这么些，接下来看客制化脚本 <code>custom.sh</code> 的内容。
+</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/sh</span>
+</span><span class='line'><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class='line'><span class="c"># Version: 1.0</span>
+</span><span class='line'><span class="c"># Script which is used to customize contents of cdrom.&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;SCRIPT_FILE<span class="o">=</span><span class="nv">$0</span>
+</span><span class='line'><span class="nv">CDROM_FS</span><span class="o">=</span><span class="nv">$1</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;rm -f <span class="nv">$CDROM_FS</span>/PC_Modem_Drivers_Install_Help.pdf
+</span><span class='line'>rm -f <span class="nv">$CDROM_FS</span>/PHICOMM_USB_Drivers_Install_Help.pdf&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;do-not-remove&quot;</span>&gt;Do not REMOVE!&lt;/h1&gt;
+</span><span class='line'>&lt;p&gt;rm <span class="nv">$SCRIPT_FILE</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+对于一般的项目，默认都是使用 <code>driver/</code> 目录下的内容作为驱动光盘的内容，其中默认包含两份中文pdf说明。但是对于外单项目来讲，肯定不能使用中文说明，那么我们就需要将其从光盘文件系统中删除。以上的脚本就做了这么一件事情，删除了光盘文件系统中的两份pdf文件。脚本最后将脚本自身从光盘文件系统中删除，否则最后生成的iso文件中还包含制作脚本，那将是一件很怪异可笑的事情。从makefile中看，客制化脚本会在生成ISO文件前一步执行，因此，客制化脚本的权限是相当大的，基本上可以实现你想对光盘文件系统执行的一切操作。
+</p>
+<p>
+到此，客制化光盘的需求就完全解决了，前后实现起来也就10分钟时间。最后吐槽一遍，Android的make系统太复杂太慢，如果不是我之前在这个模块中直接使用传统make系统，对应这个简单的需求困怕也要多花费2-3倍的时间。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用Make系统自动生成手机驱动光盘]]></title>
@@ -422,354 +559,6 @@
 
 </div>
 </div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用tmux改进终端体验]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan/"/>
-    <updated>2012-11-04T23:59:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan</id>
-    <content type="html"><![CDATA[<p>
-之前一直使用GNU Screen作为我的终端管理软件，但是发现它和我使用的Emacs编辑器不兼容，其表现是画面会被无规律的撕裂，经常造成无法正常显示和编辑文件。虽然也尝试过不少配置方法，但是都没有效果。这迫使我去寻找GNU Screen的替代品，直到后来遇到<a href="http://tmux.sourceforge.net">tmux</a> ，才将我从混乱的画面中拯救出来。tmux和Emacs的兼容非常好，没有任何问题，这点让我非常满意。同时，tmux拥有强大的自定义能力，只需简单的配置，就可以使工作环境舒适度显著提高。
-</p>
-<p>
-首先，先简单了解一下tmux。tmux顾名思义，取terminal multiplexer之意，及终端复用器，其源代码基于BSD协议进行开源和分发。使用上来说，tmux和GNU Screen大同小异，都是使用命令引导键来进行操作，不过tmux的默认引导键由Screen的 <code>C-a</code> 变更为了 <code>C-b</code> 。另外，常用命令也和Gnu Screen一样可以通过 <code>引导键 ?</code> 来查看。操作方法的近似，促使我下决心从GNU Screen转换到tmux下。考虑到tmux作为GNU Screen的改进实现，功能要高级许多，仅仅用来替代GNU Screen有点大材小用的感觉。所以为了更好的学习tmux，我从<a href="http://pragprog.com/book/bhtmux/tmux">The Pragmatic Bookshelf</a>购买了名叫 <b>tmux: Productive Mouse-Free Development</b> 的书，并花了3天时间将这本书读完，感到受益匪浅。之后，按照书中的建议配置了工作环境中的tmux，感觉非常好，极大提升了终端工作的效率。下面来看看我的配置：
-</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.tmux.conf配置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># 配置使用和GNU Screen相同的C-a作为命令引导键</span>
-</span><span class='line'><span class="nb">set</span> -g prefix C-a
-</span><span class='line'><span class="c"># 设置终端类型为256色</span>
-</span><span class='line'><span class="nb">set</span> -g default-terminal “screen-256color”&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section&quot;</span>&gt;设置状态栏前景及背景色&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;set -g status-bg colour23
-</span><span class='line'><span class="nb">set</span> -g status-fg colour238&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-1&quot;</span>&gt;设置窗口标签的前景及背景色&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;setw -g window-status-fg colour232
-</span><span class='line'>setw -g window-status-bg default
-</span><span class='line'>setw -g window-status-attr dim&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-2&quot;</span>&gt;设置当前窗口标签的前景及背景色&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;setw -g window-status-current-fg colour88
-</span><span class='line'>setw -g window-status-current-bg colour130
-</span><span class='line'>setw -g window-status-current-attr bright&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-3&quot;</span>&gt;设置窗口分割的边框颜色&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;set -g pane-border-fg colour189
-</span><span class='line'><span class="nb">set</span> -g pane-border-bg black&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-4&quot;</span>&gt;设置当前窗口分割的边框颜色&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;set -g pane-active-border-fg white
-</span><span class='line'><span class="nb">set</span> -g pane-active-border-bg colour208&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-5&quot;</span>&gt;设置提示信息的前景及背景色&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;set -g message-fg colour232
-</span><span class='line'><span class="nb">set</span> -g message-bg colour23
-</span><span class='line'><span class="nb">set</span> -g message-attr bright&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-6&quot;</span>&gt;设置状态栏左部宽度&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;set -g status-left-length 40
-</span><span class='line'><span class="c"># 设置状态栏显示内容和内容颜色。这里配置从左边开始显示，使用绿色显示session名称，黄色显示窗口号，蓝色显示窗口分割号</span>
-</span><span class='line'><span class="nb">set</span> -g status-left “#<span class="o">[</span><span class="nb">fg</span><span class="o">=</span>colour52<span class="o">]</span><span class="c">#S #[fg=yellow]#I #[fg=cyan]#P”</span>
-</span><span class='line'><span class="c"># 设置状态栏右部宽度</span>
-</span><span class='line'><span class="nb">set</span> -g status-right-length 80
-</span><span class='line'><span class="c"># 设置状态栏右边内容，这里设置为时间信息</span>
-</span><span class='line'><span class="nb">set</span> -g status-right “#<span class="o">[</span><span class="nb">fg</span><span class="o">=</span>colour106<span class="o">]</span><span class="c">#(~/bin/system_info.sh) #[fg=colour208]|%d %b %R”</span>
-</span><span class='line'><span class="c"># 窗口信息居中显示</span>
-</span><span class='line'><span class="nb">set</span> -g status-justify centre&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-7&quot;</span>&gt;监视窗口信息，如有内容变动，进行提示&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;setw -g monitor-activity on
-</span><span class='line'><span class="nb">set</span> -g visual-activity on
-</span><span class='line'><span class="nb">set</span> -g status-utf8 on&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-8&quot;</span>&gt;窗口号和窗口分割号都以1开始（默认从0开始）&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;set -g base-index 1
-</span><span class='line'>setw -g pane-base-index 1&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-9&quot;</span>&gt;支持鼠标选择窗口，调节窗口大小&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;setw -g mode-mouse on
-</span><span class='line'><span class="nb">set</span> -g mouse-select-pane on
-</span><span class='line'><span class="nb">set</span> -g mouse-resize-pane on
-</span><span class='line'><span class="nb">set</span> -g mouse-select-window on
-</span><span class='line'><span class="nb">set</span> -s escape-time 1&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;c-a-ac-a&quot;</span>&gt;设置C-a a为发送C-a键&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;bind a send-prefix
-</span><span class='line'><span class="c"># 加载tmux配置文件的快捷键</span>
-</span><span class='line'><span class="nb">bind </span>r <span class="nb">source</span>-file ~/.tmux.conf<span class="se">\;</span> display “Reloaded!”
-</span><span class='line'><span class="c"># 快捷键查看man</span>
-</span><span class='line'><span class="nb">bind</span> / <span class="nb">command</span>-prompt “split-window ‘exec man %%’”
-</span><span class='line'>unbind “%”
-</span><span class='line'>unbind “<span class="s2">&quot;”</span>
-</span><span class='line'><span class="s2"># 修改默认的窗口分割快捷键，使用更直观的符号</span>
-</span><span class='line'><span class="s2">bind | split-window -h</span>
-</span><span class='line'><span class="s2">bind - split-window -v</span>
-</span><span class='line'><span class="s2"># 选择窗口功能修改为和Screen一样的C-a “</span>
-</span><span class='line'><span class="s2">bind “&quot;</span>” choose-window&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-10&quot;</span>&gt;选择窗口分割快捷键&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;bind h <span class="k">select</span>-pane -L
-</span><span class='line'><span class="nb">bind </span>j <span class="k">select</span>-pane -D
-</span><span class='line'><span class="nb">bind </span>k <span class="k">select</span>-pane -U
-</span><span class='line'><span class="nb">bind </span>l <span class="k">select</span>-pane -R
-</span><span class='line'><span class="c"># 选择窗口快捷键</span>
-</span><span class='line'><span class="nb">bind</span> -r C-h <span class="k">select</span>-window -t :-
-</span><span class='line'><span class="nb">bind</span> -r C-l <span class="k">select</span>-window -t :+
-</span><span class='line'><span class="c"># 调节窗口大小快捷键</span>
-</span><span class='line'><span class="nb">bind</span> -r H resize-pane -L 5
-</span><span class='line'><span class="nb">bind</span> -r J resize-pane -D 5
-</span><span class='line'><span class="nb">bind</span> -r K resize-pane -U 5
-</span><span class='line'><span class="nb">bind</span> -r L resize-pane -R 5&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-11&quot;</span>&gt;快捷调整窗口分割到全屏&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;unbind Up
-</span><span class='line'><span class="nb">bind </span>Up new-window -d -n tmp <span class="se">\;</span> swap-pane -s tmp.1 <span class="se">\;</span> <span class="k">select</span>-window -t tmp
-</span><span class='line'>unbind Down
-</span><span class='line'><span class="nb">bind </span>Down last-window <span class="se">\;</span> swap-pane -s tmp.1 <span class="se">\;</span> <span class="nb">kill</span>-window -t tmp&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;section-12&quot;</span>&gt;快捷记录窗口内的内容到文件中&lt;/h1&gt;
-</span><span class='line'>&lt;p&gt;bind P pipe-pane -o “cat »~/#W.log” <span class="se">\;</span> display “Toggled logging to ~/#W.log”
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-<p>
-以上配置只需要复制保存到 <code>~/.tmux.conf</code> 文件中，下次执行tmux时就生效了。
-</p>
-<p>
-当然，tmux的高级不止在于配置功能的强大，它还支持在命令行中对指定session进行设置。利用这个特性，便可以将繁琐的工作环境初始化用脚本完成了。比如我写了如下脚本对我的工作电脑进行初始化：
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>init_tmux.sh  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#! /bin/bash</span>
-</span><span class='line'><span class="nb">export </span><span class="nv">AP_7x27_PROJECT</span><span class="o">=</span><span class="s2">&quot;~/Developer/MSM7x27A-ICS-AP&quot;</span>
-</span><span class='line'><span class="nb">export </span><span class="nv">MP_7x27_PROJECT</span><span class="o">=</span><span class="s2">&quot;~/Developer/MSM7x27A-ICS-MP&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">export </span><span class="nv">AP_8x25_PROJECT</span><span class="o">=</span><span class="s2">&quot;~/Developer/MSM8x25-ICS-AP&quot;</span>
-</span><span class='line'><span class="nb">export </span><span class="nv">MP_8x25_PROJECT</span><span class="o">=</span><span class="s2">&quot;~/Developer/MSM8x25-ICS-MP&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">if</span> <span class="o">[</span> -z <span class="s2">&quot;$TMUX&quot;</span> <span class="o">]</span>; <span class="k">then</span>
-</span><span class='line'><span class="k">    </span>tmux has-session -t development7x27
-</span><span class='line'>    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> !<span class="o">=</span> 0 <span class="o">]</span>; <span class="k">then</span>
-</span><span class='line'>        <span class="c"># init 7x27 AP</span>
-</span><span class='line'>        tmux new-session -s development7x27 -n AP_7x27 -d
-</span><span class='line'>        tmux send-keys -t development7x27 <span class="s2">&quot;cd $AP_7x27_PROJECT&amp;amp;&amp;amp;. ./build/envsetup.sh&amp;amp;&amp;amp;choosecombo 1 13 1&quot;</span> C-m
-</span><span class='line'>        tmux split-window -h -p 40 -t development7x27:1
-</span><span class='line'>        tmux send-keys -t development7x27 <span class="s2">&quot;cd $AP_7x27_PROJECT&amp;amp;&amp;amp;. ./build/envsetup.sh&amp;amp;&amp;amp;choosecombo 1 13 1&quot;</span> C-m
-</span><span class='line'>        tmux split-window -v -t development7x27:1.2
-</span><span class='line'>        tmux send-keys -t development7x27 <span class="s2">&quot;cd $AP_7x27_PROJECT&amp;amp;&amp;amp;. ./build/envsetup.sh&amp;amp;&amp;amp;choosecombo 1 13 1&quot;</span> C-m
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># init 7x27 MP</span>
-</span><span class='line'>        tmux new-window -n MP_7x27 -t development7x27
-</span><span class='line'>
-</span><span class='line'>        tmux send-keys -t development7x27:2 <span class="s2">&quot;cd $MP_7x27_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class='line'>        tmux split-window -h -p 40 -t development7x27:2
-</span><span class='line'>        tmux send-keys -t development7x27:2 <span class="s2">&quot;cd $MP_7x27_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class='line'>        tmux split-window -v -t development7x27:2.2
-</span><span class='line'>        tmux send-keys -t development7x27 <span class="s2">&quot;cd $MP_7x27_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class='line'>
-</span><span class='line'>        tmux <span class="k">select</span>-window -t development7x27:1
-</span><span class='line'>        tmux <span class="k">select</span>-pane -t development7x27:1 -L
-</span><span class='line'>    <span class="k">fi</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">        </span>tmux send-keys -t development7x27:1.3 <span class="s2">&quot;export DISPLAY=$DISPLAY&quot;</span> C-m
-</span><span class='line'>        tmux send-keys -t development7x27:2.3 <span class="s2">&quot;export DISPLAY=$DISPLAY&quot;</span> C-m
-</span><span class='line'>
-</span><span class='line'>    tmux has-session -t development8x25
-</span><span class='line'>    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> !<span class="o">=</span> 0 <span class="o">]</span>; <span class="k">then</span>
-</span><span class='line'>        <span class="c"># init 8x25 AP</span>
-</span><span class='line'>        tmux new-session -s development8x25 -n AP_8x25 -d
-</span><span class='line'>        tmux send-keys -t development8x25 <span class="s2">&quot;cd $AP_8x25_PROJECT&amp;amp;&amp;amp;. ./build/envsetup.sh&amp;amp;&amp;amp;choosecombo 1 17 3&quot;</span> C-m
-</span><span class='line'>        tmux split-window -h -p 40 -t development8x25:1
-</span><span class='line'>        tmux send-keys -t development8x25 <span class="s2">&quot;cd $AP_8x25_PROJECT&amp;amp;&amp;amp;. ./build/envsetup.sh&amp;amp;&amp;amp;choosecombo 1 17 3&quot;</span> C-m
-</span><span class='line'>        tmux send-keys -t development8x25 <span class="s1">&#39;top&#39;</span> C-m
-</span><span class='line'>        tmux split-window -v -t development8x25:1.2
-</span><span class='line'>        tmux send-keys -t development8x25 <span class="s2">&quot;cd $AP_8x25_PROJECT&amp;amp;&amp;amp;. ./build/envsetup.sh&amp;amp;&amp;amp;choosecombo 1 17 3&quot;</span> C-m
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># init 8x25 MP</span>
-</span><span class='line'>        tmux new-window -n MP_8x25 -t development8x25
-</span><span class='line'>
-</span><span class='line'>        tmux send-keys -t development8x25:2 <span class="s2">&quot;cd $MP_8x25_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class='line'>        tmux split-window -h -p 40 -t development8x25:2
-</span><span class='line'>        tmux send-keys -t development8x25:2 <span class="s2">&quot;cd $MP_8x25_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class='line'>        tmux split-window -v -t development8x25:2.2
-</span><span class='line'>        tmux send-keys -t development8x25 <span class="s2">&quot;cd $MP_8x25_PROJECT/modem_proc/build/ms&quot;</span> C-m
-</span><span class='line'>
-</span><span class='line'>        tmux <span class="k">select</span>-window -t development8x25:1
-</span><span class='line'>        tmux <span class="k">select</span>-pane -t development8x25:1 -L
-</span><span class='line'>    <span class="k">fi</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">        </span>tmux send-keys -t development8x25:1.3 <span class="s2">&quot;export DISPLAY=$DISPLAY&quot;</span> C-m
-</span><span class='line'>        tmux send-keys -t development8x25:2.3 <span class="s2">&quot;export DISPLAY=$DISPLAY&quot;</span> C-m
-</span><span class='line'>
-</span><span class='line'>    tmux attach -t development7x27
-</span><span class='line'><span class="k">fi</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-脚本主体思想为每次运行时判断相应的tmux session是否存在，如果存在则设置Xwindow的变量后attach；如果不存在相应session，则新建相应session并初始化session中相应窗口和窗口分割，同时在每个窗口分割中运行每次都要运行的环境初始化命令。最后设置Xwindow环境变量后attach。我的脚本中分别初始化了高通7x27 AP和MP的编译环境以及8x25 AP和MP的编译环境。
-</p>
-<p>
-使用时，将以上内容存为文件，并在 <code>~/.bashrc</code> 中调用就可以了。这样，不论是ssh到该主机还是新开一个终端窗口，都会直接进入指定的tmux session中，继续之前的工作。加上Xwindow的设置，tmux中也可以直接运行X程序。工作中，我就是在windows上使用putty+Xming来运行使用X程序的，非常方便高效。简单的配置让工作环境大幅改进，让我觉得之前6刀买到那本书真是超值了。
-</p>
-<p>
-说了这么多好，tmux其实也是有缺点的。最明显的一个缺点就是不支持windows，而GNU Screen却支持是windows的，这不免让人有点遗憾。所以如果有在Windows下使用类似软件的话（真的有需要吗？），只能考虑其它如GNU Screen之类的软件了。
-</p>
 ]]></content>
   </entry>
   

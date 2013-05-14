@@ -4,8 +4,166 @@
     <description><![CDATA[不停地疯]]></description>
     <title><![CDATA[不停地疯]]></title>
     <link>http://blog.xeonxu.info/</link>
-    <pubDate>2013-03-24T23:53:20+08:00</pubDate>
+    <pubDate>2013-05-14T23:39:10+08:00</pubDate>
 
+    
+    <item>
+      <description>
+	<![CDATA[
+		 <p>
+由于最近项目中又有要求说要对手机自带的虚拟驱动光盘的内容做客户定制化，于是基于上篇文章中使用make系统动态构建ISO镜像文件的方法，我又加入了客制化脚本的支持。实现的方法很简单，思路是在make工程下规定一个目录专门做客制化目录，目录下包含以不同项目名称命名的子目录，而相应子目录下便是客户定制的具体内容；同时，每个项目子目录中还包含有一个客制化脚本，用于对光盘文件系统进行重命名或者删减的操作。
+</p>
+<p>
+由于之前已经有了自动生成ISO文件的make系统，基于以上的思路实现下来，加入的代码并不多。首先是改造主makefile：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class="line"><span class="c"># Version: 1.2</span>
+</span><span class="line"><span class="c"># Date: 2013.05.09</span>
+</span><span class="line"><span class="c"># Change Log:</span>
+</span><span class="line"><span class="c"># 1.1 Makefile to generate cdrom iso file. Only generate iso file without icon in default.</span>
+</span><span class="line"><span class="c"># 1.2 Add script support to customize cdrom&#39;s contents.</span>
+</span><span class="line">
+</span><span class="line"><span class="nv">CDROM_FS</span>            <span class="o">?=</span> ./CDROM_OBJ
+</span><span class="line">TARGET_CDROM        ?<span class="o">=</span> ./cdrom_install.iso
+</span><span class="line">PRODUCT_DRIVERNAME  ?<span class="o">=</span> Phicomm
+</span><span class="line">CDROM_ROOT          ?<span class="o">=</span> ./
+</span><span class="line">
+</span><span class="line">ICON_NAME       :<span class="o">=</span> <span class="s2">&quot;$(PRODUCT_DRIVERNAME).ico&quot;</span>
+</span><span class="line">ORIGIN_ICON     :<span class="o">=</span> <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/custom/<span class="k">$(</span>PRODUCT_DRIVERNAME<span class="k">)</span>/<span class="k">$(</span>ICON_NAME<span class="k">)</span>
+</span><span class="line">CUSTOMIZE       :<span class="o">=</span> <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/custom/<span class="k">$(</span>PRODUCT_DRIVERNAME<span class="k">)</span>
+</span><span class="line">CUSTOMIZE_SCRIPT :<span class="o">=</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/custom.sh
+</span><span class="line">AUTORUN_FILE     :<span class="o">=</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/autorun.inf
+</span><span class="line">
+</span><span class="line">all:<span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class="line">    mkisofs -input-charset utf-8 -V <span class="s2">&quot;$(PRODUCT_DRIVERNAME) Driver&quot;</span> -J -r -l -v -o <span class="k">$(</span>TARGET_CDROM<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class="line">
+</span><span class="line">clean:
+</span><span class="line">    @rm -f <span class="k">$(</span>TARGET_CDROM<span class="k">)</span>
+</span><span class="line">    @rm -rf <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class="line">
+</span><span class="line">cdrom_new:clean
+</span><span class="line">    @mkdir -p <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class="line">    @if <span class="o">[</span> -e <span class="k">$(</span>CUSTOMIZE<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class="line">    cp -rf <span class="k">$(</span>CUSTOMIZE<span class="k">)</span>/* <span class="k">$(</span>CDROM_FS<span class="k">)</span>/; <span class="se">\</span>
+</span><span class="line">    <span class="k">fi</span>
+</span><span class="line">
+</span><span class="line"><span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>:cdrom_new
+</span><span class="line">    @if <span class="o">[</span> -e <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class="line">    cp -f <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/; <span class="se">\</span>
+</span><span class="line">    <span class="nb">echo</span> <span class="s2">&quot;[autorun]\r&quot;</span> &gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class="line">    <span class="nb">echo</span> <span class="s2">&quot;icon=\&quot;\\$(ICON_NAME)\&quot;\r&quot;</span> &gt;&gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class="line">    <span class="k">fi</span>
+</span><span class="line">
+</span><span class="line"><span class="k">$(</span>CDROM_FS<span class="k">)</span>:<span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>
+</span><span class="line">    @cp -rf <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/driver/* <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class="line">    @if <span class="o">[</span> -e <span class="k">$(</span>CUSTOMIZE_SCRIPT<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class="line">        sh <span class="k">$(</span>CUSTOMIZE_SCRIPT<span class="k">)</span> <span class="s2">&quot;$(CDROM_FS)&quot;</span>; <span class="se">\</span>
+</span><span class="line">    <span class="k">fi</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+相较之前的版本，我在其中新增了两个变量 <code>CUSTOMIZE</code> 和 <code>CUSTOMIZE_SCRIPT</code> ，这两个变量分别用来指定不同项目所用的客制化目录和客制化脚本。注意， <code>ORIGIN_ICON</code> 变量的内容和原来相比也有变化，路径由原来的 <code>custom</code> 目录变为了相应的项目子目录，这样对于不同的项目来说也容易管理一些。另外，在 <code>cdrom_new</code> tag段，加入了拷贝客制化内容到iso文件系统的语句。对于主makefile最核心的修改实在最后一个tag段，也就是 <code>$(CDROM_FS)</code> 段的最后一句if判断，判断客制化脚本是否存在，如果存在，则以iso文件系统路径为参数执行该脚本。makefile的改动就这么些，接下来看客制化脚本 <code>custom.sh</code> 的内容。
+</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#!/bin/sh</span>
+</span><span class="line"><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class="line"><span class="c"># Version: 1.0</span>
+</span><span class="line"><span class="c"># Script which is used to customize contents of cdrom.</span>
+</span><span class="line">
+</span><span class="line"><span class="nv">SCRIPT_FILE</span><span class="o">=</span><span class="nv">$0</span>
+</span><span class="line"><span class="nv">CDROM_FS</span><span class="o">=</span><span class="nv">$1</span>
+</span><span class="line">
+</span><span class="line">rm -f <span class="nv">$CDROM_FS</span>/PC_Modem_Drivers_Install_Help.pdf
+</span><span class="line">rm -f <span class="nv">$CDROM_FS</span>/PHICOMM_USB_Drivers_Install_Help.pdf
+</span><span class="line">
+</span><span class="line"><span class="c">#Do not REMOVE!</span>
+</span><span class="line">rm <span class="nv">$SCRIPT_FILE</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>
+对于一般的项目，默认都是使用 <code>driver/</code> 目录下的内容作为驱动光盘的内容，其中默认包含两份中文pdf说明。但是对于外单项目来讲，肯定不能使用中文说明，那么我们就需要将其从光盘文件系统中删除。以上的脚本就做了这么一件事情，删除了光盘文件系统中的两份pdf文件。脚本最后将脚本自身从光盘文件系统中删除，否则最后生成的iso文件中还包含制作脚本，那将是一件很怪异可笑的事情。从makefile中看，客制化脚本会在生成ISO文件前一步执行，因此，客制化脚本的权限是相当大的，基本上可以实现你想对光盘文件系统执行的一切操作。
+</p>
+<p>
+到此，客制化光盘的需求就完全解决了，前后实现起来也就10分钟时间。最后吐槽一遍，Android的make系统太复杂太慢，如果不是我之前在这个模块中直接使用传统make系统，对应这个简单的需求困怕也要多花费2-3倍的时间。
+</p>
+
+		 <p class='post-footer'>
+  <h1>License</h1>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
+  Original link:
+  <a href='http://blog.xeonxu.info/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti/'>http://blog.xeonxu.info/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti/</a><br/>
+  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
+  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
+</p>
+
+	]]>
+      </description>
+      <title><![CDATA[再谈自动生成ISO文件的客制化问题]]></title>
+      <link>http://blog.xeonxu.info/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti/</link>
+      <pubDate>2013-05-13T22:37:00+08:00</pubDate>
+      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti</guid>
+
+      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
+      <author>
+	<name><![CDATA[Xeon Xu]]></name>
+	
+      </author>
+    </item>
     
     <item>
       <description>
@@ -2751,113 +2909,6 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
       <link>http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/</link>
       <pubDate>2012-10-08T21:48:00+08:00</pubDate>
       <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie</guid>
-
-      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
-      <author>
-	<name><![CDATA[Xeon Xu]]></name>
-	
-      </author>
-    </item>
-    
-    <item>
-      <description>
-	<![CDATA[
-		 <p>
-手上的RT-N16跑Tomato系统已经两年有余了，两年来Tomato系统没有让我失望过，一直提供着稳定高速的网络服务，此外它还提供了内网文件服务，P2P下载以及科学上网代理等重要功能。最近，本人又败了一个小玩意：<a href="http://www.raspberrypi.org">Raspberry Pi</a> ， 税前价格$25，到手¥310。入手后，我在上面安装了ArmedSlack，运行的非常稳定，很不错。于是，本人决定将其打造为一个随身的功能强大的小电脑，包括随插随用的科学上网代理。基本思路是Raspberry Pi启动后通过公钥认证自动连接到家中的RT-N16路由器上，然后通过ssh转发相应端口，即可实现科学上网。不过，这个方法中有一个隐患：因为Tomato默认只提供root/admin账户，权限太大，如果Raspberry Pi使用这个账户进行连接，总是有点不放心。于是，我决定给Tomato系统添加新的用户。
-</p>
-<p>
-Tomato默认并不支持添加账户，即便通过optware安装了adduser后也由于没有passwd命令而失败。不过通过网络搜索，还是让我找到了一个可以添加用户的方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>。我用如下的命令在Tomato中建立了一个名为sshuser的用户：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>添加用户  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">UNAM</span><span class="o">=</span>sshuser
-</span><span class="line"><span class="nv">RNAM</span><span class="o">=</span><span class="s2">&quot;For Login Only&quot;</span>
-</span><span class="line"><span class="nv">UNUM</span><span class="o">=</span>200
-</span><span class="line"><span class="nv">UGRP</span><span class="o">=</span><span class="nv">$UNUM</span>
-</span><span class="line"><span class="c">#UGRP=0</span>
-</span><span class="line"><span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UNUM:$UGRP:$RNAM:/tmp:/bin/sh&quot;</span> &gt;&gt; /etc/passwd
-</span><span class="line"><span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UNUM:$UGRP:$RNAM:/home/$UNAM:/bin/sh&quot;</span> &gt;&gt; /etc/passwd.custom
-</span><span class="line"><span class="o">[[</span> <span class="nv">$UGRP</span> -ne 0 <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UGRP:&quot;</span> &gt;&gt;/etc/group
-</span><span class="line"><span class="o">[[</span> <span class="nv">$UGRP</span> -ne 0 <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&quot;$UNAM:x:$UGRP:&quot;</span> &gt;&gt;/etc/group.custom
-</span><span class="line">sed -n -e <span class="s2">&quot;s,^root:,$UNAM:,p&quot;</span> &lt; /etc/shadow &gt;&gt; /etc/shadow.custom
-</span><span class="line">
-</span><span class="line">chmod 777 /tmp/home
-</span><span class="line">ssh <span class="nv">$UNAM</span>@localhost <span class="s2">&quot;mkdir /home/$UNAM;touch /home/$UNAM/.profile &amp;&amp; echo success&quot;</span>
-</span><span class="line"><span class="c"># press return for the password prompt, you should see the word &quot;success&quot; reported</span>
-</span><span class="line">
-</span><span class="line">chmod 755 /tmp/home
-</span><span class="line">
-</span><span class="line">nvram setfile2nvram /etc/passwd.custom
-</span><span class="line">nvram setfile2nvram /etc/group.custom
-</span><span class="line">nvram setfile2nvram /etc/shadow.custom
-</span><span class="line">nvram setfile2nvram /home/<span class="nv">$UNAM</span>/.profile
-</span><span class="line">nvram commit
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-最后几句包含nvram的语句是将新建的几个 <code>.custom</code> 文件添加到nvram中，这样这些新添加的文件就可以在重启路由器后还能存在。然后，将以下三句添加到路由器设置中-&gt;脚本设置-&gt;初始化中：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>初始化用户  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">sed -i <span class="s2">&quot;/^sshuser:/d&quot;</span> /etc/passwd
-</span><span class="line">grep <span class="s2">&quot;^sshuser:&quot;</span> &lt; /etc/shadow.custom &gt;&gt; /etc/shadow
-</span><span class="line">grep <span class="s2">&quot;^sshuser:&quot;</span> &lt; /etc/passwd.custom &gt;&gt; /etc/passwd
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-如图：
-<img src="http://blog.xeonxu.info/./images/blog/./574rHz.png" alt="./images/blog/./574rHz.png" />
-新建的用户使用和root一样的密码，如果需要修改，需要相应修改 <code>/etc/shadow</code> 文件。新建用户登录后的效果入下图：
-<img src="http://blog.xeonxu.info/./images/blog/./574dRC.png" alt="./images/blog/./574dRC.png" />
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://tomatousb.org/tut:adding-your-own-users">http://tomatousb.org/tut:adding-your-own-users</a>
-</p>
-
-
-
-
-</div>
-</div>
-
-		 <p class='post-footer'>
-  <h1>License</h1>
-  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
-  Original link:
-  <a href='http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/'>http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/</a><br/>
-  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
-  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
-</p>
-
-	]]>
-      </description>
-      <title><![CDATA[为Tomato添加用户]]></title>
-      <link>http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu/</link>
-      <pubDate>2012-10-01T21:21:00+08:00</pubDate>
-      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/10/01/wei-tomatotian-jia-yong-hu</guid>
 
       <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
       <author>
