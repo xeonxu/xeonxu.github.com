@@ -4,10 +4,70 @@
   <title><![CDATA[不停地疯]]></title>
   <link href="http://blog.xeonxu.info/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-05-14T23:39:10+08:00</updated>
+  <updated>2013-05-17T00:09:02+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[搞了个半自动化的Vim]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/"/>
+    <updated>2013-05-14T22:48:00+08:00</updated>
+    <author>
+      <name><![CDATA[Xeon Xu]]></name>
+      
+    </author>
+    <id>http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim</id>
+    <content type="html">
+        <![CDATA[
+        <p>
+平时单位里Linux下使用wine＋sourceinsight查看代码，用emacs写代码。最近公司搞正版化，自然sourceinsight也就不能再使用了，本想自定义一下emacs做类似功能，但苦于自己三脚猫的Lisp，加上之前的配置有点杂乱，所以想着先用vim顶两天，然后再自己抽空重构一下emacs的配置结构和功能，顺便也能从vim那里偷点师。几天下来，vim也被我配置得可以替代sourceinsight大部分的功能，使用起来还算不错。推荐给同事们使用，也都很满意。这里简单讲讲我的配置思路。
+</p>
+<p>
+对于工作中的编辑器，我有以下几个基本要求：
+</p>
+<ol>
+<li>文件查找方便
+</li>
+<li>格式自动化
+</li>
+<li>自动补全
+</li>
+<li>符号跳转
+</li>
+<li>函数列表
+</li>
+<li>tab/buffer支持
+</li>
+<li>session保存
+</li>
+</ol>
+
+<p>
+对于第一个需求，我使用了有口皆碑的lookupfile插件，这个插件可以从tag文件中快速查找文件，也可以在自己生成的文件列表中查找。我自己是使用文件列表的方式来查找，速度同样很快。之前也有使用过另外一个类似功能的插件，ctrlp。但是这个插件第一次使用时都要将当前目录下的所有文件遍历一遍，对于大型项目来说，速度还是有点慢。所以ctrlp被我抛弃了；第二个需求，vim貌似原生支持就不赖，直接=就可以；第三个需求，我选择了强大的YouCompleteMe插件。YCM插件使用了Clang编译器做后端，可以在编写程序时快速的分析代码，提供准确的自动补全列表。对于第四个需求符号跳转，本来使用的是cscope，功能很强大也够用，但是修改文件后更新符号文件比较慢，所以经常也就懒得更新符号文件，导致跳转的地方经常有偏差。后来发现有个GNU global可以非常快速的更新符号文件，加上和现有的cscope插件可以很好的兼容，所以我也就换成了用GNU global做符号跳转支持了。同时，我还加入了hook在保存程序文件后自动调用global进行更新符号文件。从此以后就再也不用担心更新符号文件的问题了，保存文件后符号立马生效。第五个需求使用地球人都知道的taglist就好，绑定F8快捷弹出；第六个需求，vim同样原生支持，自己配个好用的快捷键就OK；最后一个需求很有用，vim原生也有支持，但是原生的session不支持tabbar状态的保存，于是我使用了xolox/vim-session这个插件。使用这个插件后，不但可以保存打开文件的状态，光标位置，查找上下文的状态，tabbar的状态也都可以完美保存。这样，在退出vim后，下次打开时还能快速回到上次关闭前的状态，就像在sourceinsight中重新开启工程一样。
+</p>
+<p>
+除此之外，我还添加了一些辅助类插件，比如nerdtree，nerdcommenter，easymotion，powerline等，方便目录浏览，注释等操作。用的不多，但是在某些时候还是有点用的。插件装好之后还不是很顺手，要想方便使用，自己还做了些定制。其中我写了一个脚本，为了帮助快速得建立工程。脚本中从建立lookupfile所用的文件列表到生成更新global符号文件，全部一气呵成。另外，在配置文件中我还添加了几个hook，除了保存特定文件后自动更新符号文件得hook，还有退出vim后自动保存session的hook。最后，将常用功能都绑定到快捷键上，这样使用起来就省力多了。到此，半自动化的vim就算完成了。
+</p>
+<p>
+配置好的内容可以在：<a href="https://github.com/xeonxu/vim_configs"> <code>https://github.com/xeonxu/vim_configs</code> </a> 找到，其中有两个分支，master对应Linux的版本，而macos对应Mac版本。两者的差别便是YCM中二进制文件的格式分别是对应两种系统单独编译的。由于YCM的特殊性，必须要使用最新版的vim才能正常运行，而各大系统的发行版中的vim版本都不是很新，所以需要自己通过vim源代码编译一个才行，这算是唯一的遗憾了。公司里我写了个一键安装脚本，方便同事们的部署，大家使用标准的源码编译安装方式伺候即可。
+</p>
+<p>
+作为一名emacser，跑来研究vim配置说起来也挺难为情。不过配置过程中给我印象最深的是vim的插件配置起来都挺方便，基本都是设置几个变量就好。加上vundle这个插件，很容易让人沉浸在插件的世界里。另外就是vim的启动速度确实快，这让我们这些emacs用户嫉妒不已。还有，lookupfile插件的思路蛮好，emacs上应该可以实现个更好的。另外下次配置emacs时，也要坚持换用global做符号跳转支持了，因为实在是太快太方便了。根据程序员时髦指南的解释，同时使用emacs和vim的人应该烧死，所以我看我还是尽快搞定自己的emacs配置吧。
+</p>
+
+		<p class='post-footer'>
+  <h1>License</h1>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
+  Original link:
+  <a href='http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/'>http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/</a><br/>
+  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
+  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
+</p>
+
+        ]]>
+    </content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[再谈自动生成ISO文件的客制化问题]]></title>
@@ -2727,150 +2787,6 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
   <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
   Original link:
   <a href='http://blog.xeonxu.info/blog/2012/10/11/gei-octopressde-rssshu-chu-tian-jia-zuo-zhe-xin-xi/'>http://blog.xeonxu.info/blog/2012/10/11/gei-octopressde-rssshu-chu-tian-jia-zuo-zhe-xin-xi/</a><br/>
-  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
-  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
-</p>
-
-        ]]>
-    </content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[在Android编译时建立符号链接]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/"/>
-    <updated>2012-10-08T21:48:00+08:00</updated>
-    <author>
-      <name><![CDATA[Xeon Xu]]></name>
-      
-    </author>
-    <id>http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie</id>
-    <content type="html">
-        <![CDATA[
-        <p>
-最近接到一个任务，需要将Busybox环境移植到高通平台的Android项目上。Busybox的目标执行文件有现成编译好的，需要做的工作就是添加一个Android工程，将编译好的二进制文件拷贝到Android的文件系统中，同时还需要生成相应的Busybox命令链接。
-</p>
-<p>
-拷贝文件到指定目录在Android的编译系统中有现成的方法，使用下面这个方法即可：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>拷贝文件到指定目录  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="nv">LOCAL_PATH</span> <span class="o">:=</span> <span class="k">$(</span>call my-dir<span class="k">)</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># Add busybox environment zhiqiang.xu 2012.10.8</span>
-</span><span class="line"><span class="cp">include $(CLEAR_VARS)</span>
-</span><span class="line">LOCAL_MODULE :<span class="o">=</span> busybox_modules
-</span><span class="line">LOCAL_MODULE_STEM :<span class="o">=</span> busybox
-</span><span class="line">LOCAL_SRC_FILES :<span class="o">=</span> busybox
-</span><span class="line">LOCAL_MODULE_TAGS :<span class="o">=</span> eng
-</span><span class="line">LOCAL_MODULE_CLASS :<span class="o">=</span> EXECUTABLES
-</span><span class="line">LOCAL_MODULE_PATH :<span class="o">=</span> <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox
-</span><span class="line"><span class="cp">include $(BUILD_PREBUILT)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-由于Busybox环境主要用于工程调试，所以模块设置为只在eng编译模式下有效。按照以上这段设置，可以将busybox执行文件拷贝到Android文件系统中的 <code>/system/busybox</code> 目录下。
-</p>
-<p>
-而对于生成链接，之前没有接触过。不过在搜索调查了已有的Android工程文件之后，发现系统中也提供了现成的方法，如下：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>recovery使用的软链生成方法  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="nv">BUSYBOX_LINKS</span> <span class="o">:=</span> <span class="k">$(</span>shell cat external/busybox/busybox-minimal.links<span class="k">)</span>
-</span><span class="line"><span class="cp">ifndef BOARD_HAS_SMALL_RECOVERY</span>
-</span><span class="line">exclude :<span class="o">=</span> tune2fs
-</span><span class="line"><span class="cp">ifeq ($(BOARD_HAS_LARGE_FILESYSTEM),true)</span>
-</span><span class="line">exclude +<span class="o">=</span> mke2fs
-</span><span class="line"><span class="cp">endif</span>
-</span><span class="line"><span class="cp">endif</span>
-</span><span class="line">RECOVERY_BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_RECOVERY_ROOT_OUT<span class="k">)</span>/sbin/,<span class="k">$(</span>filter-out <span class="k">$(</span>exclude<span class="k">)</span>,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">))))</span>
-</span><span class="line"><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: BUSYBOX_BINARY :<span class="o">=</span> busybox
-</span><span class="line"><span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>: <span class="k">$(</span>LOCAL_INSTALLED_MODULE<span class="k">)</span>
-</span><span class="line">        @echo <span class="s2">&quot;Symlink: $@ -&gt; $(BUSYBOX_BINARY)&quot;</span>
-</span><span class="line">        @mkdir -p <span class="k">$(</span>dir <span class="nv">$@</span><span class="k">)</span>
-</span><span class="line">        @rm -rf <span class="nv">$@</span>
-</span><span class="line">        <span class="k">$(</span>hide<span class="k">)</span> ln -sf <span class="k">$(</span>BUSYBOX_BINARY<span class="k">)</span> <span class="nv">$@</span>
-</span><span class="line">
-</span><span class="line">ALL_DEFAULT_INSTALLED_MODULES +<span class="o">=</span> <span class="k">$(</span>RECOVERY_BUSYBOX_SYMLINKS<span class="k">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-实现方法使用了标准的Makefile目标，在 <code>$(RECOVERY_BUSYBOX_SYMLINKS)</code> 目标下生成相应链接，看起来似乎是只要将Makefile的目标添加到 <code>ALL_DEFAULT_INSTALLED_MODULES</code> 这个变量后，编译的时候就会按照Makefile的标准生成目标。实验后确实可行，不过同时我也发现了一个不足。那就是使用这种方法后，通过mm/mmm命令进行模块编译的时候是没法正确执行的。换言之， <code>ALL_DEFAULT_INSTALLED_MODULES</code> 变量只有在系统完全编译的时候才会被调用。为此，领悟范例的精神后，自己改了一下实现方法，如下：
-</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>修改后的生成软链的方法  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="cp">ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))</span>
-</span><span class="line">
-</span><span class="line"><span class="cp">define _make_link</span>
-</span><span class="line">   <span class="k">$(</span>shell <span class="nb">echo</span> <span class="s2">&quot;Symlink: $(1) -&gt; $(2)&quot;</span><span class="k">)</span>
-</span><span class="line">   <span class="k">$(</span>shell mkdir -p <span class="k">$(</span>dir <span class="k">$(</span>1<span class="k">)))</span>
-</span><span class="line">   <span class="k">$(</span>shell rm -rf <span class="k">$(</span>1<span class="k">))</span>
-</span><span class="line">   <span class="k">$(</span>shell ln -sf <span class="k">$(</span>2<span class="k">)</span> <span class="k">$(</span>1<span class="k">))</span>
-</span><span class="line"><span class="cp">endef</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># Add busybox environment zhiqiang.xu 2012.10.8</span>
-</span><span class="line"><span class="c"># Now let&#39;s do busybox symlinks</span>
-</span><span class="line"><span class="nv">BUSYBOX_LINKS</span> <span class="o">:=</span> <span class="k">$(</span>shell cat <span class="k">$(</span>LOCAL_PATH<span class="k">)</span>/busybox.links<span class="k">)</span>
-</span><span class="line">BUSYBOX_SYMLINKS :<span class="o">=</span> <span class="k">$(</span>addprefix <span class="k">$(</span>TARGET_OUT<span class="k">)</span>/busybox/,<span class="k">$(</span>notdir <span class="k">$(</span>BUSYBOX_LINKS<span class="k">)))</span>
-</span><span class="line">BUSYBOX_BINARY :<span class="o">=</span> /system/busybox/<span class="k">$(</span>LOCAL_SRC_FILES<span class="k">)</span>
-</span><span class="line"><span class="k">$(</span>foreach _item, <span class="k">$(</span>BUSYBOX_SYMLINKS<span class="k">)</span>, <span class="se">\</span>
-</span><span class="line">       <span class="k">$(</span><span class="nb">eval</span> <span class="k">$(</span>call _make_link,<span class="k">$(</span>_item<span class="k">)</span>,<span class="k">$(</span>BUSYBOX_BINARY<span class="k">))))</span>
-</span><span class="line">
-</span><span class="line">_make_link :<span class="o">=</span>
-</span><span class="line"><span class="cp">endif</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>
-修改后的方法使用了自定义宏，不论是全系统编译还是使用mm/mmm进行模块编译，每次编译的时候宏都会展开执行。同时为了区分编译模式，我又添加了相应的判断宏 <code>ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))</code> 将执行部分包括在里面。实验下来效果良好，可以根据当前设定的编译模式生成或者不生成相应软链。
-最后，发现一点，我修改的这个方法由于没有依赖目标，所以每次编译的时候都会执行一遍，编译效率不高，所以这种结构不能用于大负荷的处理工作。好在生成软链不是多重的工作，这么用用也无什么大碍。
-</p>
-
-		<p class='post-footer'>
-  <h1>License</h1>
-  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
-  Original link:
-  <a href='http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/'>http://blog.xeonxu.info/blog/2012/10/08/zai-androidbian-yi-shi-jian-li-fu-hao-lian-jie/</a><br/>
   &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
   &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
 </p>

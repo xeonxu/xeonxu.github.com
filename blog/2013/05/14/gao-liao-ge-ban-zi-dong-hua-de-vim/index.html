@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>近期的烦恼 - 不停地疯</title>
+  <title>搞了个半自动化的Vim - 不停地疯</title>
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="算下来两周没有在这里写博客了，其中一大原因在于天气渐凉，不高兴一人在电脑旁受冻-_-!!! 咳咳咳，其实天气有一定影响，不过更主要的问题在于最近遇到的事情繁杂，虽然没有什么难不可为，但自己也确实花了些心思。 首先是工作上的两个任务。近期项目正好有点空挡， &hellip;">
+  <meta name="description" content="平时单位里Linux下使用wine＋sourceinsight查看代码，用emacs写代码。最近公司搞正版化，自然sourceinsight也就不能再使用了，本想自定义一下emacs做类似功能，但苦于自己三脚猫的Lisp，加上之前的配置有点杂乱，所以想着先用vim顶两天， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/">
+  <link rel="canonical" href="http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -89,7 +89,7 @@
   <header>
     
       
-        <h1 class="entry-title">近期的烦恼</h1>
+        <h1 class="entry-title">搞了个半自动化的Vim</h1>
       
     
     
@@ -106,7 +106,7 @@
   
 
 
-<time datetime="2012-11-18T23:01:00+08:00" pubdate data-updated="true">2012年11月18日</time>
+<time datetime="2013-05-14T22:48:00+08:00" pubdate data-updated="true">2013年05月14日</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -116,22 +116,39 @@
 
 
 <div class="entry-content"><p>
-算下来两周没有在这里写博客了，其中一大原因在于天气渐凉，不高兴一人在电脑旁受冻-_-!!!  咳咳咳，其实天气有一定影响，不过更主要的问题在于最近遇到的事情繁杂，虽然没有什么难不可为，但自己也确实花了些心思。
+平时单位里Linux下使用wine＋sourceinsight查看代码，用emacs写代码。最近公司搞正版化，自然sourceinsight也就不能再使用了，本想自定义一下emacs做类似功能，但苦于自己三脚猫的Lisp，加上之前的配置有点杂乱，所以想着先用vim顶两天，然后再自己抽空重构一下emacs的配置结构和功能，顺便也能从vim那里偷点师。几天下来，vim也被我配置得可以替代sourceinsight大部分的功能，使用起来还算不错。推荐给同事们使用，也都很满意。这里简单讲讲我的配置思路。
 </p>
 <p>
-首先是工作上的两个任务。近期项目正好有点空挡，于是自己决定将高通平台的电量管理从MP端移植至AP端内核里，同时添加一些判断逻辑，以使统计的电量结果不至于像原版那样生硬怪异。只可惜高通平台好多处理需要依赖远程调用，而自己手里却没有一份关于远程调用的官方文档。最后通过高通的support搞定了内核中对PMIC的一些操作，但又发现无法正常取得相应中断状态。总之，这个看起来简单地任务搞了2周还没有实质性突破。另外一个任务是协助同事完成一个用户层接口，方便在用户层升级器件的firmware。这个任务进展倒是蛮快，3个小时就写好框架和功能调试。可惜最后发现buffer有4k限制，现在还在找对策方法，这两天就在考虑这个问题。
+对于工作中的编辑器，我有以下几个基本要求：
+</p>
+<ol>
+<li>文件查找方便
+</li>
+<li>格式自动化
+</li>
+<li>自动补全
+</li>
+<li>符号跳转
+</li>
+<li>函数列表
+</li>
+<li>tab/buffer支持
+</li>
+<li>session保存
+</li>
+</ol>
+
+<p>
+对于第一个需求，我使用了有口皆碑的lookupfile插件，这个插件可以从tag文件中快速查找文件，也可以在自己生成的文件列表中查找。我自己是使用文件列表的方式来查找，速度同样很快。之前也有使用过另外一个类似功能的插件，ctrlp。但是这个插件第一次使用时都要将当前目录下的所有文件遍历一遍，对于大型项目来说，速度还是有点慢。所以ctrlp被我抛弃了；第二个需求，vim貌似原生支持就不赖，直接=就可以；第三个需求，我选择了强大的YouCompleteMe插件。YCM插件使用了Clang编译器做后端，可以在编写程序时快速的分析代码，提供准确的自动补全列表。对于第四个需求符号跳转，本来使用的是cscope，功能很强大也够用，但是修改文件后更新符号文件比较慢，所以经常也就懒得更新符号文件，导致跳转的地方经常有偏差。后来发现有个GNU global可以非常快速的更新符号文件，加上和现有的cscope插件可以很好的兼容，所以我也就换成了用GNU global做符号跳转支持了。同时，我还加入了hook在保存程序文件后自动调用global进行更新符号文件。从此以后就再也不用担心更新符号文件的问题了，保存文件后符号立马生效。第五个需求使用地球人都知道的taglist就好，绑定F8快捷弹出；第六个需求，vim同样原生支持，自己配个好用的快捷键就OK；最后一个需求很有用，vim原生也有支持，但是原生的session不支持tabbar状态的保存，于是我使用了xolox/vim-session这个插件。使用这个插件后，不但可以保存打开文件的状态，光标位置，查找上下文的状态，tabbar的状态也都可以完美保存。这样，在退出vim后，下次打开时还能快速回到上次关闭前的状态，就像在sourceinsight中重新开启工程一样。
 </p>
 <p>
-其次，周末在家各种收拾打扫，洗衣做饭。连续两周了，除了干家务和觅食以外，其它什么都没干。想来自己效率低是一个问题，着实应该改进一下。哦，今天物业还过来处理家里渗水的墙面，也算拖了大半年之久的工程开始了第一步。
+除此之外，我还添加了一些辅助类插件，比如nerdtree，nerdcommenter，easymotion，powerline等，方便目录浏览，注释等操作。用的不多，但是在某些时候还是有点用的。插件装好之后还不是很顺手，要想方便使用，自己还做了些定制。其中我写了一个脚本，为了帮助快速得建立工程。脚本中从建立lookupfile所用的文件列表到生成更新global符号文件，全部一气呵成。另外，在配置文件中我还添加了几个hook，除了保存特定文件后自动更新符号文件得hook，还有退出vim后自动保存session的hook。最后，将常用功能都绑定到快捷键上，这样使用起来就省力多了。到此，半自动化的vim就算完成了。
 </p>
 <p>
-再者，为了维护简历，将简历移植到moderncv上并使用git来管理。后来又想更统一使用orgmode来写简历，但是苦于找不到好的解决方案，现在琢磨着是不是要自己搞一个。
+配置好的内容可以在：<a href="https://github.com/xeonxu/vim_configs"> <code>https://github.com/xeonxu/vim_configs</code> </a> 找到，其中有两个分支，master对应Linux的版本，而macos对应Mac版本。两者的差别便是YCM中二进制文件的格式分别是对应两种系统单独编译的。由于YCM的特殊性，必须要使用最新版的vim才能正常运行，而各大系统的发行版中的vim版本都不是很新，所以需要自己通过vim源代码编译一个才行，这算是唯一的遗憾了。公司里我写了个一键安装脚本，方便同事们的部署，大家使用标准的源码编译安装方式伺候即可。
 </p>
 <p>
-最后，算是小成就。前几日知道了支持kindle3的kindlepdfviewer这个越狱软件，抽空搞了一下，发现对扫描版pdf的支持好到不可思议。于是kindle上瞬间多了很多扫描版的图书。首当其冲就是一直想看但一直没有看的《emacs lisp编程入门》和《GEB》。前者已经看了一半以上，作为emacs爱好者，到现在才较为系统的了解学习lisp是有点晚，不过至少我开始入门了:)
-</p>
-<p>
-今日纯属碎碎念，希望下周工作上任务都能快速完成，个人的几个安排都能顺利进行。另，下篇文章没差错的话应该是功夫网专题，否则又要被人数落跳票了。
+作为一名emacser，跑来研究vim配置说起来也挺难为情。不过配置过程中给我印象最深的是vim的插件配置起来都挺方便，基本都是设置几个变量就好。加上vundle这个插件，很容易让人沉浸在插件的世界里。另外就是vim的启动速度确实快，这让我们这些emacs用户嫉妒不已。还有，lookupfile插件的思路蛮好，emacs上应该可以实现个更好的。另外下次配置emacs时，也要坚持换用global做符号跳转支持了，因为实在是太快太方便了。根据程序员时髦指南的解释，同时使用emacs和vim的人应该烧死，所以我看我还是尽快搞定自己的emacs配置吧。
 </p>
 </div>
 
@@ -155,12 +172,12 @@
   
 
 
-<time datetime="2012-11-18T23:01:00+08:00" pubdate data-updated="true">2012年11月18日</time>
+<time datetime="2013-05-14T22:48:00+08:00" pubdate data-updated="true">2013年05月14日</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/杂谈/'>杂谈</a>, <a class='category' href='/blog/categories/生活/'>生活</a>, <a class='category' href='/blog/categories/随笔/'>随笔</a>
+    <a class='category' href='/blog/categories/Linux-/'>Linux,</a>, <a class='category' href='/blog/categories/Vim-/'>Vim,</a>, <a class='category' href='/blog/categories/开发/'>开发</a>
   
 </span>
 
@@ -194,7 +211,7 @@
   
 
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -208,10 +225,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left articlenav" href="/blog/2012/11/04/shi-yong-tmuxgai-jin-zhong-duan-ti-yan/" title="Previous Post: 使用tmux改进终端体验">&laquo; 使用tmux改进终端体验</a>
+        <a class="basic-alignment left articlenav" href="/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti/" title="Previous Post: 再谈自动生成ISO文件的客制化问题">&laquo; 再谈自动生成ISO文件的客制化问题</a>
       
-      
-        <a class="basic-alignment right articlenav" href="/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/" title="Next Post: 在Linux内核模块中操作I2C设备">在Linux内核模块中操作I2C设备 &raquo;</a>
       
     </p>
   </footer>
@@ -357,8 +372,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/';
-        var disqus_url = 'http://blog.xeonxu.info/blog/2012/11/18/jin-qi-de-fan-nao/';
+        var disqus_identifier = 'http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/';
+        var disqus_url = 'http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/';
         var disqus_script = 'embed.js';
       
     (function () {

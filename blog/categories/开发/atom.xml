@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 开发 | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/开发/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-05-14T23:39:10+08:00</updated>
+  <updated>2013-05-17T00:09:02+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,49 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[搞了个半自动化的Vim]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/"/>
+    <updated>2013-05-14T22:48:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim</id>
+    <content type="html"><![CDATA[<p>
+平时单位里Linux下使用wine＋sourceinsight查看代码，用emacs写代码。最近公司搞正版化，自然sourceinsight也就不能再使用了，本想自定义一下emacs做类似功能，但苦于自己三脚猫的Lisp，加上之前的配置有点杂乱，所以想着先用vim顶两天，然后再自己抽空重构一下emacs的配置结构和功能，顺便也能从vim那里偷点师。几天下来，vim也被我配置得可以替代sourceinsight大部分的功能，使用起来还算不错。推荐给同事们使用，也都很满意。这里简单讲讲我的配置思路。
+</p>
+<p>
+对于工作中的编辑器，我有以下几个基本要求：
+</p>
+<ol>
+<li>文件查找方便
+</li>
+<li>格式自动化
+</li>
+<li>自动补全
+</li>
+<li>符号跳转
+</li>
+<li>函数列表
+</li>
+<li>tab/buffer支持
+</li>
+<li>session保存
+</li>
+</ol>
+
+<p>
+对于第一个需求，我使用了有口皆碑的lookupfile插件，这个插件可以从tag文件中快速查找文件，也可以在自己生成的文件列表中查找。我自己是使用文件列表的方式来查找，速度同样很快。之前也有使用过另外一个类似功能的插件，ctrlp。但是这个插件第一次使用时都要将当前目录下的所有文件遍历一遍，对于大型项目来说，速度还是有点慢。所以ctrlp被我抛弃了；第二个需求，vim貌似原生支持就不赖，直接=就可以；第三个需求，我选择了强大的YouCompleteMe插件。YCM插件使用了Clang编译器做后端，可以在编写程序时快速的分析代码，提供准确的自动补全列表。对于第四个需求符号跳转，本来使用的是cscope，功能很强大也够用，但是修改文件后更新符号文件比较慢，所以经常也就懒得更新符号文件，导致跳转的地方经常有偏差。后来发现有个GNU global可以非常快速的更新符号文件，加上和现有的cscope插件可以很好的兼容，所以我也就换成了用GNU global做符号跳转支持了。同时，我还加入了hook在保存程序文件后自动调用global进行更新符号文件。从此以后就再也不用担心更新符号文件的问题了，保存文件后符号立马生效。第五个需求使用地球人都知道的taglist就好，绑定F8快捷弹出；第六个需求，vim同样原生支持，自己配个好用的快捷键就OK；最后一个需求很有用，vim原生也有支持，但是原生的session不支持tabbar状态的保存，于是我使用了xolox/vim-session这个插件。使用这个插件后，不但可以保存打开文件的状态，光标位置，查找上下文的状态，tabbar的状态也都可以完美保存。这样，在退出vim后，下次打开时还能快速回到上次关闭前的状态，就像在sourceinsight中重新开启工程一样。
+</p>
+<p>
+除此之外，我还添加了一些辅助类插件，比如nerdtree，nerdcommenter，easymotion，powerline等，方便目录浏览，注释等操作。用的不多，但是在某些时候还是有点用的。插件装好之后还不是很顺手，要想方便使用，自己还做了些定制。其中我写了一个脚本，为了帮助快速得建立工程。脚本中从建立lookupfile所用的文件列表到生成更新global符号文件，全部一气呵成。另外，在配置文件中我还添加了几个hook，除了保存特定文件后自动更新符号文件得hook，还有退出vim后自动保存session的hook。最后，将常用功能都绑定到快捷键上，这样使用起来就省力多了。到此，半自动化的vim就算完成了。
+</p>
+<p>
+配置好的内容可以在：<a href="https://github.com/xeonxu/vim_configs"> <code>https://github.com/xeonxu/vim_configs</code> </a> 找到，其中有两个分支，master对应Linux的版本，而macos对应Mac版本。两者的差别便是YCM中二进制文件的格式分别是对应两种系统单独编译的。由于YCM的特殊性，必须要使用最新版的vim才能正常运行，而各大系统的发行版中的vim版本都不是很新，所以需要自己通过vim源代码编译一个才行，这算是唯一的遗憾了。公司里我写了个一键安装脚本，方便同事们的部署，大家使用标准的源码编译安装方式伺候即可。
+</p>
+<p>
+作为一名emacser，跑来研究vim配置说起来也挺难为情。不过配置过程中给我印象最深的是vim的插件配置起来都挺方便，基本都是设置几个变量就好。加上vundle这个插件，很容易让人沉浸在插件的世界里。另外就是vim的启动速度确实快，这让我们这些emacs用户嫉妒不已。还有，lookupfile插件的思路蛮好，emacs上应该可以实现个更好的。另外下次配置emacs时，也要坚持换用global做符号跳转支持了，因为实在是太快太方便了。根据程序员时髦指南的解释，同时使用emacs和vim的人应该烧死，所以我看我还是尽快搞定自己的emacs配置吧。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[再谈自动生成ISO文件的客制化问题]]></title>
@@ -470,95 +513,6 @@
 
 最后需要注意，文中方法皆为本人翻查文档自己琢磨搞出来的，所以不排除存在隐患的可能，但在自己测试环境下使用中没有发现任何问题。如果有疑问，也希望各位看官能提出自己的看法。
 </p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[在Linux内核模块中操作I2C设备]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/"/>
-    <updated>2012-11-25T00:02:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei</id>
-    <content type="html"><![CDATA[<p>
-近期公司项目较为空闲，抽空做了一些学习性质的研发内容，其中涉及到在Linux内核模块中使用I2C对外部器件进行控制的操作。虽然在Linux中操作使用I2C设备并不复杂，但本人接触Linux内核驱动开发时间并不算长，此次学习中也算较为系统的了解了Linux中对I2C设备的操控方式，谨在此做下记录。
-</p>
-<p>
-通过Linux内核文档中关于操作I2C设备的文章后不难看出Linux中注册使用I2C设备一般通过四种方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>：
-</p>
-<ol>
-<li>通过总线号声明设备
-</li>
-<li>立即探测设备
-</li>
-<li>通过Probe探测相应设备
-</li>
-<li>在用户空间立即探测
-</li>
-</ol>
-
-<p>
-简单来说，第一种方式一般应用在嵌入式设备中。因为对于嵌入式设备来说，外围器件基本都是固定的，只需提供有限几款器件的支持即可。使用这种方式的时候，需要在板级配置文件中定义并设置 <code>i2c_board_info</code> 这个结构体的内容。其中需要配置设备名称和设备地址，此外设备中断和私有数据结构也可以选择设置。然后使用 <code>i2c_register_board_info</code> 这个接口对设置的设备进行注册使用。需要注意的是这种方法注册的设备是在注册I2C总线驱动时进行驱动适配的。
-</p>
-<p>
-第二种方法可以通过给定的I2C适配器以及相应的I2C板级结构体，自行通过 <code>i2c_new_device</code> 接口进行添加注册所需的设备。这种方法灵活性要较第一种方法大，可以很方便的在模块中使用。
-</p>
-<p>
-第三种方法是 <code>2.6</code> 内核之前的做法，使用 <code>detect</code> 方法去探测总线上的设备驱动。因为探测机制的原因，会导致一些副作用的发生，所以不建议使用，除非真的没有别的办法。
-</p>
-<p>
-第四种方法是在Linux的控制台上，在用户空间通过sysfs，使用 <code>/sys/bus/i2c/devices/i2c-3/new_device</code> 节点进行设备的添加注册。
-</p>
-<p>
-从上面可以看出，如果需要在Linux内核中以模块的方式对I2C设备进行驱动控制的话，第二种方法是比较推荐的。通过测试，在module的init中使用
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">struct</span> <span class="n">i2c_adapter</span> <span class="o">*</span><span class="n">i2c_adap</span><span class="p">;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
-</span><span class='line'><span class="n">i2c_adap</span> <span class="o">=</span> <span class="n">i2c_get_adapter</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-</span><span class='line'><span class="n">i2c_client</span> <span class="o">=</span> <span class="n">i2c_new_device</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">i2c_device</span><span class="p">);</span>
-</span><span class='line'><span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-即可成功注册I2C设备。其中:
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_board_info</span> <span class="n">ft5306_i2c_device</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">I2C_BOARD_INFO</span><span class="p">(</span><span class="s">&quot;test_i2c&quot;</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">),</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-以上，对于如何在模块中注册使用I2C设备简单做了描述。那么如何在另外的模块中对已经注册的I2C设备进行反注册呢？由于内核中操作I2C设备都是通过 <code>i2c_client</code> 结构进行，所以问题可以抽象为如何在内核中获取指定设备的 <code>i2c_client</code> 结构指针。通过查阅内核API，也找到了一个方法可以达到这样的目的，如下：
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">i2c_dev</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">i2c_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">i2c_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
-</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">i2c_unregister_device</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-该反注册例子的内容就是对前面注册的 <code>0x11</code> 地址的设备进行反注册。注意 <code>bus_find_device_by_name</code> 函数中第三项参数，该参数是需要查找的设备在总线上注册的名称。"1"代表着1号适配器，"0011"是16位的I2C地址。如此便可方便的在内核模块中对I2C设备进行挂载和解挂了。
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 参考Linux内核目录下的Documentation/i2c/instantiating-devices
-</p>
-
-
-
-</div>
-</div>
 ]]></content>
   </entry>
   
