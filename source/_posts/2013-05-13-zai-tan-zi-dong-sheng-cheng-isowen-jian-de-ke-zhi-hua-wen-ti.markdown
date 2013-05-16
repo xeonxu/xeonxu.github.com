@@ -3,7 +3,7 @@ layout: post
 title: "再谈自动生成ISO文件的客制化问题"
 date: 2013-05-13 22:37
 comments: true
-categories: Android, Linux, Qualcomm, 开发
+categories: Android Linux Qualcomm 开发
 ---
 
 <p>

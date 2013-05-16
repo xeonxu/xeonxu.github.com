@@ -3,7 +3,7 @@ layout: post
 title: "搞了个半自动化的Vim"
 date: 2013-05-14 22:48
 comments: true
-categories: Vim, Linux, 开发
+categories: Vim Linux 开发
 ---
 
 <p>
