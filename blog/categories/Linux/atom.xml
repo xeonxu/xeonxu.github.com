@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Linux | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/Linux/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-05-17T00:09:02+08:00</updated>
+  <updated>2013-05-17T00:10:25+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,49 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[搞了个半自动化的Vim]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/"/>
+    <updated>2013-05-14T22:48:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim</id>
+    <content type="html"><![CDATA[<p>
+平时单位里Linux下使用wine＋sourceinsight查看代码，用emacs写代码。最近公司搞正版化，自然sourceinsight也就不能再使用了，本想自定义一下emacs做类似功能，但苦于自己三脚猫的Lisp，加上之前的配置有点杂乱，所以想着先用vim顶两天，然后再自己抽空重构一下emacs的配置结构和功能，顺便也能从vim那里偷点师。几天下来，vim也被我配置得可以替代sourceinsight大部分的功能，使用起来还算不错。推荐给同事们使用，也都很满意。这里简单讲讲我的配置思路。
+</p>
+<p>
+对于工作中的编辑器，我有以下几个基本要求：
+</p>
+<ol>
+<li>文件查找方便
+</li>
+<li>格式自动化
+</li>
+<li>自动补全
+</li>
+<li>符号跳转
+</li>
+<li>函数列表
+</li>
+<li>tab/buffer支持
+</li>
+<li>session保存
+</li>
+</ol>
+
+<p>
+对于第一个需求，我使用了有口皆碑的lookupfile插件，这个插件可以从tag文件中快速查找文件，也可以在自己生成的文件列表中查找。我自己是使用文件列表的方式来查找，速度同样很快。之前也有使用过另外一个类似功能的插件，ctrlp。但是这个插件第一次使用时都要将当前目录下的所有文件遍历一遍，对于大型项目来说，速度还是有点慢。所以ctrlp被我抛弃了；第二个需求，vim貌似原生支持就不赖，直接=就可以；第三个需求，我选择了强大的YouCompleteMe插件。YCM插件使用了Clang编译器做后端，可以在编写程序时快速的分析代码，提供准确的自动补全列表。对于第四个需求符号跳转，本来使用的是cscope，功能很强大也够用，但是修改文件后更新符号文件比较慢，所以经常也就懒得更新符号文件，导致跳转的地方经常有偏差。后来发现有个GNU global可以非常快速的更新符号文件，加上和现有的cscope插件可以很好的兼容，所以我也就换成了用GNU global做符号跳转支持了。同时，我还加入了hook在保存程序文件后自动调用global进行更新符号文件。从此以后就再也不用担心更新符号文件的问题了，保存文件后符号立马生效。第五个需求使用地球人都知道的taglist就好，绑定F8快捷弹出；第六个需求，vim同样原生支持，自己配个好用的快捷键就OK；最后一个需求很有用，vim原生也有支持，但是原生的session不支持tabbar状态的保存，于是我使用了xolox/vim-session这个插件。使用这个插件后，不但可以保存打开文件的状态，光标位置，查找上下文的状态，tabbar的状态也都可以完美保存。这样，在退出vim后，下次打开时还能快速回到上次关闭前的状态，就像在sourceinsight中重新开启工程一样。
+</p>
+<p>
+除此之外，我还添加了一些辅助类插件，比如nerdtree，nerdcommenter，easymotion，powerline等，方便目录浏览，注释等操作。用的不多，但是在某些时候还是有点用的。插件装好之后还不是很顺手，要想方便使用，自己还做了些定制。其中我写了一个脚本，为了帮助快速得建立工程。脚本中从建立lookupfile所用的文件列表到生成更新global符号文件，全部一气呵成。另外，在配置文件中我还添加了几个hook，除了保存特定文件后自动更新符号文件得hook，还有退出vim后自动保存session的hook。最后，将常用功能都绑定到快捷键上，这样使用起来就省力多了。到此，半自动化的vim就算完成了。
+</p>
+<p>
+配置好的内容可以在：<a href="https://github.com/xeonxu/vim_configs"> <code>https://github.com/xeonxu/vim_configs</code> </a> 找到，其中有两个分支，master对应Linux的版本，而macos对应Mac版本。两者的差别便是YCM中二进制文件的格式分别是对应两种系统单独编译的。由于YCM的特殊性，必须要使用最新版的vim才能正常运行，而各大系统的发行版中的vim版本都不是很新，所以需要自己通过vim源代码编译一个才行，这算是唯一的遗憾了。公司里我写了个一键安装脚本，方便同事们的部署，大家使用标准的源码编译安装方式伺候即可。
+</p>
+<p>
+作为一名emacser，跑来研究vim配置说起来也挺难为情。不过配置过程中给我印象最深的是vim的插件配置起来都挺方便，基本都是设置几个变量就好。加上vundle这个插件，很容易让人沉浸在插件的世界里。另外就是vim的启动速度确实快，这让我们这些emacs用户嫉妒不已。还有，lookupfile插件的思路蛮好，emacs上应该可以实现个更好的。另外下次配置emacs时，也要坚持换用global做符号跳转支持了，因为实在是太快太方便了。根据程序员时髦指南的解释，同时使用emacs和vim的人应该烧死，所以我看我还是尽快搞定自己的emacs配置吧。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用Make系统自动生成手机驱动光盘]]></title>
@@ -730,128 +773,6 @@
 </p>
 <p>
 使用该编译脚本后，模块的编写调试效率高了不少，至少每次编译模块都可以在5sec内搞定了。加上上机实测调试，也能在30sec内完成。生命很可贵，像我一样当个懒人吧。
-</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[获取并操作内核中已注册的I2C设备]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei/"/>
-    <updated>2012-12-03T00:00:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/12/03/huo-qu-bing-cao-zuo-nei-he-zhong-yi-zhu-ce-de-i2cshe-bei</id>
-    <content type="html"><![CDATA[<p>
-之前写过一篇关于如何在Linux内核模块中注册操作I2C设备的<a href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">文章</a> ，那篇文章最后介绍的方法虽然可行，但是会带来一个问题：如果内核中已经包含有某设备的驱动时，那么在模块中注册该设备的I2C client之前必须先将内核中的驱动进行反注册解挂，然后才能再次注册模块中定义的驱动。这样做带来的问题就是，当你将模块从内核中卸载后，系统将无法再次注册内核中原有的驱动，导致相应设备无法使用。今天补充的方法可以在挂载模块时使用模块内的设备驱动，而在卸载后恢复回系统原来的驱动。
-</p>
-<p>
-内容相当简单，上次我们已经可以通过内核提供的接口函数，找到相应I2C总线相应地址I2C设备的I2C client结构指针。而拥有该指针后，其实就可以做很多事了。比如调用 <code>i2c_master_send</code> 接口向该client指向的设备发送I2C命令。这样，如果需要扩展内核中原有的驱动程序，比如向procfs或sysfs中添加相应的用户空间接口等。一般可以在 <code>module_init</code> 中注册sysfs入口的操作函数，然后在操作函数中通过操作该client指针而实现一定的功能。这种方法可以沿用系统内核中原有的设备驱动，可以单纯添加一些系统驱动中没有的功能。
-</p>
-<p>
-除此之外，还有一种替换内核中现有驱动的方法。通过查阅源代码，可以发现内核中还提供一个 <code>device_reprobe(dev)</code> 的API，该函数接受一个device结构体指针，实现重新匹配设备驱动的操作。同时，I2C client结构体中也有相应的device结构体。我们知道Linux内核匹配I2C设备驱动是通过名称来进行匹配的，所以，我们的方法就是用Hack的方式将系统中获取到的I2C Client结构体的名称改为我们需要的名称。一般修改为我们模块中新建的驱动的名称，这样，当调用 <code>device_reprobe</code> 接口后，系统会将原有驱动remove并重新为相应I2C设备适配一个驱动程序。当然，没有出错的话，它会适配到我们修改的名称指向的驱动。如此，我们便可以在内核模块中编写独立的设备驱动程序了。以下是简单示例框架:
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_driver</span> <span class="n">my_driver</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>    <span class="p">.</span><span class="n">driver</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>        <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span>
-</span><span class='line'>        <span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">THIS_MODULE</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">},</span>
-</span><span class='line'>    <span class="p">.</span><span class="n">probe</span> <span class="o">=</span> <span class="n">my_probe</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">.</span><span class="n">remove</span> <span class="o">=</span> <span class="n">my_remove</span><span class="p">,</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_driver_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">ts_dev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">i2c_add_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">ts_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ts_dev</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>        <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;Did not match the device name:1-0011!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-</span><span class='line'>        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="n">this_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">this_client</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>        <span class="k">goto</span> <span class="n">device_error_exit</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">name</span><span class="p">,</span> <span class="n">NEW_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="n">ts_dev</span><span class="p">);</span>
-</span><span class='line'>        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nl">device_error_exit:</span>
-</span><span class='line'>    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">pr_info</span><span class="p">(</span><span class="s">&quot;ts i2c del driver&quot;</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-只需要实现其中的 <code>my_probe</code> , <code>my_remove</code> 等函数即可实现一个完整的驱动。需要注意的是一定要在调用 <code>device_reprobe</code> 接口之前将相应的设备驱动使用 <code>i2c_add_driver</code> 添加到系统中，否则重新适配中会找不到驱动。移除模块时，用同样的方法将I2C client的名称更改为系统中原有驱动的名称，并重新适配驱动，即可实现卸载模块后系统能够使用原有驱动的功能。示例如下：
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">memcpy</span><span class="p">(</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">name</span><span class="p">,</span> <span class="n">ORIGIN_DRIVER_NAME</span><span class="p">,</span> <span class="n">I2C_NAME_SIZE</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">rc</span> <span class="o">=</span> <span class="n">device_reprobe</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">this_client</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">dev</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">i2c_del_driver</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">my_driver</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-最后需要注意，文中方法皆为本人翻查文档自己琢磨搞出来的，所以不排除存在隐患的可能，但在自己测试环境下使用中没有发现任何问题。如果有疑问，也希望各位看官能提出自己的看法。
 </p>
 ]]></content>
   </entry>

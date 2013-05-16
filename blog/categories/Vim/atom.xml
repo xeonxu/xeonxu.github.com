@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Vim | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/Vim/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-05-17T00:09:02+08:00</updated>
+  <updated>2013-05-17T00:10:25+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,49 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[搞了个半自动化的Vim]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/"/>
+    <updated>2013-05-14T22:48:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim</id>
+    <content type="html"><![CDATA[<p>
+平时单位里Linux下使用wine＋sourceinsight查看代码，用emacs写代码。最近公司搞正版化，自然sourceinsight也就不能再使用了，本想自定义一下emacs做类似功能，但苦于自己三脚猫的Lisp，加上之前的配置有点杂乱，所以想着先用vim顶两天，然后再自己抽空重构一下emacs的配置结构和功能，顺便也能从vim那里偷点师。几天下来，vim也被我配置得可以替代sourceinsight大部分的功能，使用起来还算不错。推荐给同事们使用，也都很满意。这里简单讲讲我的配置思路。
+</p>
+<p>
+对于工作中的编辑器，我有以下几个基本要求：
+</p>
+<ol>
+<li>文件查找方便
+</li>
+<li>格式自动化
+</li>
+<li>自动补全
+</li>
+<li>符号跳转
+</li>
+<li>函数列表
+</li>
+<li>tab/buffer支持
+</li>
+<li>session保存
+</li>
+</ol>
+
+<p>
+对于第一个需求，我使用了有口皆碑的lookupfile插件，这个插件可以从tag文件中快速查找文件，也可以在自己生成的文件列表中查找。我自己是使用文件列表的方式来查找，速度同样很快。之前也有使用过另外一个类似功能的插件，ctrlp。但是这个插件第一次使用时都要将当前目录下的所有文件遍历一遍，对于大型项目来说，速度还是有点慢。所以ctrlp被我抛弃了；第二个需求，vim貌似原生支持就不赖，直接=就可以；第三个需求，我选择了强大的YouCompleteMe插件。YCM插件使用了Clang编译器做后端，可以在编写程序时快速的分析代码，提供准确的自动补全列表。对于第四个需求符号跳转，本来使用的是cscope，功能很强大也够用，但是修改文件后更新符号文件比较慢，所以经常也就懒得更新符号文件，导致跳转的地方经常有偏差。后来发现有个GNU global可以非常快速的更新符号文件，加上和现有的cscope插件可以很好的兼容，所以我也就换成了用GNU global做符号跳转支持了。同时，我还加入了hook在保存程序文件后自动调用global进行更新符号文件。从此以后就再也不用担心更新符号文件的问题了，保存文件后符号立马生效。第五个需求使用地球人都知道的taglist就好，绑定F8快捷弹出；第六个需求，vim同样原生支持，自己配个好用的快捷键就OK；最后一个需求很有用，vim原生也有支持，但是原生的session不支持tabbar状态的保存，于是我使用了xolox/vim-session这个插件。使用这个插件后，不但可以保存打开文件的状态，光标位置，查找上下文的状态，tabbar的状态也都可以完美保存。这样，在退出vim后，下次打开时还能快速回到上次关闭前的状态，就像在sourceinsight中重新开启工程一样。
+</p>
+<p>
+除此之外，我还添加了一些辅助类插件，比如nerdtree，nerdcommenter，easymotion，powerline等，方便目录浏览，注释等操作。用的不多，但是在某些时候还是有点用的。插件装好之后还不是很顺手，要想方便使用，自己还做了些定制。其中我写了一个脚本，为了帮助快速得建立工程。脚本中从建立lookupfile所用的文件列表到生成更新global符号文件，全部一气呵成。另外，在配置文件中我还添加了几个hook，除了保存特定文件后自动更新符号文件得hook，还有退出vim后自动保存session的hook。最后，将常用功能都绑定到快捷键上，这样使用起来就省力多了。到此，半自动化的vim就算完成了。
+</p>
+<p>
+配置好的内容可以在：<a href="https://github.com/xeonxu/vim_configs"> <code>https://github.com/xeonxu/vim_configs</code> </a> 找到，其中有两个分支，master对应Linux的版本，而macos对应Mac版本。两者的差别便是YCM中二进制文件的格式分别是对应两种系统单独编译的。由于YCM的特殊性，必须要使用最新版的vim才能正常运行，而各大系统的发行版中的vim版本都不是很新，所以需要自己通过vim源代码编译一个才行，这算是唯一的遗憾了。公司里我写了个一键安装脚本，方便同事们的部署，大家使用标准的源码编译安装方式伺候即可。
+</p>
+<p>
+作为一名emacser，跑来研究vim配置说起来也挺难为情。不过配置过程中给我印象最深的是vim的插件配置起来都挺方便，基本都是设置几个变量就好。加上vundle这个插件，很容易让人沉浸在插件的世界里。另外就是vim的启动速度确实快，这让我们这些emacs用户嫉妒不已。还有，lookupfile插件的思路蛮好，emacs上应该可以实现个更好的。另外下次配置emacs时，也要坚持换用global做符号跳转支持了，因为实在是太快太方便了。根据程序员时髦指南的解释，同时使用emacs和vim的人应该烧死，所以我看我还是尽快搞定自己的emacs配置吧。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vim的简单配置]]></title>
