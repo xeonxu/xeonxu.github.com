@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Linux | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/Linux/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-05-17T00:10:25+08:00</updated>
+  <updated>2013-05-17T00:11:45+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -52,6 +52,143 @@
 </p>
 <p>
 作为一名emacser，跑来研究vim配置说起来也挺难为情。不过配置过程中给我印象最深的是vim的插件配置起来都挺方便，基本都是设置几个变量就好。加上vundle这个插件，很容易让人沉浸在插件的世界里。另外就是vim的启动速度确实快，这让我们这些emacs用户嫉妒不已。还有，lookupfile插件的思路蛮好，emacs上应该可以实现个更好的。另外下次配置emacs时，也要坚持换用global做符号跳转支持了，因为实在是太快太方便了。根据程序员时髦指南的解释，同时使用emacs和vim的人应该烧死，所以我看我还是尽快搞定自己的emacs配置吧。
+</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[再谈自动生成ISO文件的客制化问题]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti/"/>
+    <updated>2013-05-13T22:37:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti</id>
+    <content type="html"><![CDATA[<p>
+由于最近项目中又有要求说要对手机自带的虚拟驱动光盘的内容做客户定制化，于是基于上篇文章中使用make系统动态构建ISO镜像文件的方法，我又加入了客制化脚本的支持。实现的方法很简单，思路是在make工程下规定一个目录专门做客制化目录，目录下包含以不同项目名称命名的子目录，而相应子目录下便是客户定制的具体内容；同时，每个项目子目录中还包含有一个客制化脚本，用于对光盘文件系统进行重命名或者删减的操作。
+</p>
+<p>
+由于之前已经有了自动生成ISO文件的make系统，基于以上的思路实现下来，加入的代码并不多。首先是改造主makefile：
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class='line'><span class="c"># Version: 1.2</span>
+</span><span class='line'><span class="c"># Date: 2013.05.09</span>
+</span><span class='line'><span class="c"># Change Log:</span>
+</span><span class='line'><span class="c"># 1.1 Makefile to generate cdrom iso file. Only generate iso file without icon in default.</span>
+</span><span class='line'><span class="c"># 1.2 Add script support to customize cdrom&#39;s contents.</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">CDROM_FS</span>            <span class="o">?=</span> ./CDROM_OBJ
+</span><span class='line'>TARGET_CDROM        ?<span class="o">=</span> ./cdrom_install.iso
+</span><span class='line'>PRODUCT_DRIVERNAME  ?<span class="o">=</span> Phicomm
+</span><span class='line'>CDROM_ROOT          ?<span class="o">=</span> ./
+</span><span class='line'>
+</span><span class='line'>ICON_NAME       :<span class="o">=</span> <span class="s2">&quot;$(PRODUCT_DRIVERNAME).ico&quot;</span>
+</span><span class='line'>ORIGIN_ICON     :<span class="o">=</span> <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/custom/<span class="k">$(</span>PRODUCT_DRIVERNAME<span class="k">)</span>/<span class="k">$(</span>ICON_NAME<span class="k">)</span>
+</span><span class='line'>CUSTOMIZE       :<span class="o">=</span> <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/custom/<span class="k">$(</span>PRODUCT_DRIVERNAME<span class="k">)</span>
+</span><span class='line'>CUSTOMIZE_SCRIPT :<span class="o">=</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/custom.sh
+</span><span class='line'>AUTORUN_FILE     :<span class="o">=</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/autorun.inf
+</span><span class='line'>
+</span><span class='line'>all:<span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>    mkisofs -input-charset utf-8 -V <span class="s2">&quot;$(PRODUCT_DRIVERNAME) Driver&quot;</span> -J -r -l -v -o <span class="k">$(</span>TARGET_CDROM<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>clean:
+</span><span class='line'>    @rm -f <span class="k">$(</span>TARGET_CDROM<span class="k">)</span>
+</span><span class='line'>    @rm -rf <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>cdrom_new:clean
+</span><span class='line'>    @mkdir -p <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>    @if <span class="o">[</span> -e <span class="k">$(</span>CUSTOMIZE<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class='line'>    cp -rf <span class="k">$(</span>CUSTOMIZE<span class="k">)</span>/* <span class="k">$(</span>CDROM_FS<span class="k">)</span>/; <span class="se">\</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>:cdrom_new
+</span><span class='line'>    @if <span class="o">[</span> -e <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class='line'>    cp -f <span class="k">$(</span>ORIGIN_ICON<span class="k">)</span> <span class="k">$(</span>CDROM_FS<span class="k">)</span>/; <span class="se">\</span>
+</span><span class='line'>    <span class="nb">echo</span> <span class="s2">&quot;[autorun]\r&quot;</span> &amp;gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class='line'>    <span class="nb">echo</span> <span class="s2">&quot;icon=\&quot;\\$(ICON_NAME)\&quot;\r&quot;</span> &amp;gt;&amp;gt; <span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>; <span class="se">\</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">$(</span>CDROM_FS<span class="k">)</span>:<span class="k">$(</span>AUTORUN_FILE<span class="k">)</span>
+</span><span class='line'>    @cp -rf <span class="k">$(</span>CDROM_ROOT<span class="k">)</span>/driver/* <span class="k">$(</span>CDROM_FS<span class="k">)</span>
+</span><span class='line'>    @if <span class="o">[</span> -e <span class="k">$(</span>CUSTOMIZE_SCRIPT<span class="k">)</span> <span class="o">]</span>; <span class="k">then</span> <span class="se">\</span>
+</span><span class='line'>        sh <span class="k">$(</span>CUSTOMIZE_SCRIPT<span class="k">)</span> <span class="s2">&quot;$(CDROM_FS)&quot;</span>; <span class="se">\</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+相较之前的版本，我在其中新增了两个变量 <code>CUSTOMIZE</code> 和 <code>CUSTOMIZE_SCRIPT</code> ，这两个变量分别用来指定不同项目所用的客制化目录和客制化脚本。注意， <code>ORIGIN_ICON</code> 变量的内容和原来相比也有变化，路径由原来的 <code>custom</code> 目录变为了相应的项目子目录，这样对于不同的项目来说也容易管理一些。另外，在 <code>cdrom_new</code> tag段，加入了拷贝客制化内容到iso文件系统的语句。对于主makefile最核心的修改实在最后一个tag段，也就是 <code>$(CDROM_FS)</code> 段的最后一句if判断，判断客制化脚本是否存在，如果存在，则以iso文件系统路径为参数执行该脚本。makefile的改动就这么些，接下来看客制化脚本 <code>custom.sh</code> 的内容。
+</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/sh</span>
+</span><span class='line'><span class="c"># Author: Zhiqiang Xu</span>
+</span><span class='line'><span class="c"># Version: 1.0</span>
+</span><span class='line'><span class="c"># Script which is used to customize contents of cdrom.&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;SCRIPT_FILE<span class="o">=</span><span class="nv">$0</span>
+</span><span class='line'><span class="nv">CDROM_FS</span><span class="o">=</span><span class="nv">$1</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;rm -f <span class="nv">$CDROM_FS</span>/PC_Modem_Drivers_Install_Help.pdf
+</span><span class='line'>rm -f <span class="nv">$CDROM_FS</span>/PHICOMM_USB_Drivers_Install_Help.pdf&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1 <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;do-not-remove&quot;</span>&gt;Do not REMOVE!&lt;/h1&gt;
+</span><span class='line'>&lt;p&gt;rm <span class="nv">$SCRIPT_FILE</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>
+对于一般的项目，默认都是使用 <code>driver/</code> 目录下的内容作为驱动光盘的内容，其中默认包含两份中文pdf说明。但是对于外单项目来讲，肯定不能使用中文说明，那么我们就需要将其从光盘文件系统中删除。以上的脚本就做了这么一件事情，删除了光盘文件系统中的两份pdf文件。脚本最后将脚本自身从光盘文件系统中删除，否则最后生成的iso文件中还包含制作脚本，那将是一件很怪异可笑的事情。从makefile中看，客制化脚本会在生成ISO文件前一步执行，因此，客制化脚本的权限是相当大的，基本上可以实现你想对光盘文件系统执行的一切操作。
+</p>
+<p>
+到此，客制化光盘的需求就完全解决了，前后实现起来也就10分钟时间。最后吐槽一遍，Android的make系统太复杂太慢，如果不是我之前在这个模块中直接使用传统make系统，对应这个简单的需求困怕也要多花费2-3倍的时间。
 </p>
 ]]></content>
   </entry>
@@ -712,67 +849,6 @@
 
 修改后的驱动文件使用make即可直接编译出模块驱动，同时该驱动中也包含了设备注册的相关处理，所以相对来说更加独立。完整的驱动文件如下：
 <a href="https://docs.google.com/open?id=0B5GJiOxO7LkWVDVQMy0tcDBoejg"> <code>test_driver.tar.bz2</code> </a>
-</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[在高通平台Android环境下编译内核模块]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/"/>
-    <updated>2012-12-04T22:14:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai</id>
-    <content type="html"><![CDATA[<p>
-高通Android环境中Linux内核会作为Android的一部分进行编译，直接使用make即可一次性从头编到尾。而有的平台比如Marvell，内核的编译操作相对比较独立，必须使用标准的内核编译命令进行单独编译。一般来说，用高通的这种方式比较傻瓜化，一步到底的感觉；而用Marvell的方式用户干预较多，灵活性也更大。当然这里不是比较他们孰优孰劣，对我来说这两种方式各有千秋。在遇到具体问题时，有时还会觉得独立编译内核的方式比较方便，比如编译内核模块这一点上。
-</p>
-<p>
-编译内核模块之前必须先编译内核，编译内核之前必须先指定内核配置。在独立编译内核情况下，编译一遍内核后，可以直接使用 <code>make module</code> 来编译内核模块，如果修改了相应模块文件，使用相同的命令也能很快的进行增量编译。而在高通环境下，由于内核的编译过程已经被集成到Android的编译中，所以每次编译内核或者内核模块时，都必须通过Android的编译环境进行启用。虽然Android提供诸如 <code>make bootimage</code> 命令，可以只编译bootimage相关内容，但是Android庞大的编译体系在初始化时也会占用很多的时间。前段时间在调试一个独立的内核模块时就一直被这个问题困扰着，每次修改模块代码后都必须通过 <code>make bootimage</code> 来编译。虽然只有一个文件，但是每次编译都花费至少1min30sec，严重影响了开发进度。为此，自己参考内核模块独立编译的Makefile和Android的环境特点写了一个内核模块编译Makefile。
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># Author: zhiqiang.xu</span>
-</span><span class='line'><span class="c"># EMail:  xeonxu@gmail.com</span>
-</span><span class='line'><span class="nv">CROSS_ARCH</span><span class="o">:=</span><span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;$(ARM_EABI_TOOLCHAIN)/arm-eabi-&quot;</span>
-</span><span class='line'>KDIR:<span class="o">=</span><span class="k">$(</span>ANDROID_PRODUCT_OUT<span class="k">)</span>/obj/KERNEL_OBJ/
-</span><span class='line'>PWD:<span class="o">=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
-</span><span class='line'>
-</span><span class='line'>obj-m:<span class="o">=</span> my_module.o
-</span><span class='line'>.PHONY: modules package clean
-</span><span class='line'>all:package
-</span><span class='line'>modules:
-</span><span class='line'>    @if <span class="o">[</span> <span class="s2">&quot;$(ANDROID_BUILD_TOP)_yes&quot;</span> <span class="o">=</span> <span class="s2">&quot;_yes&quot;</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;You have to run \&quot;. build/envsetup.sh\&quot; to init enviroment first. \nAnd then you have to run</span>
-</span><span class='line'><span class="s2">\&quot;choosecombo\&quot; to setup the project.&quot;</span>&amp;amp;&amp;amp;exit 1; <span class="k">fi</span>
-</span><span class='line'>    @if <span class="o">[</span> ! -d <span class="k">$(</span>KDIR<span class="k">)</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;Build kernle first.&quot;</span>&amp;amp;&amp;amp;cd <span class="k">$(</span>ANDROID_BUILD_TOP<span class="k">)</span>&amp;amp;&amp;amp;make bootimage&amp;amp;&amp;amp;cd -; <span class="k">fi</span>
-</span><span class='line'>    <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>CROSS_ARCH<span class="k">)</span> -C <span class="k">$(</span>KDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
-</span><span class='line'>
-</span><span class='line'>package:modules
-</span><span class='line'>    @mkdir -p ./package
-</span><span class='line'>    @cp <span class="k">$(</span>obj-m:.o<span class="o">=</span>.ko<span class="k">)</span> ./package
-</span><span class='line'>
-</span><span class='line'>clean:
-</span><span class='line'>    rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers package
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-该Makefile默认会将当前目录下的 <code>my_module.c</code> 文件编译为内核模块。同时，在编译时会强制检查Android的环境是否正确配置，如果没有配置它会进行相应提示后退出编译处理。编译模块时使用的内核配置是编译Android时指定项目所配置的内核配置。如果内核还没有编译，则在编译模块之前会自动编译内核主体。如果一切OK，则每次只会编译修改过的模块文件。编译好后会将模块文件单独拷贝到当前目录下的 <code>package</code> 目录中，方便使用。
-</p>
-<p>
-使用该编译脚本后，模块的编写调试效率高了不少，至少每次编译模块都可以在5sec内搞定了。加上上机实测调试，也能在30sec内完成。生命很可贵，像我一样当个懒人吧。
 </p>
 ]]></content>
   </entry>
