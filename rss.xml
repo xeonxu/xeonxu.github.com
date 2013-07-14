@@ -4,8 +4,71 @@
     <description><![CDATA[不停地疯]]></description>
     <title><![CDATA[不停地疯]]></title>
     <link>http://blog.xeonxu.info/</link>
-    <pubDate>2013-05-17T00:11:45+08:00</pubDate>
+    <pubDate>2013-07-14T23:30:24+08:00</pubDate>
 
+    
+    <item>
+      <description>
+	<![CDATA[
+		 <p>
+一般来说，常用的电池电量的计算方法有两种：一种是使用叫做库仑计的ADC器件对电池的电流进行时间积分统计，然后除以电池的总毫安时容量，从而得出电池当前的电量；而另一种是使用电压采样ADC获取电池当前的端电压，并通过软件计算出电池的开路电压，然后根据电池的电压－容量表<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>来对应查找到当前电压下的电池容量。显而易见，从理论上来讲前一种方法更加准确。但在实际上，前一种方式往往受限于库仑计设备的采样精度以及程序员编写驱动程序的水平；同时，在硬件方面也增加了器件成本，应用上并没多少优势。像Marvell的88pm860x
+PMIC芯片中是有库仑计器件的，实际使用中统计值和实际偏差较大，需要在驱动程序中通过其它办法对所得值进行补偿校准后才有一定的使用价值。而高通的PM8029
+PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅仅是简单的获取VBATT值，并通过电流和电池内阻对VBATT进行校正后得到电池开路电压，然后根据电压－容量表查到当前电池的电量。使用对比下来，高通平台所使用的这种方法简单且有效，只需要根据不同电池制作一份电压－容量表即可完成电池的电量计算。
+</p>
+
+<p>
+但是，使用电压－容量表也不是没有缺点的，为了说得更清楚点，这里先简单介绍一下电压－容量表。这里所说的电压－容量表中的“电压”指的是电池的开路电压OCV，而不是直接由ADC所采样到的电池端的原生电压VBATT的值。学过中学物理的可以知道，所有电池是有阻抗的，一般我们人为将其抽象为电池内阻，因此一个电池通常可以被抽象为一块原电池和电池内阻的串联体。这样，如果电池有电流流出的话，输出的电流越大，通过欧姆定律可以得出电池内阻的分压也会越大。这意味着在输出电流状态下，外部测得的电池端电压就会比实际开路电压小；相反，如果电池在充电中，电流方向和放电时相反，电流为流入电池。此时测得的端电压就会比开路电压略大。简而言之，从外部所测的的电池端电压很不稳定，它是电池内阻、电流以及温度等因素的函数。因此，开路电压的概念就变得重要了，如果继续基于之前所说的抽象电池来讲，开路电压是在电路中没有电流回路的情况下测得的电池端电压，也即是原电池的端电压。计算开路电压时，一般会估算一个电池内阻值，然后根据欧姆定律使用ADC采样到的电池端电压以及电池电流来计算出开路电压。至于电压－容量对应表，则是基于另外一个假设：电池的不同电量都对应一个唯一的电压值。但是，假设毕竟是假设，事实情况总要复杂一些。先不提容量与电压的非线性关系，不同供应商提供的不同型号的电池，其电压－容量特性都是不一致的，而且有时会出现某一阶段电压特别耐用的情况，这直接导致有时计算得到的电压－容量表中会出现同一电压对应多个容量的情况。如下图中，随着时间的增长，有时电压会保持比较平稳的状态。加上电压－电量表计算时一般都是使用供应商提供的电池充放电数据，这种数据一般使用比较标准的电流对电池进行恒流充放电后统计得到的，和手机实际使用的情况存在一定差异，而且数据采样设备在精度上也有较大的差别。这也造成了如果直接使用供应商数据计算得到的电压－容量表，在实际使用时效果不够好的情况。针对这种情况，人为会对所得结果做一些补偿和修正。但是这种问题一般都要花比较长的时间测试后才有可能发现，而且补偿的效果同样需要花费较长的时间才能验证。那么能不能通过简单的方法有效避免这类问题呢？
+</p>
+<p>
+<img src="http://blog.xeonxu.info/./images/blog/./1656aA2.png" alt="./images/blog/./1656aA2.png" />
+</p>
+
+<p>
+考虑到数据采样设备以及环境的差异问题，如果直接使用手机内部的ADC采样电池数据，然后使用这个数据计算电量表会不会好一点？实际验证下来，这种方法确实有一定的效果改进。采样之前，将手机环境至于标准功耗模式（最大亮度常亮，循环播放MP3），然后再进行采样，这样可以最大限度的模拟手机使用过程中电池的实际情况。采样的数据包括放电时长以及电池开路电压。至于电量表的计算，在这种情况下更为简单。因为在采样过程中手机处于标准功耗模式中，可以近似认为电流恒定，所以电量的损耗和时间是函数关系。将采样全程时长分为100份，然后分别得到每份所对应的电压值，电量表就做出来了。这种方法有个很大的优势，那就是思路简单，很适合脚本化操作。采样脚本外加计算电量表脚本，使用bash一会儿就可以搞定。
+</p>
+
+<p>
+可是，出于之前所说的一个问题，电池的电量和电压并没有一个绝对的对应关系，极端时甚至会出现得到的电量表中同一个电压值对应了多个电量。为了解决这个问题，我们引入了数学方法，使用样条差值的办法拟合采样的数据点，然后在拟合的曲线上重新进行电压电量对应关系的获取。使用了这个方法之后，电池电量方面的问题少了很多。而且由于使用了时间分割电量，所以在实际使用中，每格电量的使用时间都很接近，符合用户对电量的认知。拟合曲线的效果如图：
+<img src="http://blog.xeonxu.info/./images/blog/./1656N2v.png" alt="./images/blog/./1656N2v.png" />
+</p>
+
+<p>
+改进后的电量表采样及计算脚本在：<a href="https://github.com/xeonxu/battery_analyzer/blob/spline_2step/data_analysis.sh">battery analyzer</a> 。脚本中的样条差值部分使用了octave程序实现，效果蛮不错的。
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 指开路电压与电池容量的对应关系表。
+</p>
+
+
+
+
+</div>
+</div>
+
+		 <p class='post-footer'>
+  <h1>License</h1>
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
+  Original link:
+  <a href='http://blog.xeonxu.info/blog/2013/07/02/jian-shu-yi-zhong-dian-chi-dian-liang-biao-de-qu-de-fang-fa/'>http://blog.xeonxu.info/blog/2013/07/02/jian-shu-yi-zhong-dian-chi-dian-liang-biao-de-qu-de-fang-fa/</a><br/>
+  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
+  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
+</p>
+
+	]]>
+      </description>
+      <title><![CDATA[简述一种电池电量表的取得方法]]></title>
+      <link>http://blog.xeonxu.info/blog/2013/07/02/jian-shu-yi-zhong-dian-chi-dian-liang-biao-de-qu-de-fang-fa/</link>
+      <pubDate>2013-07-02T21:49:00+08:00</pubDate>
+      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2013/07/02/jian-shu-yi-zhong-dian-chi-dian-liang-biao-de-qu-de-fang-fa</guid>
+
+      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
+      <author>
+	<name><![CDATA[Xeon Xu]]></name>
+	
+      </author>
+    </item>
     
     <item>
       <description>
@@ -2495,336 +2558,6 @@ Vitamin-R运行起来的界面非常简单，运行时会在菜单栏上出来�
       <link>http://blog.xeonxu.info/blog/2012/10/14/tui-jian-shi-yong-vitamin-r/</link>
       <pubDate>2012-10-14T21:24:00+08:00</pubDate>
       <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/10/14/tui-jian-shi-yong-vitamin-r</guid>
-
-      <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
-      <author>
-	<name><![CDATA[Xeon Xu]]></name>
-	
-      </author>
-    </item>
-    
-    <item>
-      <description>
-	<![CDATA[
-		 <p>
-Octopress自带的RSS模版中没有包含文章作者信息，而是只包含了网站作者信息。考虑到博客经常只是一个人写作，同时文章作者随RSS显示，更常用一些，所以我对默认的RSS模版做了一点改动，让它支持了文章作者信息的输出。其实改动相当简单，默认情况下就一个 <code>atom.xml</code> 文件，该文件位于 <code>source/</code> 目录下。改动如下：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>atom.xml输出作者信息 (atom_author.diff)</span> <a href="http://blog.xeonxu.info/downloads/code/atom_author.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/atom.xml b/source/atom.xml</span>
-</span><span class="line"><span class="gh">index 83af3f8..c20506b 100644</span>
-</span><span class="line"><span class="gd">--- a/source/atom.xml</span>
-</span><span class="line"><span class="gi">+++ b/source/atom.xml</span>
-</span><span class="line"><span class="gu">@@ -9,10 +9,6 @@ layout: nil</span>
-</span><span class="line">   &lt;link href=&quot;{{ site.url }}/&quot;/&gt;
-</span><span class="line">   &lt;updated&gt;{{ site.time | date_to_xmlschema }}&lt;/updated&gt;
-</span><span class="line">   &lt;id&gt;{{ site.url }}/&lt;/id&gt;
-</span><span class="line"><span class="gd">-  &lt;author&gt;</span>
-</span><span class="line"><span class="gd">-    &lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;</span>
-</span><span class="line"><span class="gd">-    {% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}</span>
-</span><span class="line"><span class="gd">-  &lt;/author&gt;</span>
-</span><span class="line">   &lt;generator uri=&quot;http://octopress.org/&quot;&gt;Octopress&lt;/generator&gt;
-</span><span class="line">
-</span><span class="line">   {% for post in site.posts limit: 20 %}
-</span><span class="line"><span class="gu">@@ -20,8 +16,17 @@ layout: nil</span>
-</span><span class="line">     &lt;title type=&quot;html&quot;&gt;&lt;![CDATA[{{ post.title | cdata_escape }}]]&gt;&lt;/title&gt;
-</span><span class="line">     &lt;link href=&quot;{{ site.url }}{{ post.url }}&quot;/&gt;
-</span><span class="line">     &lt;updated&gt;{{ post.date | date_to_xmlschema }}&lt;/updated&gt;
-</span><span class="line"><span class="gi">+    &lt;author&gt;</span>
-</span><span class="line"><span class="gi">+      &lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;</span>
-</span><span class="line"><span class="gi">+      {% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}</span>
-</span><span class="line"><span class="gi">+    &lt;/author&gt;</span>
-</span><span class="line">     &lt;id&gt;{{ site.url }}{{ post.id }}&lt;/id&gt;
-</span><span class="line">     &lt;content type=&quot;html&quot;&gt;&lt;![CDATA[{{ post.content | expand_urls: site.url | cdata_escape }}]]&gt;&lt;/content&gt;
-</span><span class="line">   &lt;/entry&gt;
-</span><span class="line">   {% endfor %}
-</span><span class="line"> &lt;/feed&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-其实很简单，就是将全局的作者设定移到文章条目的设定中，这样设置的作者信息就成为了文章的属性。
-对于曾经给Octopress添加过RSS2.0支持的站点<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，还需要相应修改一下 <code>source/</code> 目录下 <code>rss.xml</code> 文件：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>rss.xml输出作者信息 (rss_author.diff)</span> <a href="http://blog.xeonxu.info/downloads/code/rss_author.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/rss.xml b/source/rss.xml</span>
-</span><span class="line"><span class="gh">index 435f17f..044e52f 100644</span>
-</span><span class="line"><span class="gd">--- a/source/rss.xml</span>
-</span><span class="line"><span class="gi">+++ b/source/rss.xml</span>
-</span><span class="line"><span class="gu">@@ -3,27 +3,31 @@ layout: nil</span>
-</span><span class="line"> ---
-</span><span class="line"> &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-</span><span class="line"> &lt;rss xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; version=&quot;2.0&quot;&gt;
-</span><span class="line">  &lt;channel&gt;
-</span><span class="line">    &lt;description&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/description&gt;
-</span><span class="line">    &lt;title&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/title&gt;
-</span><span class="line">    &lt;link&gt;{{ site.url }}/&lt;/link&gt;
-</span><span class="line">    &lt;pubDate&gt;{{ site.time | date_to_xmlschema }}&lt;/pubDate&gt;
-</span><span class="line">
-</span><span class="line">    {% for post in site.posts limit: 20 %}
-</span><span class="line">    &lt;item&gt;
-</span><span class="line">      &lt;description&gt;
-</span><span class="line">	&lt;![CDATA[
-</span><span class="line">		 {{ post.content | expand_urls: site.url | cdata_escape }}
-</span><span class="line">	]]&gt;
-</span><span class="line">      &lt;/description&gt;
-</span><span class="line">      &lt;title&gt;&lt;![CDATA[{{ post.title | cdata_escape }}]]&gt;&lt;/title&gt;
-</span><span class="line">      &lt;link&gt;{{ site.url }}{{ post.url }}&lt;/link&gt;
-</span><span class="line">      &lt;pubDate&gt;{{ post.date | date_to_xmlschema }}&lt;/pubDate&gt;
-</span><span class="line">      &lt;guid isPermaLink=&quot;false&quot;&gt;{{ site.url }}{{ post.id }}&lt;/guid&gt;
-</span><span class="line">      &lt;source url=&quot;{{ site.url }}/rss.xml&quot;&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/source&gt;
-</span><span class="line"><span class="gi">+      &lt;author&gt;</span>
-</span><span class="line"><span class="gi">+	&lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;</span>
-</span><span class="line"><span class="gi">+	{% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}</span>
-</span><span class="line"><span class="gi">+      &lt;/author&gt;</span>
-</span><span class="line">    &lt;/item&gt;
-</span><span class="line">    {% endfor %}
-</span><span class="line">  &lt;/channel&gt;
-</span><span class="line"> &lt;/rss&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-同样，只需在文章描述段中加入作者信息的属性即可。修改好文件保存之后，再次运行 <code>rake generate</code> 就会发现rss文件已经正确更新了。
-</p>
-<p>
-另外，有人还想在RSS输出的文章中加入相应版权声明，但又不想将版权声明嵌到文章里（比如像我这样）。办法也是有的，其实还是修改RSS模版文件。
-首先在 <code>source/_includes/post/</code> 目录中添加一个叫 <code>copyright.html</code> 新文件，内容如下，也可以是自己自定的一些版权内容：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>版权声明文件 (copyright.diff)</span> <a href="http://blog.xeonxu.info/downloads/code/copyright.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/_includes/post/copyright.html b/source/_includes/post/copyright.html</span>
-</span><span class="line"><span class="gh">index 2e57b7e..9547c7b 100644</span>
-</span><span class="line"><span class="gd">--- a/source/_includes/post/copyright.html</span>
-</span><span class="line"><span class="gi">+++ b/source/_includes/post/copyright.html</span>
-</span><span class="line"><span class="gu">@@ -1,2 +1,8 @@</span>
-</span><span class="line"><span class="gi">+&lt;p class=&#39;post-footer&#39;&gt;</span>
-</span><span class="line"><span class="gi">+  &lt;h1&gt;License&lt;/h1&gt;</span>
-</span><span class="line"><span class="gi">+  &lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh&quot;&gt;&lt;img alt=&quot;知识共享许可协议&quot; style=&quot;border-width:0&quot; src=&quot;http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png&quot; /&gt;&lt;/a&gt;&lt;br /&gt;本博作品采用&lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh&quot;&gt;知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议&lt;/a&gt;进行许可。&lt;br/&gt;</span>
-</span><span class="line"><span class="gi">+  Original link:</span>
-</span><span class="line"><span class="gi">+  &lt;a href=&#39;{{ site.url }}{{ post.url }}&#39;&gt;{{ site.url }}{{ post.url }}&lt;/a&gt;&lt;br/&gt;</span>
-</span><span class="line"><span class="gi">+  &amp;nbsp;written by &lt;a href=&#39;{{ site.url }}&#39;&gt;{{ site.author }}&lt;/a&gt;</span>
-</span><span class="line"><span class="gi">+  &amp;nbsp;posted at &lt;a href=&#39;{{ site.url }}&#39;&gt;{{ site.url }}&lt;/a&gt;</span>
-</span><span class="line"><span class="gi">+&lt;/p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-我的版权声明模版中加入了CC许可，文章原始链接，作者名称以及个人站点信息。然后分别修改 <code>atom.xml</code> 和 <code>rss.xml</code> 文件如下：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>atom.xml添加版权声明 (atom_copyright.diff)</span> <a href="http://blog.xeonxu.info/downloads/code/atom_copyright.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/atom.xml b/source/atom.xml</span>
-</span><span class="line"><span class="gh">index 83af3f8..c20506b 100644</span>
-</span><span class="line"><span class="gd">--- a/source/atom.xml</span>
-</span><span class="line"><span class="gi">+++ b/source/atom.xml</span>
-</span><span class="line"><span class="gu">@@ -20,8 +16,17 @@ layout: nil</span>
-</span><span class="line">     &lt;title type=&quot;html&quot;&gt;&lt;![CDATA[{{ post.title | cdata_escape }}]]&gt;&lt;/title&gt;
-</span><span class="line">     &lt;link href=&quot;{{ site.url }}{{ post.url }}&quot;/&gt;
-</span><span class="line">     &lt;updated&gt;{{ post.date | date_to_xmlschema }}&lt;/updated&gt;
-</span><span class="line">    &lt;author&gt;
-</span><span class="line">      &lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;
-</span><span class="line">      {% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}
-</span><span class="line">    &lt;/author&gt;
-</span><span class="line">     &lt;id&gt;{{ site.url }}{{ post.id }}&lt;/id&gt;
-</span><span class="line"><span class="gd">-    &lt;content type=&quot;html&quot;&gt;&lt;![CDATA[{{ post.content | expand_urls: site.url | cdata_escape }}]]&gt;&lt;/content&gt;</span>
-</span><span class="line"><span class="gi">+    &lt;content type=&quot;html&quot;&gt;</span>
-</span><span class="line"><span class="gi">+        &lt;![CDATA[</span>
-</span><span class="line"><span class="gi">+        {{ post.content | expand_urls: site.url | cdata_escape }}</span>
-</span><span class="line"><span class="gi">+		{% include post/copyright.html %}</span>
-</span><span class="line"><span class="gi">+        ]]&gt;</span>
-</span><span class="line"><span class="gi">+    &lt;/content&gt;</span>
-</span><span class="line">   &lt;/entry&gt;
-</span><span class="line">   {% endfor %}
-</span><span class="line"> &lt;/feed&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-就添加一句 <code>include post/copyright.html</code> ，不过要注意是在CDATA段中。 <code>rss.xml</code> 一样处理：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>rss.xml添加版权声明 (rss_copyright.diff)</span> <a href="http://blog.xeonxu.info/downloads/code/rss_copyright.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/rss.xml b/source/rss.xml</span>
-</span><span class="line"><span class="gh">index 435f17f..044e52f 100644</span>
-</span><span class="line"><span class="gd">--- a/source/rss.xml</span>
-</span><span class="line"><span class="gi">+++ b/source/rss.xml</span>
-</span><span class="line"><span class="gu">@@ -3,27 +3,31 @@ layout: nil</span>
-</span><span class="line"> ---
-</span><span class="line"> &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-</span><span class="line"> &lt;rss xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; version=&quot;2.0&quot;&gt;
-</span><span class="line">  &lt;channel&gt;
-</span><span class="line">    &lt;description&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/description&gt;
-</span><span class="line">    &lt;title&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/title&gt;
-</span><span class="line">    &lt;link&gt;{{ site.url }}/&lt;/link&gt;
-</span><span class="line">    &lt;pubDate&gt;{{ site.time | date_to_xmlschema }}&lt;/pubDate&gt;
-</span><span class="line">
-</span><span class="line">    {% for post in site.posts limit: 20 %}
-</span><span class="line">    &lt;item&gt;
-</span><span class="line">      &lt;description&gt;
-</span><span class="line">	&lt;![CDATA[
-</span><span class="line">		 {{ post.content | expand_urls: site.url | cdata_escape }}
-</span><span class="line"><span class="gi">+		 {% include post/copyright.html %}</span>
-</span><span class="line">	]]&gt;
-</span><span class="line">      &lt;/description&gt;
-</span><span class="line">      &lt;title&gt;&lt;![CDATA[{{ post.title | cdata_escape }}]]&gt;&lt;/title&gt;
-</span><span class="line">      &lt;link&gt;{{ site.url }}{{ post.url }}&lt;/link&gt;
-</span><span class="line">      &lt;pubDate&gt;{{ post.date | date_to_xmlschema }}&lt;/pubDate&gt;
-</span><span class="line">      &lt;guid isPermaLink=&quot;false&quot;&gt;{{ site.url }}{{ post.id }}&lt;/guid&gt;
-</span><span class="line">
-</span><span class="line">      &lt;source url=&quot;{{ site.url }}/rss.xml&quot;&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/source&gt;
-</span><span class="line">      &lt;author&gt;
-</span><span class="line">	&lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;
-</span><span class="line">	{% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}
-</span><span class="line">      &lt;/author&gt;
-</span><span class="line">    &lt;/item&gt;
-</span><span class="line">    {% endfor %}
-</span><span class="line">  &lt;/channel&gt;
-</span><span class="line"> &lt;/rss&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-轻松搞定，效果就是我博客现在的效果。
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://log4d.com/2012/05/support-rss/">http://log4d.com/2012/05/support-rss/</a>
-</p>
-
-
-
-</div>
-</div>
-
-		 <p class='post-footer'>
-  <h1>License</h1>
-  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br />本博作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh">知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议</a>进行许可。<br/>
-  Original link:
-  <a href='http://blog.xeonxu.info/blog/2012/10/11/gei-octopressde-rssshu-chu-tian-jia-zuo-zhe-xin-xi/'>http://blog.xeonxu.info/blog/2012/10/11/gei-octopressde-rssshu-chu-tian-jia-zuo-zhe-xin-xi/</a><br/>
-  &nbsp;written by <a href='http://blog.xeonxu.info'>Xeon Xu</a>
-  &nbsp;posted at <a href='http://blog.xeonxu.info'>http://blog.xeonxu.info</a>
-</p>
-
-	]]>
-      </description>
-      <title><![CDATA[给Octopress的RSS输出中添加文章作者信息]]></title>
-      <link>http://blog.xeonxu.info/blog/2012/10/11/gei-octopressde-rssshu-chu-tian-jia-zuo-zhe-xin-xi/</link>
-      <pubDate>2012-10-11T23:30:00+08:00</pubDate>
-      <guid isPermaLink="false">http://blog.xeonxu.info/blog/2012/10/11/gei-octopressde-rssshu-chu-tian-jia-zuo-zhe-xin-xi</guid>
 
       <source url="http://blog.xeonxu.info/rss.xml"><![CDATA[不停地疯]]></source>
       <author>

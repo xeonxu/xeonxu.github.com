@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="高通Android环境中Linux内核会作为Android的一部分进行编译，直接使用make即可一次性从头编到尾。而有的平台比如Marvell，内核的编译操作相对比较独立，必须使用标准的内核编译命令进行单独编译。一般来说，用高通的这种方式比较傻瓜化，一步到底的感觉； &hellip;">
+  <meta name="description" content="如前篇文章所述，使用模块化方式开发内核驱动可以有效减少编译时间，从而提高开发效率。除此之外，内核模块使用 insmod 载入内核时可以像使用应用程序一样像内核模块中传入特定参数，参数完全由开发者定义。像中断号，GPIO管脚，总线号，设备地址，log等级等等，都可以通过内核参数进行传入。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,392 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia/">嵌入式系统内核驱动模块化转换的简单框架</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-15T15:57:00+08:00" pubdate data-updated="true">2012年12月15日</time>
+        
+         | <a href="/blog/2012/12/15/qian-ru-shi-xi-tong-nei-he-qu-dong-mo-kuai-hua-zhuan-huan-de-jian-dan-kuang-jia/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+如前篇文章所述，使用模块化方式开发内核驱动可以有效减少编译时间，从而提高开发效率。除此之外，内核模块使用 <code>insmod</code> 载入内核时可以像使用应用程序一样像内核模块中传入特定参数，参数完全由开发者定义。像中断号，GPIO管脚，总线号，设备地址，log等级等等，都可以通过内核参数进行传入。这意味着可以在只编译一次内核驱动模块的情况下，通过传入不同的参数就可以修改驱动程序的属性，大大提高灵活性，对于Debug更加方便。
+</p>
+<p>
+由于在嵌入式系统中，注册设备驱动时也要相应将设备注册到系统中，而设备注册逻辑一般都存放在如 <code>Board_xxxx.c</code> 这类板级驱动文件中。这种安排方式在模块化驱动中显得不是很方便，因为载入模块的系统中需要先注册过设备，这也意味着需要先将相应设备信息添加入板级配置文件后才能使用模块驱动。为此，我想实现一个简单的包装框架，实现以下两个目的：
+</p>
+<ol>
+<li>修改尽可能少的代码进行驱动模块化
+</li>
+<li>模块化的驱动可以方便的整合到原系统中，无需做多余的改动
+</li>
+</ol>
+
+<p>
+按照这个想法，我使用ft5x0x的tp驱动完成了驱动模块化转换的简单框架。其中包含两个部分，分别如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>模块包装文件  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+<span class="line-number">62</span>
+<span class="line-number">63</span>
+<span class="line-number">64</span>
+<span class="line-number">65</span>
+<span class="line-number">66</span>
+<span class="line-number">67</span>
+<span class="line-number">68</span>
+<span class="line-number">69</span>
+<span class="line-number">70</span>
+<span class="line-number">71</span>
+<span class="line-number">72</span>
+<span class="line-number">73</span>
+<span class="line-number">74</span>
+<span class="line-number">75</span>
+<span class="line-number">76</span>
+<span class="line-number">77</span>
+<span class="line-number">78</span>
+<span class="line-number">79</span>
+<span class="line-number">80</span>
+<span class="line-number">81</span>
+<span class="line-number">82</span>
+<span class="line-number">83</span>
+<span class="line-number">84</span>
+<span class="line-number">85</span>
+<span class="line-number">86</span>
+<span class="line-number">87</span>
+<span class="line-number">88</span>
+<span class="line-number">89</span>
+<span class="line-number">90</span>
+<span class="line-number">91</span>
+<span class="line-number">92</span>
+<span class="line-number">93</span>
+<span class="line-number">94</span>
+<span class="line-number">95</span>
+<span class="line-number">96</span>
+<span class="line-number">97</span>
+<span class="line-number">98</span>
+<span class="line-number">99</span>
+<span class="line-number">100</span>
+<span class="line-number">101</span>
+<span class="line-number">102</span>
+<span class="line-number">103</span>
+<span class="line-number">104</span>
+<span class="line-number">105</span>
+<span class="line-number">106</span>
+<span class="line-number">107</span>
+<span class="line-number">108</span>
+<span class="line-number">109</span>
+<span class="line-number">110</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="cp">#include &lt;linux/kernel.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/module.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/slab.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/i2c.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/err.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/delay.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/gpio.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;asm/uaccess.h&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#include &lt;linux/fs.h&gt;</span>
+</span><span class="line"><span class="cp">#include &lt;linux/mm.h&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#include &quot;ft5x06_ts.h&quot;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">extern</span> <span class="kt">int</span> <span class="n">init_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class="line"><span class="k">extern</span> <span class="kt">void</span> <span class="n">exit_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#define module_PRINT_ERR     (1U &lt;&lt; 0)</span>
+</span><span class="line"><span class="cp">#define module_PRINT_WARNING (1U &lt;&lt; 1)</span>
+</span><span class="line"><span class="cp">#define module_PRINT_INFO    (1U &lt;&lt; 2)</span>
+</span><span class="line"><span class="cp">#define module_PRINT_DEBUG   (1U &lt;&lt; 3)</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#ifndef DEFAULT_DEV_NAME</span>
+</span><span class="line"><span class="cp">#define DEFAULT_DEV_NAME &quot;ft5x0x_ts&quot;</span>
+</span><span class="line"><span class="cp">#endif</span>
+</span><span class="line"><span class="cp">#ifndef DEFAULT_DEV_ADAP</span>
+</span><span class="line"><span class="cp">#define DEFAULT_DEV_ADAP 255</span>
+</span><span class="line"><span class="cp">#endif</span>
+</span><span class="line"><span class="cp">#ifndef DEFAULT_DEV_ADDR</span>
+</span><span class="line"><span class="cp">#define DEFAULT_DEV_ADDR 0x38</span>
+</span><span class="line"><span class="cp">#endif</span>
+</span><span class="line">
+</span><span class="line"><span class="cp">#define pr_module(debug_level_mask, args...)                    \</span>
+</span><span class="line"><span class="cp">    do {                                                        \</span>
+</span><span class="line"><span class="cp">        if (debug_mask &amp; module_PRINT_##debug_level_mask) {     \</span>
+</span><span class="line"><span class="cp">            printk(KERN_##debug_level_mask &quot;[module_driver] &quot;args);    \</span>
+</span><span class="line"><span class="cp">        }                                                       \</span>
+</span><span class="line"><span class="cp">    } while (0)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="kt">int</span> <span class="n">debug_mask</span> <span class="o">=</span> <span class="n">module_PRINT_ERR</span> <span class="o">|</span> \
+</span><span class="line">    <span class="n">module_PRINT_INFO</span>  <span class="o">|</span> \
+</span><span class="line">    <span class="n">module_PRINT_WARNING</span>  <span class="o">|</span> <span class="n">module_PRINT_DEBUG</span> <span class="p">;</span>
+</span><span class="line"><span class="n">module_param_named</span><span class="p">(</span><span class="n">debug_mask</span><span class="p">,</span> <span class="n">debug_mask</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="n">S_IRUGO</span> <span class="o">|</span> <span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">S_IWGRP</span><span class="p">);</span>
+</span><span class="line"><span class="k">static</span> <span class="n">u8</span> <span class="n">local_device_adap</span> <span class="o">=</span> <span class="n">DEFAULT_DEV_ADAP</span><span class="p">;</span>
+</span><span class="line"><span class="n">module_param_named</span><span class="p">(</span><span class="n">adap</span><span class="p">,</span> <span class="n">local_device_adap</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">S_IRUGO</span> <span class="o">|</span> <span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">S_IWGRP</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">adap</span><span class="p">,</span> <span class="s">&quot;Set the i2c adapter of device.&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">static</span> <span class="n">u8</span> <span class="n">local_device_addr</span> <span class="o">=</span> <span class="n">DEFAULT_DEV_ADDR</span><span class="p">;</span>
+</span><span class="line"><span class="n">module_param_named</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">local_device_addr</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">S_IRUGO</span> <span class="o">|</span> <span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">S_IWGRP</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="s">&quot;Set the address of device.&quot;</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">this_client</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">MODULE_DRIVER_INFO</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">struct</span> <span class="n">i2c_board_info</span> <span class="o">*</span><span class="n">this_device_info</span><span class="p">;</span>
+</span><span class="line">    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">prepare_func</span><span class="p">)(</span><span class="kt">void</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span> <span class="n">module_driver_info</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">    <span class="p">.</span><span class="n">this_device_info</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ft5x0x_device_info</span><span class="p">,</span>
+</span><span class="line">    <span class="p">.</span><span class="n">prepare_func</span> <span class="o">=</span> <span class="n">ft5x06_touchpad_setup</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_driver_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="cm">/* int rc; */</span>
+</span><span class="line">    <span class="k">struct</span> <span class="n">i2c_adapter</span> <span class="o">*</span><span class="n">i2c_adap</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">pr_module</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span><span class="s">&quot;Enter in %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="cm">/* Init GPIOs */</span>
+</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="n">module_driver_info</span><span class="p">.</span><span class="n">prepare_func</span><span class="p">)</span>
+</span><span class="line">        <span class="p">(</span><span class="o">*</span><span class="n">module_driver_info</span><span class="p">.</span><span class="n">prepare_func</span><span class="p">)();</span>
+</span><span class="line">
+</span><span class="line">    <span class="cm">/* Add device driver. */</span>
+</span><span class="line">    <span class="n">init_wrapper</span><span class="p">();</span>
+</span><span class="line">    <span class="n">module_driver_info</span><span class="p">.</span><span class="n">this_device_info</span><span class="o">-&gt;</span><span class="n">addr</span> <span class="o">=</span> <span class="n">local_device_addr</span><span class="p">;</span>
+</span><span class="line">    <span class="cm">/* Add i2c device to platform */</span>
+</span><span class="line">    <span class="n">i2c_adap</span> <span class="o">=</span> <span class="n">i2c_get_adapter</span><span class="p">(</span><span class="n">local_device_adap</span><span class="p">);</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="nb">NULL</span> <span class="o">==</span> <span class="n">i2c_adap</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">pr_module</span><span class="p">(</span><span class="n">ERR</span><span class="p">,</span> <span class="s">&quot;%s: i2c_get_adapter for %d failed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span> <span class="n">local_device_adap</span><span class="p">);</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">error_adapter</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="n">this_client</span> <span class="o">=</span> <span class="n">i2c_new_device</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">,</span> <span class="n">module_driver_info</span><span class="p">.</span><span class="n">this_device_info</span><span class="p">);</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="nb">NULL</span> <span class="o">==</span> <span class="n">this_client</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">pr_module</span><span class="p">(</span><span class="n">ERR</span><span class="p">,</span> <span class="s">&quot;%s: i2c_new_device for %s failed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span> <span class="n">module_driver_info</span><span class="p">.</span><span class="n">this_device_info</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">);</span>
+</span><span class="line">        <span class="k">goto</span> <span class="n">error_device</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="n">pr_module</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span> <span class="s">&quot;%s: this_client:%p, addr:%#x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">,</span> <span class="n">this_client</span><span class="p">,</span> <span class="n">this_client</span><span class="o">-&gt;</span><span class="n">addr</span><span class="p">);</span>
+</span><span class="line">    <span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
+</span><span class="line">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">  <span class="nl">error_device:</span>
+</span><span class="line">    <span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
+</span><span class="line">  <span class="nl">error_adapter:</span>
+</span><span class="line">    <span class="n">exit_wrapper</span><span class="p">();</span>
+</span><span class="line">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_driver_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="n">pr_module</span><span class="p">(</span><span class="n">INFO</span><span class="p">,</span><span class="s">&quot;Enter in %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+</span><span class="line">    <span class="n">exit_wrapper</span><span class="p">();</span>
+</span><span class="line">    <span class="n">i2c_unregister_device</span><span class="p">(</span><span class="n">this_client</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="n">module_init</span><span class="p">(</span><span class="n">module_driver_init</span><span class="p">);</span>
+</span><span class="line"><span class="n">module_exit</span><span class="p">(</span><span class="n">module_driver_exit</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="n">MODULE_AUTHOR</span><span class="p">(</span><span class="s">&quot;zhiqiang.xu&lt;zhiqiang.xu@phicomm.com.cn&gt;&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_DESCRIPTION</span><span class="p">(</span><span class="s">&quot;i2c device module driver&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_LICENSE</span><span class="p">(</span><span class="s">&quot;GPL v2&quot;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+以上为部分内容， 其中需要实现板级设备信息 <code>ft5x0x_device_info</code> 和设备初始化函数 <code>ft5x06_touchpad_setup</code> 。其实也就是将板级文件中的相应信息拷贝过来即可。
+</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>原驱动文件的修改  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="cp">#if defined(MODULE)</span>
+</span><span class="line"><span class="kt">int</span> <span class="nf">init_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">ft5x0x_ts_init</span><span class="p">();</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">init_wrapper</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="kt">void</span> <span class="nf">exit_wrapper</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="n">ft5x0x_ts_exit</span><span class="p">();</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">exit_wrapper</span><span class="p">);</span>
+</span><span class="line"><span class="cp">#else</span>
+</span><span class="line"><span class="n">module_init</span><span class="p">(</span><span class="n">ft5x0x_ts_init</span><span class="p">);</span>
+</span><span class="line"><span class="n">module_exit</span><span class="p">(</span><span class="n">ft5x0x_ts_exit</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="n">MODULE_AUTHOR</span><span class="p">(</span><span class="s">&quot;&lt;luowj&gt;&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_DESCRIPTION</span><span class="p">(</span><span class="s">&quot;FocalTech ft5x0x TouchScreen driver&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="n">MODULE_LICENSE</span><span class="p">(</span><span class="s">&quot;GPL&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="cp">#endif</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>
+由于内核模块中只能存在一对 <code>module_init</code> 和 <code>module_exit</code> ，所以在原驱动文件中使用模块宏 <code>MODULE</code> 将这部分排除，同时使用统一的包装函数名称将驱动初始化函数和退出函数包装起来，并导出符号。
+</p>
+<p>
+最后，参照上篇文章内容编写 <code>Makefile</code> 文件，如下：
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+</pre></td><td class="code"><pre><code class="makefile"><span class="line"><span class="c"># Author: zhiqiang.xu</span>
+</span><span class="line"><span class="c"># EMail : xeonxu@gmail.com</span>
+</span><span class="line"><span class="c"># Date  : 2012-12-11</span>
+</span><span class="line"><span class="nv">CROSS_ARCH</span><span class="o">:=</span><span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;$(ARM_EABI_TOOLCHAIN)/arm-eabi-&quot;</span>
+</span><span class="line">KDIR:<span class="o">=</span><span class="k">$(</span>ANDROID_PRODUCT_OUT<span class="k">)</span>/obj/KERNEL_OBJ/
+</span><span class="line">PWD:<span class="o">=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
+</span><span class="line">
+</span><span class="line">test_driver-objs :<span class="o">=</span> module_driver.o ft5x06_ts.o focaltech_ctl.o  ft5x06_ex_fun.o
+</span><span class="line">obj-m:<span class="o">=</span> test_driver.o
+</span><span class="line">.PHONY: modules package clean
+</span><span class="line">all:package
+</span><span class="line">modules:
+</span><span class="line">    @if <span class="o">[</span> <span class="s2">&quot;$(ANDROID_BUILD_TOP)&quot;</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;You have to run \&quot;. build/envsetup.sh\&quot; to init enviroment first. \nAnd then you have to run</span>
+</span><span class="line"><span class="s2">\&quot;choosecombo\&quot; to setup the project.&quot;</span><span class="o">&amp;&amp;</span><span class="nb">exit </span>1; <span class="k">fi</span>
+</span><span class="line">    @if <span class="o">[</span> ! -d <span class="k">$(</span>KDIR<span class="k">)</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;Build kernel first.&quot;</span><span class="o">&amp;&amp;</span><span class="nb">cd</span> <span class="k">$(</span>ANDROID_BUILD_TOP<span class="k">)</span><span class="o">&amp;&amp;</span>make -j4 bootimage&amp;&amp;cd -; <span class="k">fi</span>
+</span><span class="line">    <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>CROSS_ARCH<span class="k">)</span> -C <span class="k">$(</span>KDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span><span class="line">
+</span><span class="line">package:modules
+</span><span class="line">    @mkdir -p ./package
+</span><span class="line">    @cp *.bat ./package
+</span><span class="line">    @cp <span class="k">$(</span>obj-m:.o<span class="o">=</span>.ko<span class="k">)</span> ./package
+</span><span class="line">    @tar --transform<span class="o">=</span><span class="s1">&#39;s,package,test_driver,&#39;</span> -jcf test_driver.tar.bz2 ./package/
+</span><span class="line">
+</span><span class="line">clean:
+</span><span class="line">    rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers package test_driver.tar.bz2
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+修改后的驱动文件使用make即可直接编译出模块驱动，同时该驱动中也包含了设备注册的相关处理，所以相对来说更加独立。完整的驱动文件如下：
+<a href="https://docs.google.com/open?id=0B5GJiOxO7LkWVDVQMy0tcDBoejg"> <code>test_driver.tar.bz2</code> </a>
+</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1478,348 +1864,6 @@ Vitamin-R运行起来的界面非常简单，运行时会在菜单栏上出来�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/10/11/gei-octopressde-rssshu-chu-tian-jia-zuo-zhe-xin-xi/">给Octopress的RSS输出中添加文章作者信息</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-11T23:30:00+08:00" pubdate data-updated="true">2012年10月11日</time>
-        
-         | <a href="/blog/2012/10/11/gei-octopressde-rssshu-chu-tian-jia-zuo-zhe-xin-xi/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-Octopress自带的RSS模版中没有包含文章作者信息，而是只包含了网站作者信息。考虑到博客经常只是一个人写作，同时文章作者随RSS显示，更常用一些，所以我对默认的RSS模版做了一点改动，让它支持了文章作者信息的输出。其实改动相当简单，默认情况下就一个 <code>atom.xml</code> 文件，该文件位于 <code>source/</code> 目录下。改动如下：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>atom.xml输出作者信息 (atom_author.diff)</span> <a href="/downloads/code/atom_author.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/atom.xml b/source/atom.xml</span>
-</span><span class="line"><span class="gh">index 83af3f8..c20506b 100644</span>
-</span><span class="line"><span class="gd">--- a/source/atom.xml</span>
-</span><span class="line"><span class="gi">+++ b/source/atom.xml</span>
-</span><span class="line"><span class="gu">@@ -9,10 +9,6 @@ layout: nil</span>
-</span><span class="line">   &lt;link href=&quot;{{ site.url }}/&quot;/&gt;
-</span><span class="line">   &lt;updated&gt;{{ site.time | date_to_xmlschema }}&lt;/updated&gt;
-</span><span class="line">   &lt;id&gt;{{ site.url }}/&lt;/id&gt;
-</span><span class="line"><span class="gd">-  &lt;author&gt;</span>
-</span><span class="line"><span class="gd">-    &lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;</span>
-</span><span class="line"><span class="gd">-    {% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}</span>
-</span><span class="line"><span class="gd">-  &lt;/author&gt;</span>
-</span><span class="line">   &lt;generator uri=&quot;http://octopress.org/&quot;&gt;Octopress&lt;/generator&gt;
-</span><span class="line">
-</span><span class="line">   {% for post in site.posts limit: 20 %}
-</span><span class="line"><span class="gu">@@ -20,8 +16,17 @@ layout: nil</span>
-</span><span class="line">     &lt;title type=&quot;html&quot;&gt;&lt;![CDATA[{{ post.title | cdata_escape }}]]&gt;&lt;/title&gt;
-</span><span class="line">     &lt;link href=&quot;{{ site.url }}{{ post.url }}&quot;/&gt;
-</span><span class="line">     &lt;updated&gt;{{ post.date | date_to_xmlschema }}&lt;/updated&gt;
-</span><span class="line"><span class="gi">+    &lt;author&gt;</span>
-</span><span class="line"><span class="gi">+      &lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;</span>
-</span><span class="line"><span class="gi">+      {% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}</span>
-</span><span class="line"><span class="gi">+    &lt;/author&gt;</span>
-</span><span class="line">     &lt;id&gt;{{ site.url }}{{ post.id }}&lt;/id&gt;
-</span><span class="line">     &lt;content type=&quot;html&quot;&gt;&lt;![CDATA[{{ post.content | expand_urls: site.url | cdata_escape }}]]&gt;&lt;/content&gt;
-</span><span class="line">   &lt;/entry&gt;
-</span><span class="line">   {% endfor %}
-</span><span class="line"> &lt;/feed&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-其实很简单，就是将全局的作者设定移到文章条目的设定中，这样设置的作者信息就成为了文章的属性。
-对于曾经给Octopress添加过RSS2.0支持的站点<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，还需要相应修改一下 <code>source/</code> 目录下 <code>rss.xml</code> 文件：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>rss.xml输出作者信息 (rss_author.diff)</span> <a href="/downloads/code/rss_author.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/rss.xml b/source/rss.xml</span>
-</span><span class="line"><span class="gh">index 435f17f..044e52f 100644</span>
-</span><span class="line"><span class="gd">--- a/source/rss.xml</span>
-</span><span class="line"><span class="gi">+++ b/source/rss.xml</span>
-</span><span class="line"><span class="gu">@@ -3,27 +3,31 @@ layout: nil</span>
-</span><span class="line"> ---
-</span><span class="line"> &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-</span><span class="line"> &lt;rss xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; version=&quot;2.0&quot;&gt;
-</span><span class="line">  &lt;channel&gt;
-</span><span class="line">    &lt;description&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/description&gt;
-</span><span class="line">    &lt;title&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/title&gt;
-</span><span class="line">    &lt;link&gt;{{ site.url }}/&lt;/link&gt;
-</span><span class="line">    &lt;pubDate&gt;{{ site.time | date_to_xmlschema }}&lt;/pubDate&gt;
-</span><span class="line">
-</span><span class="line">    {% for post in site.posts limit: 20 %}
-</span><span class="line">    &lt;item&gt;
-</span><span class="line">      &lt;description&gt;
-</span><span class="line">	&lt;![CDATA[
-</span><span class="line">		 {{ post.content | expand_urls: site.url | cdata_escape }}
-</span><span class="line">	]]&gt;
-</span><span class="line">      &lt;/description&gt;
-</span><span class="line">      &lt;title&gt;&lt;![CDATA[{{ post.title | cdata_escape }}]]&gt;&lt;/title&gt;
-</span><span class="line">      &lt;link&gt;{{ site.url }}{{ post.url }}&lt;/link&gt;
-</span><span class="line">      &lt;pubDate&gt;{{ post.date | date_to_xmlschema }}&lt;/pubDate&gt;
-</span><span class="line">      &lt;guid isPermaLink=&quot;false&quot;&gt;{{ site.url }}{{ post.id }}&lt;/guid&gt;
-</span><span class="line">      &lt;source url=&quot;{{ site.url }}/rss.xml&quot;&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/source&gt;
-</span><span class="line"><span class="gi">+      &lt;author&gt;</span>
-</span><span class="line"><span class="gi">+	&lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;</span>
-</span><span class="line"><span class="gi">+	{% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}</span>
-</span><span class="line"><span class="gi">+      &lt;/author&gt;</span>
-</span><span class="line">    &lt;/item&gt;
-</span><span class="line">    {% endfor %}
-</span><span class="line">  &lt;/channel&gt;
-</span><span class="line"> &lt;/rss&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-同样，只需在文章描述段中加入作者信息的属性即可。修改好文件保存之后，再次运行 <code>rake generate</code> 就会发现rss文件已经正确更新了。
-</p>
-<p>
-另外，有人还想在RSS输出的文章中加入相应版权声明，但又不想将版权声明嵌到文章里（比如像我这样）。办法也是有的，其实还是修改RSS模版文件。
-首先在 <code>source/_includes/post/</code> 目录中添加一个叫 <code>copyright.html</code> 新文件，内容如下，也可以是自己自定的一些版权内容：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>版权声明文件 (copyright.diff)</span> <a href="/downloads/code/copyright.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/_includes/post/copyright.html b/source/_includes/post/copyright.html</span>
-</span><span class="line"><span class="gh">index 2e57b7e..9547c7b 100644</span>
-</span><span class="line"><span class="gd">--- a/source/_includes/post/copyright.html</span>
-</span><span class="line"><span class="gi">+++ b/source/_includes/post/copyright.html</span>
-</span><span class="line"><span class="gu">@@ -1,2 +1,8 @@</span>
-</span><span class="line"><span class="gi">+&lt;p class=&#39;post-footer&#39;&gt;</span>
-</span><span class="line"><span class="gi">+  &lt;h1&gt;License&lt;/h1&gt;</span>
-</span><span class="line"><span class="gi">+  &lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh&quot;&gt;&lt;img alt=&quot;知识共享许可协议&quot; style=&quot;border-width:0&quot; src=&quot;http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png&quot; /&gt;&lt;/a&gt;&lt;br /&gt;本博作品采用&lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh&quot;&gt;知识共享署名-非商业性使用-相同方式共享 3.0 Unported许可协议&lt;/a&gt;进行许可。&lt;br/&gt;</span>
-</span><span class="line"><span class="gi">+  Original link:</span>
-</span><span class="line"><span class="gi">+  &lt;a href=&#39;{{ site.url }}{{ post.url }}&#39;&gt;{{ site.url }}{{ post.url }}&lt;/a&gt;&lt;br/&gt;</span>
-</span><span class="line"><span class="gi">+  &amp;nbsp;written by &lt;a href=&#39;{{ site.url }}&#39;&gt;{{ site.author }}&lt;/a&gt;</span>
-</span><span class="line"><span class="gi">+  &amp;nbsp;posted at &lt;a href=&#39;{{ site.url }}&#39;&gt;{{ site.url }}&lt;/a&gt;</span>
-</span><span class="line"><span class="gi">+&lt;/p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-我的版权声明模版中加入了CC许可，文章原始链接，作者名称以及个人站点信息。然后分别修改 <code>atom.xml</code> 和 <code>rss.xml</code> 文件如下：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>atom.xml添加版权声明 (atom_copyright.diff)</span> <a href="/downloads/code/atom_copyright.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/atom.xml b/source/atom.xml</span>
-</span><span class="line"><span class="gh">index 83af3f8..c20506b 100644</span>
-</span><span class="line"><span class="gd">--- a/source/atom.xml</span>
-</span><span class="line"><span class="gi">+++ b/source/atom.xml</span>
-</span><span class="line"><span class="gu">@@ -20,8 +16,17 @@ layout: nil</span>
-</span><span class="line">     &lt;title type=&quot;html&quot;&gt;&lt;![CDATA[{{ post.title | cdata_escape }}]]&gt;&lt;/title&gt;
-</span><span class="line">     &lt;link href=&quot;{{ site.url }}{{ post.url }}&quot;/&gt;
-</span><span class="line">     &lt;updated&gt;{{ post.date | date_to_xmlschema }}&lt;/updated&gt;
-</span><span class="line">    &lt;author&gt;
-</span><span class="line">      &lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;
-</span><span class="line">      {% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}
-</span><span class="line">    &lt;/author&gt;
-</span><span class="line">     &lt;id&gt;{{ site.url }}{{ post.id }}&lt;/id&gt;
-</span><span class="line"><span class="gd">-    &lt;content type=&quot;html&quot;&gt;&lt;![CDATA[{{ post.content | expand_urls: site.url | cdata_escape }}]]&gt;&lt;/content&gt;</span>
-</span><span class="line"><span class="gi">+    &lt;content type=&quot;html&quot;&gt;</span>
-</span><span class="line"><span class="gi">+        &lt;![CDATA[</span>
-</span><span class="line"><span class="gi">+        {{ post.content | expand_urls: site.url | cdata_escape }}</span>
-</span><span class="line"><span class="gi">+		{% include post/copyright.html %}</span>
-</span><span class="line"><span class="gi">+        ]]&gt;</span>
-</span><span class="line"><span class="gi">+    &lt;/content&gt;</span>
-</span><span class="line">   &lt;/entry&gt;
-</span><span class="line">   {% endfor %}
-</span><span class="line"> &lt;/feed&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-就添加一句 <code>include post/copyright.html</code> ，不过要注意是在CDATA段中。 <code>rss.xml</code> 一样处理：
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>rss.xml添加版权声明 (rss_copyright.diff)</span> <a href="/downloads/code/rss_copyright.diff">download</a></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-</pre></td><td class="code"><pre><code class="diff"><span class="line"><span class="gh">diff --git a/source/rss.xml b/source/rss.xml</span>
-</span><span class="line"><span class="gh">index 435f17f..044e52f 100644</span>
-</span><span class="line"><span class="gd">--- a/source/rss.xml</span>
-</span><span class="line"><span class="gi">+++ b/source/rss.xml</span>
-</span><span class="line"><span class="gu">@@ -3,27 +3,31 @@ layout: nil</span>
-</span><span class="line"> ---
-</span><span class="line"> &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-</span><span class="line"> &lt;rss xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; version=&quot;2.0&quot;&gt;
-</span><span class="line">  &lt;channel&gt;
-</span><span class="line">    &lt;description&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/description&gt;
-</span><span class="line">    &lt;title&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/title&gt;
-</span><span class="line">    &lt;link&gt;{{ site.url }}/&lt;/link&gt;
-</span><span class="line">    &lt;pubDate&gt;{{ site.time | date_to_xmlschema }}&lt;/pubDate&gt;
-</span><span class="line">
-</span><span class="line">    {% for post in site.posts limit: 20 %}
-</span><span class="line">    &lt;item&gt;
-</span><span class="line">      &lt;description&gt;
-</span><span class="line">	&lt;![CDATA[
-</span><span class="line">		 {{ post.content | expand_urls: site.url | cdata_escape }}
-</span><span class="line"><span class="gi">+		 {% include post/copyright.html %}</span>
-</span><span class="line">	]]&gt;
-</span><span class="line">      &lt;/description&gt;
-</span><span class="line">      &lt;title&gt;&lt;![CDATA[{{ post.title | cdata_escape }}]]&gt;&lt;/title&gt;
-</span><span class="line">      &lt;link&gt;{{ site.url }}{{ post.url }}&lt;/link&gt;
-</span><span class="line">      &lt;pubDate&gt;{{ post.date | date_to_xmlschema }}&lt;/pubDate&gt;
-</span><span class="line">      &lt;guid isPermaLink=&quot;false&quot;&gt;{{ site.url }}{{ post.id }}&lt;/guid&gt;
-</span><span class="line">
-</span><span class="line">      &lt;source url=&quot;{{ site.url }}/rss.xml&quot;&gt;&lt;![CDATA[{{ site.title }}]]&gt;&lt;/source&gt;
-</span><span class="line">      &lt;author&gt;
-</span><span class="line">	&lt;name&gt;&lt;![CDATA[{{ site.author | strip_html }}]]&gt;&lt;/name&gt;
-</span><span class="line">	{% if site.email %}&lt;email&gt;&lt;![CDATA[{{ site.email }}]]&gt;&lt;/email&gt;{% endif %}
-</span><span class="line">      &lt;/author&gt;
-</span><span class="line">    &lt;/item&gt;
-</span><span class="line">    {% endfor %}
-</span><span class="line">  &lt;/channel&gt;
-</span><span class="line"> &lt;/rss&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-轻松搞定，效果就是我博客现在的效果。
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://log4d.com/2012/05/support-rss/">http://log4d.com/2012/05/support-rss/</a>
-</p>
-
-
-
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1844,19 +1888,19 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
 <section>
  <h1>Categories</h1>
  <ul id="categories">
- <li class='category'><a href='/blog/categories/Android/'>Android (12)</a></li>
+ <li class='category'><a href='/blog/categories/Android/'>Android (13)</a></li>
 <li class='category'><a href='/blog/categories/Emacs/'>Emacs (3)</a></li>
 <li class='category'><a href='/blog/categories/GTD/'>GTD (1)</a></li>
 <li class='category'><a href='/blog/categories/Linux/'>Linux (17)</a></li>
 <li class='category'><a href='/blog/categories/Octopress/'>Octopress (4)</a></li>
 <li class='category'><a href='/blog/categories/Org-Mode/'>Org-Mode (3)</a></li>
-<li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (4)</a></li>
+<li class='category'><a href='/blog/categories/Qualcomm/'>Qualcomm (5)</a></li>
 <li class='category'><a href='/blog/categories/RaspberryPi/'>RaspberryPi (2)</a></li>
 <li class='category'><a href='/blog/categories/Tomato/'>Tomato (1)</a></li>
 <li class='category'><a href='/blog/categories/Vim/'>Vim (2)</a></li>
 <li class='category'><a href='/blog/categories/iOS/'>iOS (1)</a></li>
 <li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
-<li class='category'><a href='/blog/categories/开发/'>开发 (13)</a></li>
+<li class='category'><a href='/blog/categories/开发/'>开发 (14)</a></li>
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (8)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (7)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
@@ -1867,6 +1911,10 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/07/02/jian-shu-yi-zhong-dian-chi-dian-liang-biao-de-qu-de-fang-fa/">简述一种电池电量表的取得方法</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/">搞了个半自动化的Vim</a>
@@ -1882,10 +1930,6 @@ Octopress自带的RSS模版中没有包含文章作者信息，而是只包含�
     
       <li class="post">
         <a href="/blog/2013/03/06/shi-yong-ccacheyou-hua-androidde-bian-yi-shi-jian/">使用ccache优化Android的编译时间</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/02/11/iphonezhong-yu-huan-shi-bei-wo-yue-yu-liao/">iPhone终于还是被我越狱了</a>
       </li>
     
   </ul>
