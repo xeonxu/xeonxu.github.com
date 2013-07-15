@@ -3,7 +3,7 @@ layout: post
 title: "使用ccache优化Android的编译时间"
 date: 2013-03-06 23:17
 comments: true
-categories: Android Qualcomm Linux
+categories: Android Qualcomm Linux 开发
 ---
 
 <p>
