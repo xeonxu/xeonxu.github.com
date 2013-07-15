@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 开发 | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/开发/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-07-14T23:30:24+08:00</updated>
+  <updated>2013-07-15T22:35:52+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -37,6 +37,8 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
 
 <p>
 可是，出于之前所说的一个问题，电池的电量和电压并没有一个绝对的对应关系，极端时甚至会出现得到的电量表中同一个电压值对应了多个电量。为了解决这个问题，我们引入了数学方法，使用样条差值的办法拟合采样的数据点，然后在拟合的曲线上重新进行电压电量对应关系的获取。使用了这个方法之后，电池电量方面的问题少了很多。而且由于使用了时间分割电量，所以在实际使用中，每格电量的使用时间都很接近，符合用户对电量的认知。拟合曲线的效果如图：
+</p>
+<p>
 <img src="http://blog.xeonxu.info/./images/blog/./1656N2v.png" alt="./images/blog/./1656N2v.png" />
 </p>
 
@@ -378,16 +380,17 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[在高通平台Android环境下编译内核模块]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai/"/>
-    <updated>2012-12-04T22:14:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/12/04/zai-gao-tong-ping-tai-androidhuan-jing-xia-bian-yi-nei-he-mo-kuai</id>
+    <title type="html"><![CDATA[使用ccache优化Android的编译时间]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/03/06/shi-yong-ccacheyou-hua-androidde-bian-yi-shi-jian/"/>
+    <updated>2013-03-06T23:17:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/03/06/shi-yong-ccacheyou-hua-androidde-bian-yi-shi-jian</id>
     <content type="html"><![CDATA[<p>
-高通Android环境中Linux内核会作为Android的一部分进行编译，直接使用make即可一次性从头编到尾。而有的平台比如Marvell，内核的编译操作相对比较独立，必须使用标准的内核编译命令进行单独编译。一般来说，用高通的这种方式比较傻瓜化，一步到底的感觉；而用Marvell的方式用户干预较多，灵活性也更大。当然这里不是比较他们孰优孰劣，对我来说这两种方式各有千秋。在遇到具体问题时，有时还会觉得独立编译内核的方式比较方便，比如编译内核模块这一点上。
+最近在Android编译过程中发现，使用ccache也能很好的提升C/C++编译感受，虽然比不上分布式编译所带来的成倍编译速度的体验，但是减少一半编译时间还是绰绰有余的。其实在Android的编译系统中已经自带了对ccache的支持，之前我那篇讲解如何使用distcc编译Android的<a href="http://blog.xeonxu.info/blog/2012/08/30/da-jian-linuxxia-de-fen-bu-shi-bian-yi-xi-tong/#sec-4">文章</a> 中其实就是在ccache的支持基础上进行修改的。但是Android编译系统中的ccache只对Android系统的库文件等进行优化，并不包括Kernel和LK的编译。没搞明白为什么原生的编译系统没有包含这两部分的ccache支持，为此我自己修改了Android编译系统中Kernel和LK的Makefile文件。使用修改后的Makefile文件编译Kernel和LK时，第二次可以节省3-4分钟的时间。看上去时间不长，但是考虑到原来编译Kernel和LK时需要用时8分钟左右，这点提升也是有意义的。
 </p>
 <p>
-编译内核模块之前必须先编译内核，编译内核之前必须先指定内核配置。在独立编译内核情况下，编译一遍内核后，可以直接使用 <code>make module</code> 来编译内核模块，如果修改了相应模块文件，使用相同的命令也能很快的进行增量编译。而在高通环境下，由于内核的编译过程已经被集成到Android的编译中，所以每次编译内核或者内核模块时，都必须通过Android的编译环境进行启用。虽然Android提供诸如 <code>make bootimage</code> 命令，可以只编译bootimage相关内容，但是Android庞大的编译体系在初始化时也会占用很多的时间。前段时间在调试一个独立的内核模块时就一直被这个问题困扰着，每次修改模块代码后都必须通过 <code>make bootimage</code> 来编译。虽然只有一个文件，但是每次编译都花费至少1min30sec，严重影响了开发进度。为此，自己参考内核模块独立编译的Makefile和Android的环境特点写了一个内核模块编译Makefile。
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+修改非常简单，对于Kernel只需要修改
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AndroidKernel.mk  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -408,32 +411,140 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
 <span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='makefile'><span class='line'><span class="c"># Author: zhiqiang.xu</span>
-</span><span class='line'><span class="c"># EMail:  xeonxu@gmail.com</span>
-</span><span class='line'><span class="nv">CROSS_ARCH</span><span class="o">:=</span><span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="s2">&quot;$(ARM_EABI_TOOLCHAIN)/arm-eabi-&quot;</span>
-</span><span class='line'>KDIR:<span class="o">=</span><span class="k">$(</span>ANDROID_PRODUCT_OUT<span class="k">)</span>/obj/KERNEL_OBJ/
-</span><span class='line'>PWD:<span class="o">=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gd">--- a/kernel/AndroidKernel.mk</span>
+</span><span class='line'><span class="gi">+++ b/kernel/AndroidKernel.mk</span>
+</span><span class='line'><span class="gu">@@ -62,30 +62,30 @@ $(KERNEL_OUT):</span>
+</span><span class='line'>        mkdir -p $(KERNEL_OUT)
 </span><span class='line'>
-</span><span class='line'>obj-m:<span class="o">=</span> my_module.o
-</span><span class='line'>.PHONY: modules package clean
-</span><span class='line'>all:package
-</span><span class='line'>modules:
-</span><span class='line'>    @if <span class="o">[</span> <span class="s2">&quot;$(ANDROID_BUILD_TOP)_yes&quot;</span> <span class="o">=</span> <span class="s2">&quot;_yes&quot;</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;You have to run \&quot;. build/envsetup.sh\&quot; to init enviroment first. \nAnd then you have to run</span>
-</span><span class='line'><span class="s2">\&quot;choosecombo\&quot; to setup the project.&quot;</span>&amp;amp;&amp;amp;exit 1; <span class="k">fi</span>
-</span><span class='line'>    @if <span class="o">[</span> ! -d <span class="k">$(</span>KDIR<span class="k">)</span> <span class="o">]</span>; <span class="k">then </span><span class="nb">echo</span> <span class="s2">&quot;Build kernle first.&quot;</span>&amp;amp;&amp;amp;cd <span class="k">$(</span>ANDROID_BUILD_TOP<span class="k">)</span>&amp;amp;&amp;amp;make bootimage&amp;amp;&amp;amp;cd -; <span class="k">fi</span>
-</span><span class='line'>    <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>CROSS_ARCH<span class="k">)</span> -C <span class="k">$(</span>KDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span><span class='line'> $(KERNEL_CONFIG): $(KERNEL_OUT)
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- $(KERNEL_DEFCONFIG)</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; $(KERNEL_DEFCONFIG)</span>
 </span><span class='line'>
-</span><span class='line'>package:modules
-</span><span class='line'>    @mkdir -p ./package
-</span><span class='line'>    @cp <span class="k">$(</span>obj-m:.o<span class="o">=</span>.ko<span class="k">)</span> ./package
+</span><span class='line'> $(KERNEL_OUT)/piggy : $(TARGET_PREBUILT_INT_KERNEL)
+</span><span class='line'>        $(hide) gunzip -c $(KERNEL_OUT)/arch/arm/boot/compressed/piggy.gzip &amp;gt; $(KERNEL_OUT)/piggy
 </span><span class='line'>
-</span><span class='line'>clean:
-</span><span class='line'>    rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers package
+</span><span class='line'> $(TARGET_PREBUILT_INT_KERNEL): $(KERNEL_OUT) $(KERNEL_CONFIG) $(KERNEL_HEADERS_INSTALL)
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- CONFIG_NO_ERROR_ON_MISMATCH=y</span>
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- modules</span>
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) INSTALL_MOD_PATH=../../$(KERNEL_MODULES_INSTALL) ARCH=arm CROSS_COMPILE=arm-eabi- modules_install</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; CONFIG_NO_ERROR_ON_MISMATCH=y</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; modules</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) INSTALL_MOD_PATH=../../$(KERNEL_MODULES_INSTALL) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; modules_install</span>
+</span><span class='line'>        $(mv-modules)
+</span><span class='line'>        $(clean-module-folder)
+</span><span class='line'>        $(append-dtb)
+</span><span class='line'>
+</span><span class='line'> $(KERNEL_HEADERS_INSTALL): $(KERNEL_OUT) $(KERNEL_CONFIG)
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- headers_install</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; headers_install</span>
+</span><span class='line'>
+</span><span class='line'> kerneltags: $(KERNEL_OUT) $(KERNEL_CONFIG)
+</span><span class='line'><span class="gd">-       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- tags</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; tags</span>
+</span><span class='line'>
+</span><span class='line'> kernelconfig: $(KERNEL_OUT) $(KERNEL_CONFIG)
+</span><span class='line'>        env KCONFIG_NOTIMESTAMP=true \
+</span><span class='line'><span class="gd">-            $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- menuconfig</span>
+</span><span class='line'><span class="gi">+            $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; menuconfig</span>
+</span><span class='line'>        env KCONFIG_NOTIMESTAMP=true \
+</span><span class='line'><span class="gd">-            $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- savedefconfig</span>
+</span><span class='line'><span class="gi">+            $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=&quot;ccache arm-eabi-&quot; savedefconfig</span>
+</span><span class='line'>        cp $(KERNEL_OUT)/defconfig kernel/arch/arm/configs/$(KERNEL_DEFCONFIG)
+</span><span class='line'>
+</span><span class='line'> endif
 </span></code></pre></td></tr></table></div></figure></notextile></div>
-该Makefile默认会将当前目录下的 <code>my_module.c</code> 文件编译为内核模块。同时，在编译时会强制检查Android的环境是否正确配置，如果没有配置它会进行相应提示后退出编译处理。编译模块时使用的内核配置是编译Android时指定项目所配置的内核配置。如果内核还没有编译，则在编译模块之前会自动编译内核主体。如果一切OK，则每次只会编译修改过的模块文件。编译好后会将模块文件单独拷贝到当前目录下的 <code>package</code> 目录中，方便使用。
-</p>
-<p>
-使用该编译脚本后，模块的编写调试效率高了不少，至少每次编译模块都可以在5sec内搞定了。加上上机实测调试，也能在30sec内完成。生命很可贵，像我一样当个懒人吧。
+
+对于LK，修改文件AndroidBoot.mk
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AndroidBoot.mk  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gd">--- a/AndroidBoot.mk</span>
+</span><span class='line'><span class="gi">+++ b/AndroidBoot.mk</span>
+</span><span class='line'><span class="gu">@@ -23,6 +23,10 @@ else</span>
+</span><span class='line'>   USER_SYSTEM := USER_SYSTEM=0
+</span><span class='line'> endif
+</span><span class='line'>
+</span><span class='line'><span class="gi">+ifeq ($(USE_CCACHE), 1)</span>
+</span><span class='line'><span class="gi">+  CCACHE := CCACHE=$(ANDROID_BUILD_TOP)/prebuilts/misc/linux-x86/ccache/ccache</span>
+</span><span class='line'><span class="gi">+endif</span>
+</span><span class='line'><span class="gi">+</span>
+</span><span class='line'> # NAND variant output
+</span><span class='line'> TARGET_NAND_BOOTLOADER := $(PRODUCT_OUT)/appsboot.mbn
+</span><span class='line'> NAND_BOOTLOADER_OUT := $(TARGET_OUT_INTERMEDIATES)/NAND_BOOTLOADER_OBJ
+</span><span class='line'><span class="gu">@@ -50,11 +54,11 @@ $(EMMC_BOOTLOADER_OUT): emmc_appsbootldr_clean</span>
+</span><span class='line'>
+</span><span class='line'> # Top level for NAND variant targets
+</span><span class='line'> $(TARGET_NAND_BOOTLOADER): $(NAND_BOOTLOADER_OUT)
+</span><span class='line'><span class="gd">-       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(NAND_BOOTLOADER_OUT) $(BOOTLOADER_PLATFORM) $(SIGNED_KERNEL)</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(NAND_BOOTLOADER_OUT) $(BOOTLOADER_PLATFORM) $(SIGNED_KERNEL) $(CCACHE)</span>
+</span><span class='line'>
+</span><span class='line'> # Top level for eMMC variant targets
+</span><span class='line'> $(TARGET_EMMC_BOOTLOADER): $(EMMC_BOOTLOADER_OUT)
+</span><span class='line'><span class="gd">-       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(EMMC_BOOTLOADER_OUT) $(BOOTLOADER_PLATFORM) EMMC_BOOT=1 $(SIGNED_KERNEL)</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(EMMC_BOOTLOADER_OUT) $(BOOTLOADER_PLATFORM) EMMC_BOOT=1 $(SIGNED_KERNEL) $(CCACHE)</span>
+</span><span class='line'>
+</span><span class='line'> # Keep build NAND &amp;amp; eMMC as default for targets still using TARGET_BOOTLOADER
+</span><span class='line'> TARGET_BOOTLOADER := $(PRODUCT_OUT)/EMMCBOOT.MBN
+</span><span class='line'><span class="gu">@@ -77,4 +81,4 @@ $(NANDWRITE_OUT): nandwrite_clean</span>
+</span><span class='line'>
+</span><span class='line'> $(TARGET_NANDWRITE): $(NANDWRITE_OUT)
+</span><span class='line'>        @echo $(BOOTLOADER_PLATFORM)_nandwrite
+</span><span class='line'><span class="gd">-       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(NANDWRITE_OUT) $(BOOTLOADER_PLATFORM)_nandwrite BUILD_NANDWRITE=1</span>
+</span><span class='line'><span class="gi">+       $(MAKE) -C bootable/bootloader/lk BOOTLOADER_OUT=../../../$(NANDWRITE_OUT) $(BOOTLOADER_PLATFORM)_nandwrite BUILD_NANDWRITE=1 $(CCACHE)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+使用时，和Android编译环境默认开启ccache支持一样，只需要在编译环境中定义 <code>USE_CCACHE=1</code> 即可。
 </p>
 ]]></content>
   </entry>
