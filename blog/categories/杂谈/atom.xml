@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 杂谈 | 不停地疯]]></title>
   <link href="http://blog.xeonxu.info/blog/categories/杂谈/atom.xml" rel="self"/>
   <link href="http://blog.xeonxu.info/"/>
-  <updated>2013-07-15T22:35:52+08:00</updated>
+  <updated>2013-07-16T00:09:06+08:00</updated>
   <id>http://blog.xeonxu.info/</id>
   <author>
     <name><![CDATA[Xeon Xu]]></name>
@@ -12,6 +12,59 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[windows上的alfred]]></title>
+    <link href="http://blog.xeonxu.info/blog/2013/07/02/windowsshang-de-alfred/"/>
+    <updated>2013-07-02T23:09:00+08:00</updated>
+    <id>http://blog.xeonxu.info/blog/2013/07/02/windowsshang-de-alfred</id>
+    <content type="html"><![CDATA[<p>
+Mac上我一直使用<a href="http://www.alfredapp.com">alfred</a> 快速索引文件以及快速操作什么的，而Windows上则没有找到一款比较好用的类似软件。加上Windows半残废的查找功能，每天在上面工作真是有种自虐的感觉。后来使用免费的<a href="http://www.voidtools.com">everything</a> ，查找文件快捷方便，弥补了Windows查找功能的不足。但是everything不能像alfred一样对搜索的结果直接进行操作，而且选择结果后everything也不会自动退出，经常造成多个窗口飘在桌面上，感觉不是很爽。直到最近，我在查找everything配置的过程中发现了另外一款Windows上的全盘索引软件：<a href="http://www.listary.com">Listary</a> ，借助它的索引和查找功能，不仅可以很方便的快速定位文件，而且可以对结果进行后续操作，有点alfred的影子，于是立马下载安装试用。
+</p>
+<p>
+Listary安装好后直接就运行了，运行后会有一段简单的使用指引，跟着它做可以快速了解Listary的主要功能。第一次安装运行后可能会对全盘进行索引，需要花点时间，但是速度还是比较快的，特别是相比Windows自带的那个残废来说。Listary属于后台程序，默认使用Win＋s激活，也可以自行设置快捷键。应用图标在右下角状态栏中可以找到，通过应用图标可以查看版本信息，查看帮助，或者设置软件。如果选择进入设置菜单，我们可以看到Listary目前支持的所有功能，如图：
+</p>
+<p>
+<img src="http://blog.xeonxu.info/./images/blog/./951HFA.png" alt="./images/blog/./951HFA.png" />
+</p>
+<p>
+可以看到Listary支持快速切换，模糊导航以及第三方文件管理器。这些都非常有用，除了模糊查找外，快速切换也是很有用的，可以非常方便的在打开文件对话框中快速定位到刚才打开的文件夹，而不用一层层的去选取进入，大大提高工作效率。此外，工程也是一个比较有用的概念。简单说，这个功能可以将一些常用的目录定义为一个搜索前缀，然后搜索时先打相应的搜索前缀，那么之后的搜索内容都会在之前定义的目录中去查找了。这比较适合我这种懒人，我一般将所有文档都放在一个固定目录下，但是却懒得整理，使用工程功能将该目录设定为doc前缀，之后搜索文档时只需要快捷键呼出Listary并敲入doc，然后空格并输入需要查找的文档名称就可以了。结果的展现只是一瞬间的事情，方便至极。中文名称？没问题！直接拼音缩写就行了。
+</p>
+<p>
+另外，Listary也支持everything的数据库，据说速度会更快一些，但是我没有发现差别，出于功能兼容方面的考虑，我使用Listary自带的索引引擎。外观功能据说在下个版本会提供主题的设置，目前只是简单的字体大小设置而已，以后可以关注下。可以说这个软件目前可以设置的功能就上图这么些了，没什么特别复杂的内容。
+</p>
+<p>
+对搜索结果的二次操作时alfred的一大特点，Listary对此也有支持，只是功能稍弱。默认是在搜索结果上按方向右键进入（结果如图），而且目前不能用户自定义该触发热键（喂，作者你就不能设置一个手指不用移这么远的按键么？）。未来也会支持对搜索结果的快捷键操作，目前只在开发测试版中可以用到。搜索快捷键使用vim的风格，通过ctrl键触发和关闭。在快捷键模式中可以通过数字直接选择结果，或者使用u/d键上下翻页，或者使用alt＋数字键进入结果的二次操作功能。
+</p>
+<p>
+<img src="http://blog.xeonxu.info/./images/blog/./951UPG.png" alt="./images/blog/./951UPG.png" />
+</p>
+<p>
+说到这里相信各位也有点感兴趣了吧？这款软件分免费版和付费版两个版本，免费版可以在非商业环境下使用，有部分功能限制，比如之前说的工程功能以及二次操作功能等。我为了用上完整功能，从异次元软件代理处购买了该软件的license。好在该软件的license是终身的，也就是说之后的所有版本升级都可以免费得到，同时一个license可以支持三台电脑安装，符合我上班工作的需要。
+</p>
+<p>
+除此之外，Listary还有以下缺点：
+</p>
+<ol>
+<li>相比alfred没有自定义脚本的功能
+</li>
+<li>某些特定场景下快速切换无效
+</li>
+<li>不支持索引Outlook等内容（这是巨硬的问题，苹果至少有spotlight做内容索引），所以邮件搜索还得靠残废的Windows Search
+</li>
+<li>快捷键支持不是很完美，特别是开发者还是vimer，所以快捷键都是vim风格的，没有emacs风格用着爽
+</li>
+<li>快捷键模式中进入二次操作界面后不能使用搜索快速定位功能选项
+</li>
+<li>存在一些诡异的Bug
+</li>
+</ol>
+
+<p>
+好在软件的开发者还比较活跃，隔几天会有一个新版本发布，而且也可以去官方论坛上提一些改进要求什么的。目前对我来说，这个软件的存在至少让我在windows上工作时多少有点在mac下的感觉。
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[入手HHKB Pro2]]></title>
@@ -134,52 +187,6 @@
 <p>
 今日纯属碎碎念，希望下周工作上任务都能快速完成，个人的几个安排都能顺利进行。另，下篇文章没差错的话应该是功夫网专题，否则又要被人数落跳票了。
 </p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[最近看完的两本书]]></title>
-    <link href="http://blog.xeonxu.info/blog/2012/10/29/zui-jin-kan-wan-de-liang-ben-shu/"/>
-    <updated>2012-10-29T22:23:00+08:00</updated>
-    <id>http://blog.xeonxu.info/blog/2012/10/29/zui-jin-kan-wan-de-liang-ben-shu</id>
-    <content type="html"><![CDATA[<p>
-近日看完两本关于Slackware的入门书，一本是大名鼎鼎的《Slackware Linux Essentials》，另一本是《Slackware Linux Basics》。之所以想起来看Slackware相关的书，是因为人生接触的第一个Linux发行版就是Slackware。那时候家里没有网络，从报纸上知道了开源软件和Linux的存在。后来在书店里看到了电子工业出版社出版的《Linux大全》，那是一本很厚的书，书的背面印着获取书中描述的Linux版本的方法，我就是从那里获取到的人生第一个Linux发行版。原版书提供三个Linux发行版可供选择，而电子工业出版社只提供其中的两个发行版，一个是人们熟知的RedHat，而另一个就是Slackware。当时本人处于对计算机技术极度痴迷的状态，总是希望能有一些挑战，所以选择邮购了其中安装及配置较为复杂的一个发行版，也就是Slackware。当然，最后从拿到Slackware光盘，到安装并简单配置到能使用确实花了不少时间，也因为如此，我对Slackware的印象才如此深刻。之后在大学的时候自己买过RedHat/Fedora并用了那么几次，工作了后接触更多的是Ubuntu，但是随着Linux使用经验的逐渐增长以及知识的不断积累，越发觉得之后使用的那些Linux发行版似乎都缺少了一点什么，这种感觉说不上来，但是这种隐隐约约的感觉将我的目光再次引向Slackware发行版。
-</p>
-<p>
-碰巧，前段时间从网上买过一台Raspberry Pi<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>，而且正好，又有爱好者将ArmedSlack<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>移植到了Raspberry Pi上，理所当然，我的Raspberry Pi便跑上了Slackware。可惜，虽说最早接触的是Slackware，但是自己对Slackware的了解并不系统，所以下定决心说一定要看完至少一本关于Slackware的著作。于是，才从网上找到上述的两本书。还好，从目前情况来看，这个任务算是完成了，而且超标了。
-</p>
-<p>
-现在说说才看完的这两本书，作为Slackware Linux的官方教材《Slackware Linux Essentials》<sup><a class="footref" name="fnr.3" href="#fn.3">3</a></sup>更新并不频繁，目前作者正在编写第三版，但是该版尚处于Beta状态<sup><a class="footref" name="fnr.4" href="#fn.4">4</a></sup>，所以市面上能买到的只有第二版。鉴于前者更新不够及时，导致了《Slackware Linux Basics》<sup><a class="footref" name="fnr.5" href="#fn.5">5</a></sup>的出现。从名字上看，前者似乎比后者更加全面，但从本人阅读下来的感觉来说，Basics的内容明显要比Essentials的深入一些；从页数上来说，Basics的相比也要多一些，但是这并不是说两本书哪本更好。单从入门角度来讲，我觉得Essentials的内容更适合入门学习；Basics的内容作为Essentials的补充，适合进阶学习。总体来讲，两本书可以互相参考学习。就本人经验，看完其中一本后，另外一本可以很快看完，因为只需要看差异的部分就可以了。虽然这两本书都以Slackware为切入点，但是其内容对于其它发行版也是部分适用的。所以，不论对于想学Slackware还是想学Linux的同学，我是极力推荐去看这两本书的，比市面上买的那些翻译山寨教学书好过不少。至于需要书的同学，可以去脚注找找，两本书官方都提供常用电子档下载，而我是用软件将HTML转成了kindle格式在kindle上读完这两本书的。
-</p>
-<p>
-另外，做个预告，我打算将Raspberry Pi打造为基于ArmedSlack系统的“科学上网机”，目前基本成型，具体实现方法和相关软件会随着博客的更新逐步公开。
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> <a href="http://www.raspberrypi.org">http://www.raspberrypi.org</a>
-</p>
-
-
-<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 一款基于ARM芯片的Slackware Linux发行版，网址：<a href="http://www.armedslack.org">http://www.armedslack.org</a>
-</p>
-
-
-<p class="footnote"><sup><a class="footnum" name="fn.3" href="#fnr.3">3</a></sup> <a href="http://slackbook.org">http://slackbook.org</a>
-</p>
-
-
-<p class="footnote"><sup><a class="footnum" name="fn.4" href="#fnr.4">4</a></sup> <a href="http://slackbook.org/beta/">http://slackbook.org/beta/</a>
-</p>
-
-
-<p class="footnote"><sup><a class="footnum" name="fn.5" href="#fnr.5">5</a></sup> <a href="http://code.google.com/p/support/">http://code.google.com/p/support/</a>
-</p>
-
-
-
-</div>
-</div>
 ]]></content>
   </entry>
   

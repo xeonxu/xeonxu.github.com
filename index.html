@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="一般来说，常用的电池电量的计算方法有两种：一种是使用叫做库仑计的ADC器件对电池的电流进行时间积分统计，然后除以电池的总毫安时容量，从而得出电池当前的电量；而另一种是使用电压采样ADC获取电池当前的端电压，并通过软件计算出电池的开路电压，然后根据电池的电压－ &hellip;">
+  <meta name="description" content="Mac上我一直使用alfred 快速索引文件以及快速操作什么的，而Windows上则没有找到一款比较好用的类似软件。加上Windows半残废的查找功能，每天在上面工作真是有种自虐的感觉。后来使用免费的everything ，查找文件快捷方便，弥补了Windows查找功能的不足。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,90 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2013/07/02/windowsshang-de-alfred/">Windows上的alfred</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-02T23:09:00+08:00" pubdate data-updated="true">2013年07月02日</time>
+        
+         | <a href="/blog/2013/07/02/windowsshang-de-alfred/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+Mac上我一直使用<a href="http://www.alfredapp.com">alfred</a> 快速索引文件以及快速操作什么的，而Windows上则没有找到一款比较好用的类似软件。加上Windows半残废的查找功能，每天在上面工作真是有种自虐的感觉。后来使用免费的<a href="http://www.voidtools.com">everything</a> ，查找文件快捷方便，弥补了Windows查找功能的不足。但是everything不能像alfred一样对搜索的结果直接进行操作，而且选择结果后everything也不会自动退出，经常造成多个窗口飘在桌面上，感觉不是很爽。直到最近，我在查找everything配置的过程中发现了另外一款Windows上的全盘索引软件：<a href="http://www.listary.com">Listary</a> ，借助它的索引和查找功能，不仅可以很方便的快速定位文件，而且可以对结果进行后续操作，有点alfred的影子，于是立马下载安装试用。
+</p>
+<p>
+Listary安装好后直接就运行了，运行后会有一段简单的使用指引，跟着它做可以快速了解Listary的主要功能。第一次安装运行后可能会对全盘进行索引，需要花点时间，但是速度还是比较快的，特别是相比Windows自带的那个残废来说。Listary属于后台程序，默认使用Win＋s激活，也可以自行设置快捷键。应用图标在右下角状态栏中可以找到，通过应用图标可以查看版本信息，查看帮助，或者设置软件。如果选择进入设置菜单，我们可以看到Listary目前支持的所有功能，如图：
+</p>
+<p>
+<img src="/./images/blog/./951HFA.png" alt="./images/blog/./951HFA.png" />
+</p>
+<p>
+可以看到Listary支持快速切换，模糊导航以及第三方文件管理器。这些都非常有用，除了模糊查找外，快速切换也是很有用的，可以非常方便的在打开文件对话框中快速定位到刚才打开的文件夹，而不用一层层的去选取进入，大大提高工作效率。此外，工程也是一个比较有用的概念。简单说，这个功能可以将一些常用的目录定义为一个搜索前缀，然后搜索时先打相应的搜索前缀，那么之后的搜索内容都会在之前定义的目录中去查找了。这比较适合我这种懒人，我一般将所有文档都放在一个固定目录下，但是却懒得整理，使用工程功能将该目录设定为doc前缀，之后搜索文档时只需要快捷键呼出Listary并敲入doc，然后空格并输入需要查找的文档名称就可以了。结果的展现只是一瞬间的事情，方便至极。中文名称？没问题！直接拼音缩写就行了。
+</p>
+<p>
+另外，Listary也支持everything的数据库，据说速度会更快一些，但是我没有发现差别，出于功能兼容方面的考虑，我使用Listary自带的索引引擎。外观功能据说在下个版本会提供主题的设置，目前只是简单的字体大小设置而已，以后可以关注下。可以说这个软件目前可以设置的功能就上图这么些了，没什么特别复杂的内容。
+</p>
+<p>
+对搜索结果的二次操作时alfred的一大特点，Listary对此也有支持，只是功能稍弱。默认是在搜索结果上按方向右键进入（结果如图），而且目前不能用户自定义该触发热键（喂，作者你就不能设置一个手指不用移这么远的按键么？）。未来也会支持对搜索结果的快捷键操作，目前只在开发测试版中可以用到。搜索快捷键使用vim的风格，通过ctrl键触发和关闭。在快捷键模式中可以通过数字直接选择结果，或者使用u/d键上下翻页，或者使用alt＋数字键进入结果的二次操作功能。
+</p>
+<p>
+<img src="/./images/blog/./951UPG.png" alt="./images/blog/./951UPG.png" />
+</p>
+<p>
+说到这里相信各位也有点感兴趣了吧？这款软件分免费版和付费版两个版本，免费版可以在非商业环境下使用，有部分功能限制，比如之前说的工程功能以及二次操作功能等。我为了用上完整功能，从异次元软件代理处购买了该软件的license。好在该软件的license是终身的，也就是说之后的所有版本升级都可以免费得到，同时一个license可以支持三台电脑安装，符合我上班工作的需要。
+</p>
+<p>
+除此之外，Listary还有以下缺点：
+</p>
+<ol>
+<li>相比alfred没有自定义脚本的功能
+</li>
+<li>某些特定场景下快速切换无效
+</li>
+<li>不支持索引Outlook等内容（这是巨硬的问题，苹果至少有spotlight做内容索引），所以邮件搜索还得靠残废的Windows Search
+</li>
+<li>快捷键支持不是很完美，特别是开发者还是vimer，所以快捷键都是vim风格的，没有emacs风格用着爽
+</li>
+<li>快捷键模式中进入二次操作界面后不能使用搜索快速定位功能选项
+</li>
+<li>存在一些诡异的Bug
+</li>
+</ol>
+
+<p>
+好在软件的开发者还比较活跃，隔几天会有一个新版本发布，而且也可以去官方论坛上提一些改进要求什么的。目前对我来说，这个软件的存在至少让我在windows上工作时多少有点在mac下的感觉。
+</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1064,51 +1148,6 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/12/24/ji-nian-feng-hua-jun/">纪念冯华君</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-24T21:39:00+08:00" pubdate data-updated="true">2012年12月24日</time>
-        
-         | <a href="/blog/2012/12/24/ji-nian-feng-hua-jun/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-这几天听到的最令人震惊也是最让人遗憾的消息就是，年轻的31岁程序开发者冯华君去世了。当我刚在twitter上看到这个消息的时候，我都不相信自己的眼睛。我与冯华君并未谋过面，只在几年前和他在MSN上简单聊过几句。那时他正在开发Mac上的FIT输入法，而我联系他是跟他反馈几个关于输入法的改进建议。从那次简单的交流中，我所认识到的冯华君是一位有想法，有理想抱负的年轻人。当他得知我也是一名程序员时，也曾鼓励我去为FIT做贡献。可惜，我的懒惰和拖延症使得这一切成为遗憾，这是唯一一次可以和华君一起工作的机会。此后我们在网上接触的机会少了，再后来出现了twitter和微博，我关注了他。但在微博上我们基本没有怎么互动过，因为那时的我变得更加懒惰，只是彼此价值观接近，我时常转发一些他的帖子。然而现如今，斯人已然离去。
-</p>
-<p>
-今天，在为冯华君惋惜的同时，我也感到无比地懊恼和惭愧。只愿这位年轻人在世界地另一个地方能过得好吧。
-</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1144,9 +1183,10 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
 <li class='category'><a href='/blog/categories/iOS/'>iOS (1)</a></li>
 <li class='category'><a href='/blog/categories/功夫网/'>功夫网 (1)</a></li>
 <li class='category'><a href='/blog/categories/开发/'>开发 (15)</a></li>
-<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (8)</a></li>
+<li class='category'><a href='/blog/categories/杂谈/'>杂谈 (9)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (7)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
+<li class='category'><a href='/blog/categories/酷软/'>酷软 (1)</a></li>
 <li class='category'><a href='/blog/categories/随笔/'>随笔 (7)</a></li>
 
  </ul>
@@ -1154,6 +1194,10 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/07/02/windowsshang-de-alfred/">windows上的alfred</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/07/02/jian-shu-yi-zhong-dian-chi-dian-liang-biao-de-qu-de-fang-fa/">简述一种电池电量表的取得方法</a>
@@ -1169,10 +1213,6 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
     
       <li class="post">
         <a href="/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan/">使用Make系统自动生成手机驱动光盘</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/03/06/shi-yong-ccacheyou-hua-androidde-bian-yi-shi-jian/">使用ccache优化Android的编译时间</a>
       </li>
     
   </ul>
