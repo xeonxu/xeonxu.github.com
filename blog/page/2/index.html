@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="这几天听到的最令人震惊也是最让人遗憾的消息就是，年轻的31岁程序开发者冯华君去世了。当我刚在twitter上看到这个消息的时候，我都不相信自己的眼睛。我与冯华君并未谋过面，只在几年前和他在MSN上简单聊过几句。那时他正在开发Mac上的FIT输入法，而我联系他是跟他反馈几个关于输入法的改进建议。 &hellip;">
+  <meta name="description" content="不经意间，9个月过去了，宝宝也赶在13年前夕，提前预产期一个月降临人世。由于早产，被医院隔离监护了2天，第3天才将小孩从保暖房里接出来。第一次看到自己小孩娇小的模样，真是又兴奋，又担心。开始当爸爸后，各种工作也就接踵而至。首先是喂奶，由于是初期，母乳还没有多少，只能泡奶粉。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +85,54 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2013/01/12/dang-ba-ba-liao/">当爸爸了</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-12T22:13:00+08:00" pubdate data-updated="true">2013年01月12日</time>
+        
+         | <a href="/blog/2013/01/12/dang-ba-ba-liao/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>
+不经意间，9个月过去了，宝宝也赶在13年前夕，提前预产期一个月降临人世。由于早产，被医院隔离监护了2天，第3天才将小孩从保暖房里接出来。第一次看到自己小孩娇小的模样，真是又兴奋，又担心。开始当爸爸后，各种工作也就接踵而至。首先是喂奶，由于是初期，母乳还没有多少，只能泡奶粉。但是我这个毛手爸爸除了能喂饱自己以外，小孩奶粉还真不会泡。看了奶粉说明，试了水温，冲了奶粉，结果小孩还是不爱吃。后来我才知道，那是因为之前调的奶粉温度太低了。好在到了第2天，母乳已经很多了，可以直接母乳喂养，才算将我从冲泡奶粉的差事中解放出来。除了喂奶，换尿布也是重头戏。小孩2小时吃一次奶换一次尿布，初为父母的我们，第一天为此真是忙得手忙脚乱。还好有“尿不湿”的存在，否则光是换洗尿布，就够我受了。
+</p>
+<p>
+现在，从小孩出生，已经过去了半个月，小孩也从之前的5斤长到如今的7斤。看着他一天天长大，心中充满了欣慰。真心希望他能越来越好，健健康康。
+</p>
+<p>
+加油，小子！
+</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1708,127 +1756,6 @@ OK，大功告成。退出远程机，使用 <code>ssh user@server</code> 命令
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/">小脚本帮大忙</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-21T23:38:00+08:00" pubdate data-updated="true">2012年10月21日</time>
-        
-         | <a href="/blog/2012/10/21/xiao-jiao-ben-bang-da-mang/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-前两天单位的在做项目中发现一个Bug：手机在启动后触摸屏有一定几率无法使用。这个Bug非常恼人，因为重现几率非常低，而且只会出现在重启过程中。这意味着不论是调查原因还是验证对策，都将是非常耗时且繁琐的。因为对策问题之前，首先需要重现问题，如此才好分析问题的原因。而这个Bug必须要反复重启手机才能重现，人为操作的话太浪费时间效率低下。
-好在这个Bug的行为比较稳定，重现后触屏肯定不能使用。通过adb对比调查正常手机和问题手机的设备节点，发现在出问题的手机中，触屏设备没有注册成功。看来是设备注册失败，导致的触屏异常。于是，我们考虑使用脚本对该Bug进行再现分析。思路如下：
-</p>
-<ol>
-<li>写一个脚本判断触屏驱动的设备节点是否注册成功，如果成功则复位重启；否则保留现场等待分析。
-</li>
-<li>将该脚本添加到 <code>init.rc</code> 中成为一个服务，在启动时调用。
-</li>
-<li>脚本运行时将相应的运行信息输出到外部文件中，从而可以计算出再现率。
-</li>
-</ol>
-
-<p>基于以上想法，写出了以下脚本代码：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>check_tp.sh  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#!/system/bin/sh</span>
-</span><span class="line"><span class="nv">tp_name</span><span class="o">=</span><span class="s2">&quot;xxxx&quot;</span> <span class="c"># xxxx为注册的tp名称</span>
-</span><span class="line"><span class="nv">input_name</span><span class="o">=</span><span class="sb">`</span>cat /sys/class/input/input0/name<span class="sb">`</span>
-</span><span class="line"><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;x_$tp_name&quot;</span> <span class="o">=</span> <span class="s2">&quot;x_$input_name&quot;</span> <span class="o">]</span>; <span class="k">then</span>
-</span><span class="line"><span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is OK.&quot;</span> &gt;&gt; /data/check_tp.log
-</span><span class="line">    reboot
-</span><span class="line"><span class="k">else</span>
-</span><span class="line"><span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is not OK.&quot;</span> &gt;&gt; /data/check_tp.log
-</span><span class="line"><span class="k">fi</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-同时，修改 <code>init.rc</code> 文件，在其中加入：
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">service check_tp /system/bin/sh /system/bin/check_tp.sh
-</span><span class="line">    class main
-</span><span class="line">    oneshot
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-然后重新编译bootimage并刷机。最后使用 <code>adb remount&amp;&amp;adb push check_tp.sh /system/bin/&amp;&amp;adb shell chmod 755 /system/bin/check_tp.sh</code> ，将刚才新写的脚本推送到手机上。重启手机，之后就会看到手机不断的上电然后复位重启。
-在运行该脚本不断重启手机8小时之后，手机正常进入了系统。此时操作手机进行验证，发现触屏已经无效。分析 <code>/data/check_tp.log</code> 文件，算出手机共重启了1000多次，从而得出该问题的再现率大概为千分之一。利用该脚本，验证bug方便了好多，大大提高了工作效率。
-</p>
-
-<div id="outline-container-1" class="outline-2">
-<h2 id="sec-1">后记</h2>
-<div class="outline-text-2" id="text-1">
-
-<p>由于以上写的脚本使用到了 <code>if</code> 关键字，而Android系统默认不支持该关键字，必须依赖busybox环境才行。之前我有移植过busybox，但是只在工程模式下生效，所以该脚本在release版本中是不能正常运行的。为了不依赖运行环境，我又将该脚本换了一种写法，改为：
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>check_tp2.sh  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#!/system/bin/sh</span>
-</span><span class="line"><span class="nv">tp_name</span><span class="o">=</span><span class="s2">&quot;xxxx&quot;</span> <span class="c"># xxxx为注册的tp名称</span>
-</span><span class="line"><span class="nv">input_name</span><span class="o">=</span><span class="sb">`</span>cat /sys/class/input/input0/name<span class="sb">`</span>
-</span><span class="line"><span class="k">case</span> <span class="nv">$input_name</span> in
-</span><span class="line">    <span class="nv">$tp_name</span><span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is OK.&quot;</span> &gt;&gt; /data/check_tp.log
-</span><span class="line">              reboot
-</span><span class="line">             ;;
-</span><span class="line">    *<span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;`date` touch screen is not OK.&quot;</span> &gt;&gt; /data/check_tp.log
-</span><span class="line">            ;;
-</span><span class="line"><span class="k">esac</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-这样，即便是在Android原生环境中，也可以正确无误的运行。这样就能将该脚本发给测试，利用它对release版本进行bug验证了。
-</p></div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1869,14 +1796,18 @@ OK，大功告成。退出远程机，使用 <code>ssh user@server</code> 命令
 <li class='category'><a href='/blog/categories/杂谈/'>杂谈 (9)</a></li>
 <li class='category'><a href='/blog/categories/生活/'>生活 (7)</a></li>
 <li class='category'><a href='/blog/categories/翻译/'>翻译 (1)</a></li>
-<li class='category'><a href='/blog/categories/酷软/'>酷软 (1)</a></li>
-<li class='category'><a href='/blog/categories/随笔/'>随笔 (7)</a></li>
+<li class='category'><a href='/blog/categories/酷软/'>酷软 (2)</a></li>
+<li class='category'><a href='/blog/categories/随笔/'>随笔 (8)</a></li>
 
  </ul>
 </section>
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/07/14/limbodi-yu-bian-jing/">Limbo地狱边境</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/07/02/windowsshang-de-alfred/">windows上的alfred</a>
@@ -1892,10 +1823,6 @@ OK，大功告成。退出远程机，使用 <code>ssh user@server</code> 命令
     
       <li class="post">
         <a href="/blog/2013/05/13/zai-tan-zi-dong-sheng-cheng-isowen-jian-de-ke-zhi-hua-wen-ti/">再谈自动生成ISO文件的客制化问题</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/03/24/shi-yong-makexi-tong-zi-dong-sheng-cheng-shou-ji-qu-dong-guang-pan/">使用Make系统自动生成手机驱动光盘</a>
       </li>
     
   </ul>
