@@ -1,3 +1,9 @@
 [submodule "source/org_posts"]
 	path = source/org_posts
-	url = git@githost.com:xeonxu/org_files.git
+	url = git@bitbucket.org:xeonxu/org_files.git
+[submodule ".themes/slash"]
+	path = .themes/slash
+	url = git://github.com/tommy351/Octopress-Theme-Slash.git
+[submodule ".themes/darkstripes"]
+	path = .themes/darkstripes
+	url = git://github.com/amelandri/darkstripes.git
