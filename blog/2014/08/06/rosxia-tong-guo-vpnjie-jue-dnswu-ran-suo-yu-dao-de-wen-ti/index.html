@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>在Linux内核模块中操作I2C设备 - 不停地疯</title>
+  <title>简单总结ROS下通过VPN解决DNS污染时所遇到的问题 - 不停地疯</title>
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="近期公司项目较为空闲，抽空做了一些学习性质的研发内容，其中涉及到在Linux内核模块中使用I2C对外部器件进行控制的操作。虽然在Linux中操作使用I2C设备并不复杂，但本人接触Linux内核驱动开发时间并不算长，此次学习中也算较为系统的了解了Linux中对I2C设备的操控方式，谨在此做下记录 &hellip;">
+  <meta name="description" content="之前参照ROS透明经济翻墙在家中搭建了无痛网络，但是期间在解决DNS污染问题上纠缠了一阵，现简单总结一下所遇到的问题。原因有几个方面： 在配置ROS路由器时，本地流量不受标记影响，所以路由器本地是不走vpn的。而电脑DNS之前指定的是ROS自带的DNS， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/">
+  <link rel="canonical" href="http://blog.xeonxu.info/blog/2014/08/06/rosxia-tong-guo-vpnjie-jue-dnswu-ran-suo-yu-dao-de-wen-ti/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -89,7 +89,7 @@
   <header>
     
       
-        <h1 class="entry-title">在Linux内核模块中操作I2C设备</h1>
+        <h1 class="entry-title">简单总结ROS下通过VPN解决DNS污染时所遇到的问题</h1>
       
     
     
@@ -106,7 +106,7 @@
   
 
 
-<time datetime="2012-11-25T00:02:00+08:00" pubdate data-updated="true">2012年11月25日</time>
+<time datetime="2014-08-06T22:30:00+08:00" pubdate data-updated="true">2014年08月06日</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -115,93 +115,17 @@
   </header>
 
 
-<div class="entry-content"><p>
-近期公司项目较为空闲，抽空做了一些学习性质的研发内容，其中涉及到在Linux内核模块中使用I2C对外部器件进行控制的操作。虽然在Linux中操作使用I2C设备并不复杂，但本人接触Linux内核驱动开发时间并不算长，此次学习中也算较为系统的了解了Linux中对I2C设备的操控方式，谨在此做下记录。
-</p>
-<p>
-通过Linux内核文档中关于操作I2C设备的文章后不难看出Linux中注册使用I2C设备一般通过四种方法<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>：
-</p>
+<div class="entry-content"><p>之前参照<a href="http://bbs.router.com.cn/thread-45681-1-1.html">ROS透明经济翻墙</a>在家中搭建了无痛网络，但是期间在解决DNS污染问题上纠缠了一阵，现简单总结一下所遇到的问题。原因有几个方面：</p>
+
 <ol>
-<li>通过总线号声明设备
-</li>
-<li>立即探测设备
-</li>
-<li>通过Probe探测相应设备
-</li>
-<li>在用户空间立即探测
-</li>
+  <li>在配置ROS路由器时，本地流量不受标记影响，所以路由器本地是不走vpn的。而电脑DNS之前指定的是ROS自带的DNS，所以虽然在ROS上指定了上级DNS为Google DNS，但由于ROS本地没走vpn，所以域名仍然会被污染。</li>
+  <li>后来在另外一台路由器上使用了dnsmasq，但是由于沿用了之前配置，所以忘了将114DNS从主查询DNS中删除，更关键在于，污染的域名没有强制使用Google DNS进行解析，所以，虽然添加了Google DNS作为上级查询，但是114DNS的反馈要快好多，所以使用中还是会遇到污染。</li>
+  <li>接下来，尝试使用了openDNS的非标端口，解决污染有效，但是openDNS不够稳定，所以继续探索。</li>
+  <li>最后，经过多次尝试后才发现是第一步中所遇到的污染问题是由于ROS本地流量标记的问题。于是还是决定使用dnsmasq来解决，最后在配置文件中将被污染的域名设置为强制走Google DNS，这样在ROS自动路由的情况下，Google DNS走vpn，被污染的域名就可以从Google DNS获得干净的ip地址了。这样就解决了污染问题。不过这个解决方案仍然需要人为维护，至少需要维护dnsmasq配置文件中被污染的域名列表。</li>
 </ol>
 
-<p>
-简单来说，第一种方式一般应用在嵌入式设备中。因为对于嵌入式设备来说，外围器件基本都是固定的，只需提供有限几款器件的支持即可。使用这种方式的时候，需要在板级配置文件中定义并设置 <code>i2c_board_info</code> 这个结构体的内容。其中需要配置设备名称和设备地址，此外设备中断和私有数据结构也可以选择设置。然后使用 <code>i2c_register_board_info</code> 这个接口对设置的设备进行注册使用。需要注意的是这种方法注册的设备是在注册I2C总线驱动时进行驱动适配的。
-</p>
-<p>
-第二种方法可以通过给定的I2C适配器以及相应的I2C板级结构体，自行通过 <code>i2c_new_device</code> 接口进行添加注册所需的设备。这种方法灵活性要较第一种方法大，可以很方便的在模块中使用。
-</p>
-<p>
-第三种方法是 <code>2.6</code> 内核之前的做法，使用 <code>detect</code> 方法去探测总线上的设备驱动。因为探测机制的原因，会导致一些副作用的发生，所以不建议使用，除非真的没有别的办法。
-</p>
-<p>
-第四种方法是在Linux的控制台上，在用户空间通过sysfs，使用 <code>/sys/bus/i2c/devices/i2c-3/new_device</code> 节点进行设备的添加注册。
-</p>
-<p>
-从上面可以看出，如果需要在Linux内核中以模块的方式对I2C设备进行驱动控制的话，第二种方法是比较推荐的。通过测试，在module的init中使用
+<p>最近，看到shadowsocks的作者<a href="https://twitter.com/clowwindy">@clowwindy</a>又搞出了个<a href="https://github.com/clowwindy/ChinaDNS-C">china-DNS</a>的玩意，看上去非常不错，可以很傻瓜免维护的解决DNS，准备有时间再搞一搞。</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_adapter</span> <span class="o">*</span><span class="n">i2c_adap</span><span class="p">;</span>
-</span><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
-</span><span class="line"><span class="n">i2c_adap</span> <span class="o">=</span> <span class="n">i2c_get_adapter</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-</span><span class="line"><span class="n">i2c_client</span> <span class="o">=</span> <span class="n">i2c_new_device</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">i2c_device</span><span class="p">);</span>
-</span><span class="line"><span class="n">i2c_put_adapter</span><span class="p">(</span><span class="n">i2c_adap</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-即可成功注册I2C设备。其中:
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">static</span> <span class="k">struct</span> <span class="n">i2c_board_info</span> <span class="n">ft5306_i2c_device</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class="line">    <span class="n">I2C_BOARD_INFO</span><span class="p">(</span><span class="s">&quot;test_i2c&quot;</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">),</span>
-</span><span class="line"><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-以上，对于如何在模块中注册使用I2C设备简单做了描述。那么如何在另外的模块中对已经注册的I2C设备进行反注册呢？由于内核中操作I2C设备都是通过 <code>i2c_client</code> 结构进行，所以问题可以抽象为如何在内核中获取指定设备的 <code>i2c_client</code> 结构指针。通过查阅内核API，也找到了一个方法可以达到这样的目的，如下：
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">i2c_client</span> <span class="o">*</span><span class="n">i2c_client</span><span class="p">;</span>
-</span><span class="line"><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">i2c_dev</span><span class="p">;</span>
-</span><span class="line">
-</span><span class="line"><span class="n">i2c_dev</span> <span class="o">=</span> <span class="n">bus_find_device_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i2c_bus_type</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="s">&quot;1-0011&quot;</span><span class="p">);</span>
-</span><span class="line"><span class="k">if</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">)</span>
-</span><span class="line">    <span class="n">i2c_client</span>  <span class="o">=</span>  <span class="n">container_of</span><span class="p">(</span><span class="n">i2c_dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">i2c_client</span><span class="p">,</span> <span class="n">dev</span><span class="p">);</span>
-</span><span class="line"><span class="k">if</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">)</span>
-</span><span class="line">    <span class="n">i2c_unregister_device</span><span class="p">(</span><span class="n">i2c_client</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-该反注册例子的内容就是对前面注册的 <code>0x11</code> 地址的设备进行反注册。注意 <code>bus_find_device_by_name</code> 函数中第三项参数，该参数是需要查找的设备在总线上注册的名称。&#8221;1&#8221;代表着1号适配器，&#8221;0011&#8221;是16位的I2C地址。如此便可方便的在内核模块中对I2C设备进行挂载和解挂了。
-</p>
-<div id="footnotes">
-<h2 class="footnotes">Footnotes: </h2>
-<div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> 参考Linux内核目录下的Documentation/i2c/instantiating-devices
-</p>
-
-
-
-</div>
-</div>
 </div>
 
 
@@ -224,14 +148,8 @@
   
 
 
-<time datetime="2012-11-25T00:02:00+08:00" pubdate data-updated="true">2012年11月25日</time>
+<time datetime="2014-08-06T22:30:00+08:00" pubdate data-updated="true">2014年08月06日</time>
       
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/Android/'>Android</a>, <a class='category' href='/blog/categories/Linux/'>Linux</a>, <a class='category' href='/blog/categories/开发/'>开发</a>
-  
-</span>
 
 
     </p>
@@ -263,7 +181,7 @@
   
 
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.xeonxu.info/blog/2014/08/06/rosxia-tong-guo-vpnjie-jue-dnswu-ran-suo-yu-dao-de-wen-ti/" data-via="xeonxu" data-counturl="http://blog.xeonxu.info/blog/2014/08/06/rosxia-tong-guo-vpnjie-jue-dnswu-ran-suo-yu-dao-de-wen-ti/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -277,10 +195,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left articlenav" href="/blog/2012/11/18/jin-qi-de-fan-nao/" title="Previous Post: 近期的烦恼">&laquo; 近期的烦恼</a>
+        <a class="basic-alignment left articlenav" href="/blog/2014/08/04/you-yi-nian/" title="Previous Post: 又一年">&laquo; 又一年</a>
       
-      
-        <a class="basic-alignment right articlenav" href="/blog/2012/12/02/raspberry-pishang-da-jian-zi-dong-sshdai-li/" title="Next Post: Raspberry Pi上搭建自动ssh代理">Raspberry Pi上搭建自动ssh代理 &raquo;</a>
       
     </p>
   </footer>
@@ -423,8 +339,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/';
-        var disqus_url = 'http://blog.xeonxu.info/blog/2012/11/25/zai-linuxnei-he-zhong-yi-mo-kuai-fang-shi-cao-zuo-i2cshe-bei/';
+        var disqus_identifier = 'http://blog.xeonxu.info/blog/2014/08/06/rosxia-tong-guo-vpnjie-jue-dnswu-ran-suo-yu-dao-de-wen-ti/';
+        var disqus_url = 'http://blog.xeonxu.info/blog/2014/08/06/rosxia-tong-guo-vpnjie-jue-dnswu-ran-suo-yu-dao-de-wen-ti/';
         var disqus_script = 'embed.js';
       
     (function () {

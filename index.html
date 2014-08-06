@@ -9,7 +9,7 @@
   <meta name="author" content="Xeon Xu">
 
   
-  <meta name="description" content="不经意间，距离上一次更新博客，已经又一年过去。至于为何这么长时间没有更新博客，个人原因可能是最万能的一种回答方式吧。一方面工作的繁忙，加上家中新添的一员，各个方面都影响着懒惰的自己改变着现有的状态。儿子在这一年内成长很快，突然间牙齿就已经14颗了，爸爸妈妈也叫的很欢。这一年间，我学会了德淘奶粉， &hellip;">
+  <meta name="description" content="之前参照ROS透明经济翻墙在家中搭建了无痛网络，但是期间在解决DNS污染问题上纠缠了一阵，现简单总结一下所遇到的问题。原因有几个方面： 在配置ROS路由器时，本地流量不受标记影响，所以路由器本地是不走vpn的。而电脑DNS之前指定的是ROS自带的DNS， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -92,6 +92,56 @@
   <header>
     
       <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
+        <h1 class="entry-title"><a href="/blog/2014/08/06/rosxia-tong-guo-vpnjie-jue-dnswu-ran-suo-yu-dao-de-wen-ti/">简单总结ROS下通过VPN解决DNS污染时所遇到的问题</a></h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-06T22:30:00+08:00" pubdate data-updated="true">2014年08月06日</time>
+        
+         | <a href="/blog/2014/08/06/rosxia-tong-guo-vpnjie-jue-dnswu-ran-suo-yu-dao-de-wen-ti/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>之前参照<a href="http://bbs.router.com.cn/thread-45681-1-1.html">ROS透明经济翻墙</a>在家中搭建了无痛网络，但是期间在解决DNS污染问题上纠缠了一阵，现简单总结一下所遇到的问题。原因有几个方面：</p>
+
+<ol>
+  <li>在配置ROS路由器时，本地流量不受标记影响，所以路由器本地是不走vpn的。而电脑DNS之前指定的是ROS自带的DNS，所以虽然在ROS上指定了上级DNS为Google DNS，但由于ROS本地没走vpn，所以域名仍然会被污染。</li>
+  <li>后来在另外一台路由器上使用了dnsmasq，但是由于沿用了之前配置，所以忘了将114DNS从主查询DNS中删除，更关键在于，污染的域名没有强制使用Google DNS进行解析，所以，虽然添加了Google DNS作为上级查询，但是114DNS的反馈要快好多，所以使用中还是会遇到污染。</li>
+  <li>接下来，尝试使用了openDNS的非标端口，解决污染有效，但是openDNS不够稳定，所以继续探索。</li>
+  <li>最后，经过多次尝试后才发现是第一步中所遇到的污染问题是由于ROS本地流量标记的问题。于是还是决定使用dnsmasq来解决，最后在配置文件中将被污染的域名设置为强制走Google DNS，这样在ROS自动路由的情况下，Google DNS走vpn，被污染的域名就可以从Google DNS获得干净的ip地址了。这样就解决了污染问题。不过这个解决方案仍然需要人为维护，至少需要维护dnsmasq配置文件中被污染的域名列表。</li>
+</ol>
+
+<p>最近，看到shadowsocks的作者<a href="https://twitter.com/clowwindy">@clowwindy</a>又搞出了个<a href="https://github.com/clowwindy/ChinaDNS-C">china-DNS</a>的玩意，看上去非常不错，可以很傻瓜免维护的解决DNS，准备有时间再搞一搞。</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
         <h1 class="entry-title"><a href="/blog/2014/08/04/you-yi-nian/">又一年</a></h1>
       
     
@@ -129,6 +179,7 @@
   <li>域名从狗爹的转移到了google domain，不用再忍受狗爹的“优质”用户体验。</li>
   <li>开始正式使用dropbox和1password，加强个人账户的安全性。</li>
   <li>写了些小工具，改进工作流，提升工作生活的效率。</li>
+  <li>自己动手改造了703N路由器为16M双Flash＋64M内存。</li>
 </ol>
 
 <p>另外，总觉得长时间不更新博客不符合个人行事风格，而且域名也续费到了2017年，说什么也不该浪费，但一直不知道该从什么时候开始恢复。借着新电脑的到来，重新配置了octopress环境，再次开始博客的写作。考虑之前使用org文件写博客只能使用电脑(因为要用emacs)，操作太局限，现尝试使用dropbox同步博客文章，并使用markdown格式进行写作。希望以后至少不会用没空之类理由来搪塞不更新博客的理由，毕竟markdown这种格式兼容性相对较好，iOS设备上也能找到很多工具进行编辑，应该勉强能够随时随地写博客了。</p>
@@ -1058,63 +1109,6 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <!-- Now we're back to normal posts. Note the links used under href in both headers.-->
-        <h1 class="entry-title"><a href="/blog/2013/02/10/xin-nian-xin-qi-xiang/">新年新气象</a></h1>
-      
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-10T16:49:00+08:00" pubdate data-updated="true">2013年02月10日</time>
-        
-         | <a href="/blog/2013/02/10/xin-nian-xin-qi-xiang/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>
-今天是中国农历新年的大年初一，在此，简单总结一下去年的收获与成就。
-</p>
-<p>
-去年，最大的收获应该要说是我的宝贝儿子出生了。小家伙为了赶在2013年之前出生，竟然提前一个月来到人世。这让作父母的我们真是又兴奋又小心，对他的照顾也更加细致体贴。如今，小宝宝已经出生将近一个半月，这期间多少个不眠夜，多少次喂奶换尿布，让我对做父母的责任也有了较深刻的体会，真心不容易。看到小孩一天天长大，体重也增加了不少，由最初的五斤张到现在的将近九斤，也算是给我们作父母的最大安慰吧。
-</p>
-<p>
-去年是本人以驱动工程师的身份工作在工作岗位上的第一年，这一年中有坎坷，有迷茫，也有收获。但是最大的收获可能是我对于工作，人际等等的重新思考和审视吧。曾经的各种自以为是在经历了去年的一些事情之后，都有了新的认识。工作期间也结识了了一些新朋友，都是些很热心的家伙们，大家有共同的话题，希望以后都能长久保持联系。
-</p>
-<p>
-另外，在去年中因为工作而结识了优秀软件tmux，自学了lisp语言，算是比较过得去的主要收获。哦，还有一件重要的收获，那就是我终于摆脱了三年的契约，扔掉了手中的烂黑莓，重新换上了iPhone：)。同时还收获到了HHKB。
-</p>
-<p>
-说到成就，去年一年中似乎没有达成什么耀目的成就。总体来讲，对Linux内核驱动开发算是入了个门；看完十本书（十本书说实在算不上什么成就，人家一个月读的都比我这多，但是聊胜于无吧）；工作中搞定了一键搭建高通编译环境的软件；提了三篇专利；搭建了这个博客。然后，好像没有了……
-</p>
-<p>
-在新的一年里，我希望宝宝可以健健康康，我可以多看几本书，系统学习及掌握Omnifocus，继续学习驱动开发技术，学习Lua和Ruby，多参加几个开源项目。要求不多，一步步来。
-</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1163,6 +1157,10 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/06/rosxia-tong-guo-vpnjie-jue-dnswu-ran-suo-yu-dao-de-wen-ti/">简单总结ROS下通过VPN解决DNS污染时所遇到的问题</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/04/you-yi-nian/">又一年</a>
       </li>
     
@@ -1176,10 +1174,6 @@ PMIC芯片中则没有库仑计功能，驱动中的逻辑也比较单纯，仅�
     
       <li class="post">
         <a href="/blog/2013/07/02/jian-shu-yi-zhong-dian-chi-dian-liang-biao-de-qu-de-fang-fa/">简述一种电池电量表的取得方法</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/05/14/gao-liao-ge-ban-zi-dong-hua-de-vim/">搞了个半自动化的Vim</a>
       </li>
     
   </ul>
